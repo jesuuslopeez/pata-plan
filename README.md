@@ -1,2 +1,4 @@
 # pata-plan
-Web app for managing the health, vaccination schedules, and veterinary records of multiple pets and animal shelters.
+<div align="center">
+  <img src="docs/assets/banner.png" alt="PataPlan" width="100%">
+</div>
