@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: PataPlan
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Jesús
+    family-names: López Pérez
+repository-code: "https://github.com/jesuslopezperez/pata-plan"
+url: "https://github.com/jesuslopezperez/pata-plan"
+license: MIT
+version: 0.1.0
+date-released: "2026-03-13"
+abstract: "Web application for managing the health, vaccination schedules, and veterinary records of multiple pets and animal shelters."
+keywords:
+  - pet-health
+  - veterinary
+  - animal-shelter
+  - vaccination-tracker
+  - react
+  - nodejs
+  - postgresql
