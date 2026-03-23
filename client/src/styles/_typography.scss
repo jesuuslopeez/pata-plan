@@ -1,0 +1,8 @@
+@use 'mixins' as *;
+
+.h1 { @include heading-1; }
+.h2 { @include heading-2; }
+.h3 { @include heading-3; }
+.body { @include body-text; }
+.small { @include small-text; }
+.caption { @include caption-text; }

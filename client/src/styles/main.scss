@@ -1,0 +1,16 @@
+@use 'reset';
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'typography';
+
+body {
+  font-family: $font-family;
+  @include body-text;
+  background-color: $neutral-50;
+  color: $neutral-900;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
