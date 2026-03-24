@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  COLLABORATOR
+}
+
+enum Species {
+  DOG
+  CAT
+  OTHER
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum EventCategory {
+  VACCINE
+  DEWORMING_INTERNAL
+  DEWORMING_EXTERNAL
+  TREATMENT
+  CHECKUP
+}
+
+enum HealthEventStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+  SKIPPED
+}
+
+enum ProtocolAssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  VACCINE
+  DEWORMING
+  SURGERY
+  MEDICATION
+  FOOD
+  OTHER
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         Role       @default(COLLABORATOR)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  groups       Group[]
+  protocols    Protocol[]
+}
+
+model Group {
+  id        Int      @id @default(autoincrement())
+  name      String
+  userId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  animals   Animal[]
+}
+
+model Animal {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  species             Species
+  breed               String?
+  sex                 Sex                  @default(UNKNOWN)
+  dateOfBirth         DateTime?
+  microchip           String?
+  photoUrl            String?
+  notes               String?
+  groupId             Int
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  group               Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  weightRecords       WeightRecord[]
+  healthEvents        HealthEvent[]
+  vetVisits           VetVisit[]
+  documents           Document[]
+  expenses            Expense[]
+  protocolAssignments ProtocolAssignment[]
+}
+
+model WeightRecord {
+  id         Int      @id @default(autoincrement())
+  animalId   Int
+  valueKg    Decimal
+  recordedAt DateTime @default(now())
+  isAnomaly  Boolean  @default(false)
+  animal     Animal   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+}
+
+model EventType {
+  id            Int           @id @default(autoincrement())
+  name          String
+  category      EventCategory
+  severityScore Int           @default(5)
+  healthEvents  HealthEvent[]
+  protocolSteps ProtocolStep[]
+}
+
+model HealthEvent {
+  id                     Int                 @id @default(autoincrement())
+  animalId               Int
+  eventTypeId            Int
+  scheduledDate          DateTime
+  completedDate          DateTime?
+  product                String?
+  vetName                String?
+  notes                  String?
+  frequencyDays          Int?
+  nextDueDate            DateTime?
+  status                 HealthEventStatus   @default(PENDING)
+  protocolAssignmentId   Int?
+  createdAt              DateTime            @default(now())
+  animal                 Animal              @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  eventType              EventType           @relation(fields: [eventTypeId], references: [id])
+  protocolAssignment     ProtocolAssignment? @relation(fields: [protocolAssignmentId], references: [id], onDelete: SetNull)
+}
+
+model Protocol {
+  id          Int                  @id @default(autoincrement())
+  name        String
+  description String?
+  userId      Int
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steps       ProtocolStep[]
+  assignments ProtocolAssignment[]
+}
+
+model ProtocolStep {
+  id          Int       @id @default(autoincrement())
+  protocolId  Int
+  eventTypeId Int
+  dayOffset   Int
+  product     String?
+  notes       String?
+  sortOrder   Int
+  protocol    Protocol  @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  eventType   EventType @relation(fields: [eventTypeId], references: [id])
+}
+
+model ProtocolAssignment {
+  id           Int                      @id @default(autoincrement())
+  animalId     Int
+  protocolId   Int
+  startDate    DateTime
+  status       ProtocolAssignmentStatus @default(ACTIVE)
+  createdAt    DateTime                 @default(now())
+  animal       Animal                   @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  protocol     Protocol                 @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  healthEvents HealthEvent[]
+}
+
+model VetVisit {
+  id           Int        @id @default(autoincrement())
+  animalId     Int
+  visitDate    DateTime
+  reason       String
+  diagnosis    String?
+  treatment    String?
+  vetName      String?
+  observations String?
+  cost         Decimal?
+  createdAt    DateTime   @default(now())
+  animal       Animal     @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  documents    Document[]
+  expenses     Expense[]
+}
+
+model Document {
+  id          Int       @id @default(autoincrement())
+  animalId    Int
+  vetVisitId  Int?
+  filename    String
+  fileUrl     String
+  fileType    String
+  description String?
+  uploadedAt  DateTime  @default(now())
+  animal      Animal    @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  vetVisit    VetVisit? @relation(fields: [vetVisitId], references: [id], onDelete: SetNull)
+}
+
+model Expense {
+  id          Int             @id @default(autoincrement())
+  animalId    Int
+  vetVisitId  Int?
+  amount      Decimal
+  category    ExpenseCategory
+  description String?
+  expenseDate DateTime
+  createdAt   DateTime        @default(now())
+  animal      Animal          @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  vetVisit    VetVisit?       @relation(fields: [vetVisitId], references: [id], onDelete: SetNull)
+}
