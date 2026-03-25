@@ -11,9 +11,11 @@ const app = express();
 app.use(helmet());
 
 // CORS
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  })
+);
 
 // Request logging
 app.use(morgan('dev'));
