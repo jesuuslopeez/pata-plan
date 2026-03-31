@@ -259,6 +259,7 @@ const complete = async (userId, eventId, data) => {
         scheduledDate: nextScheduledDate,
         product: existing.product,
         vetName: existing.vetName,
+        notes: existing.notes,
         frequencyDays: existing.frequencyDays,
         nextDueDate: addDays(nextScheduledDate, existing.frequencyDays),
         status: 'PENDING',
