@@ -49,8 +49,11 @@ app.get('/', (req, res) => {
 });
 
 // Routes
+const { authenticate } = require('./middlewares/auth');
 const authRoutes = require('./routes/auth.routes');
+const groupRoutes = require('./routes/group.routes');
 app.use('/api/auth', authRoutes);
+app.use('/api/groups', authenticate, groupRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
