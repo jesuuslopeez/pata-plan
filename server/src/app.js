@@ -48,8 +48,9 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'PataPlan API' });
 });
 
-// TODO: Register routes here
-// app.use('/api/auth', require('./routes/auth'));
+// Routes
+const authRoutes = require('./routes/auth.routes');
+app.use('/api/auth', authRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
