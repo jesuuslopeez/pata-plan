@@ -57,10 +57,13 @@ const authRoutes = require('./routes/auth.routes');
 const groupRoutes = require('./routes/group.routes');
 const animalRoutes = require('./routes/animal.routes');
 const weightRoutes = require('./routes/weight.routes');
+const eventRoutes = require('./routes/event.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
 app.use('/api/animals', authenticate, weightRoutes);
+app.use('/api/animals', authenticate, eventRoutes);
+app.use('/api/events', authenticate, eventRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
