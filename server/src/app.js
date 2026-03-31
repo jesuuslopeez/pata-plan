@@ -48,12 +48,17 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'PataPlan API' });
 });
 
+// Static files
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 const { authenticate } = require('./middlewares/auth');
 const authRoutes = require('./routes/auth.routes');
 const groupRoutes = require('./routes/group.routes');
+const animalRoutes = require('./routes/animal.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
+app.use('/api/animals', authenticate, animalRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
