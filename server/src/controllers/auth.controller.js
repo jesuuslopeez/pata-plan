@@ -9,4 +9,22 @@ const register = async (req, res, next) => {
   }
 };
 
-module.exports = { register };
+const login = async (req, res, next) => {
+  try {
+    const result = await authService.login(req.body);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const me = async (req, res, next) => {
+  try {
+    const user = await authService.getMe(req.user.id);
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, me };

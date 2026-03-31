@@ -34,4 +34,45 @@ const register = async ({ name, email, password }) => {
   return { user, token };
 };
 
-module.exports = { register };
+const USER_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  createdAt: true,
+};
+
+const login = async ({ email, password }) => {
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+  });
+
+  if (!user) {
+    throw new ApiError(401, 'Invalid credentials');
+  }
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) {
+    throw new ApiError(401, 'Invalid credentials');
+  }
+
+  const token = generateToken({ userId: user.id, role: user.role });
+
+  const { passwordHash: _, ...userData } = user;
+  return { user: userData, token };
+};
+
+const getMe = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { ...USER_SELECT, updatedAt: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  return user;
+};
+
+module.exports = { register, login, getMe };
