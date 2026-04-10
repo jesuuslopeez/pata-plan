@@ -24,6 +24,11 @@
     "multer": "^2.1.1",
     "pg": "^8.20.0"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": ["./src/tests/setup.js"],
+    "testMatch": ["**/src/tests/**/*.test.js"]
+  },
   "prisma": {
     "seed": "node prisma/seed.js"
   },
