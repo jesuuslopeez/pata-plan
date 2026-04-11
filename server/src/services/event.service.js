@@ -1,5 +1,6 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const { recalculateCascade } = require('./recalculation.service');
 
 const getUserGroupIds = async (userId) => {
   const groups = await prisma.group.findMany({
@@ -268,7 +269,9 @@ const complete = async (userId, eventId, data) => {
     });
   }
 
-  return { event, nextEvent };
+  const recalculation = await recalculateCascade(existing, completedDate);
+
+  return { event, nextEvent, recalculation };
 };
 
 const remove = async (userId, eventId) => {
