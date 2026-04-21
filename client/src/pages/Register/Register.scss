@@ -39,14 +39,15 @@
   }
 
   &__tagline {
-    @include body-text;
+    font-size: $font-size-md;
+    font-weight: 400;
     color: $neutral-white;
     opacity: 0.85;
   }
 
   &__right {
     flex: 1;
-    background-color: $neutral-50;
+    background-color: $neutral-white;
     @include flex-center;
     padding: $spacing-8;
 
@@ -68,13 +69,15 @@
   }
 
   &__title {
-    @include heading-2;
-    color: $neutral-900;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $neutral-800;
     margin-bottom: $spacing-2;
   }
 
   &__subtitle {
-    @include small-text;
+    font-size: $font-size-md;
+    font-weight: 400;
     color: $neutral-600;
   }
 
@@ -83,7 +86,7 @@
     color: $danger;
     padding: $spacing-3 $spacing-4;
     border-radius: $radius-md;
-    @include small-text;
+    font-size: $font-size-sm;
   }
 
   &__field {
@@ -92,16 +95,17 @@
   }
 
   &__label {
-    @include small-text;
-    font-weight: 600;
-    color: $neutral-900;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $neutral-800;
   }
 
   &__input {
     padding: $spacing-3 $spacing-4;
     border: 1px solid $neutral-100;
     border-radius: $radius-md;
-    @include body-text;
+    font-size: $font-size-lg;
+    font-weight: 400;
     color: $neutral-900;
     background-color: $neutral-white;
     transition: border-color 0.2s;
@@ -122,7 +126,7 @@
 
   &__error {
     color: $danger;
-    @include caption-text;
+    font-size: $font-size-xs;
   }
 
   &__button {
@@ -132,8 +136,8 @@
     color: $neutral-white;
     border: none;
     border-radius: $radius-lg;
-    @include body-text;
-    font-weight: 600;
+    font-size: $font-size-lg;
+    font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s;
 
@@ -148,13 +152,14 @@
   }
 
   &__link {
-    @include small-text;
+    font-size: $font-size-md;
+    font-weight: 400;
     text-align: center;
     color: $neutral-600;
 
     a {
       color: $primary-600;
-      font-weight: 500;
+      font-weight: 400;
 
       &:hover {
         color: $primary-400;
