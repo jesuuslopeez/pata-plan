@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 import { MainLayout } from '../layouts/MainLayout';

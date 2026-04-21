@@ -1,0 +1,77 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.header {
+  @include flex-between;
+  padding: $spacing-5 $spacing-6;
+  background-color: $neutral-white;
+  border-bottom: 1px solid $neutral-100;
+
+  &__menu {
+    display: none;
+    background: none;
+    border: none;
+    color: $neutral-800;
+    cursor: pointer;
+    padding: $spacing-2;
+
+    @include mobile {
+      display: block;
+    }
+  }
+
+  &__greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    @include mobile {
+      display: none;
+    }
+  }
+
+  &__greeting-text {
+    font-size: $font-size-sm;
+    font-weight: 400;
+    color: $neutral-600;
+  }
+
+  &__greeting-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-3;
+  }
+
+  &__badge {
+    @include flex-center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background-color: $neutral-50;
+    color: $neutral-600;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background-color: $neutral-100;
+    }
+  }
+
+  &__avatar {
+    @include flex-center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background-color: $primary-600;
+    color: $neutral-white;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}
