@@ -62,15 +62,16 @@ export function Register() {
     <div className="register">
       <div className="register__left">
         <div className="register__brand">
-          <h1 className="register__logo">PataPlan</h1>
-          <p className="register__tagline">
-            Gestiona la salud de tus mascotas y refugio en un solo lugar
-          </p>
+          <img className="register__logo" src="/pataplan.png" alt="PataPlan" />
+          <p className="register__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
       <div className="register__right">
         <form className="register__form" onSubmit={handleSubmit} noValidate>
-          <h2 className="register__title">Crear cuenta</h2>
+          <div className="register__header">
+            <h2 className="register__title">Crear cuenta</h2>
+            <p className="register__subtitle">Completa tus datos para empezar</p>
+          </div>
 
           {apiError && <div className="register__alert">{apiError}</div>}
 
@@ -82,20 +83,20 @@ export function Register() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Tu nombre"
+              placeholder="Tu nombre completo"
             />
             {errors.name && <span className="register__error">{errors.name}</span>}
           </div>
 
           <div className="register__field">
-            <label className="register__label" htmlFor="email">Email</label>
+            <label className="register__label" htmlFor="email">Correo electrónico</label>
             <input
               className={`register__input ${errors.email ? 'register__input--error' : ''}`}
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder="tu@correo.com"
             />
             {errors.email && <span className="register__error">{errors.email}</span>}
           </div>

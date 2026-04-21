@@ -50,27 +50,28 @@ export function Login() {
     <div className="login">
       <div className="login__left">
         <div className="login__brand">
-          <h1 className="login__logo">PataPlan</h1>
-          <p className="login__tagline">
-            Gestiona la salud de tus mascotas y refugio en un solo lugar
-          </p>
+          <img className="login__logo" src="/pataplan.png" alt="PataPlan" />
+          <p className="login__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
       <div className="login__right">
         <form className="login__form" onSubmit={handleSubmit} noValidate>
-          <h2 className="login__title">Iniciar sesión</h2>
+          <div className="login__header">
+            <h2 className="login__title">Iniciar sesión</h2>
+            <p className="login__subtitle">Introduce tus credenciales para acceder</p>
+          </div>
 
           {apiError && <div className="login__alert">{apiError}</div>}
 
           <div className="login__field">
-            <label className="login__label" htmlFor="email">Email</label>
+            <label className="login__label" htmlFor="email">Correo electrónico</label>
             <input
               className={`login__input ${errors.email ? 'login__input--error' : ''}`}
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder="tu@correo.com"
             />
             {errors.email && <span className="login__error">{errors.email}</span>}
           </div>
@@ -86,6 +87,10 @@ export function Login() {
               placeholder="••••••••"
             />
             {errors.password && <span className="login__error">{errors.password}</span>}
+          </div>
+
+          <div className="login__forgot">
+            <span>¿Olvidaste tu contraseña?</span>
           </div>
 
           <button className="login__button" type="submit" disabled={submitting}>

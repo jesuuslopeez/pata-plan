@@ -16,8 +16,8 @@
     padding: $spacing-8;
 
     @include mobile {
-      padding: $spacing-8 $spacing-4;
-      min-height: 12rem;
+      padding: $spacing-6 $spacing-4;
+      min-height: 10rem;
     }
   }
 
@@ -27,20 +27,26 @@
   }
 
   &__logo {
-    @include heading-1;
-    font-size: 2.5rem;
-    margin-bottom: $spacing-4;
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    margin-bottom: $spacing-6;
+
+    @include mobile {
+      max-width: 14rem;
+      margin-bottom: $spacing-3;
+    }
   }
 
   &__tagline {
     @include body-text;
+    color: $neutral-white;
     opacity: 0.85;
-    max-width: 20rem;
   }
 
   &__right {
     flex: 1;
-    background-color: $neutral-white;
+    background-color: $neutral-50;
     @include flex-center;
     padding: $spacing-8;
 
@@ -56,10 +62,20 @@
     gap: $spacing-5;
   }
 
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-2;
+  }
+
   &__title {
     @include heading-2;
     color: $neutral-900;
     margin-bottom: $spacing-2;
+  }
+
+  &__subtitle {
+    @include small-text;
+    color: $neutral-600;
   }
 
   &__alert {
@@ -72,23 +88,27 @@
 
   &__field {
     @include flex-column;
-    gap: $spacing-1;
+    gap: $spacing-2;
   }
 
   &__label {
     @include small-text;
-    font-weight: 500;
-    color: $neutral-800;
+    font-weight: 600;
+    color: $neutral-900;
   }
 
   &__input {
     padding: $spacing-3 $spacing-4;
-    border: 1px solid $neutral-300;
+    border: 1px solid $neutral-100;
     border-radius: $radius-md;
     @include body-text;
     color: $neutral-900;
     background-color: $neutral-white;
     transition: border-color 0.2s;
+
+    &::placeholder {
+      color: $neutral-300;
+    }
 
     &:focus {
       outline: none;
@@ -105,12 +125,27 @@
     @include caption-text;
   }
 
+  &__forgot {
+    text-align: right;
+
+    span {
+      @include small-text;
+      color: $primary-600;
+      cursor: pointer;
+
+      &:hover {
+        color: $primary-400;
+      }
+    }
+  }
+
   &__button {
-    padding: $spacing-3 $spacing-6;
+    width: 100%;
+    padding: $spacing-4;
     background-color: $primary-600;
     color: $neutral-white;
     border: none;
-    border-radius: $radius-md;
+    border-radius: $radius-lg;
     @include body-text;
     font-weight: 600;
     cursor: pointer;
