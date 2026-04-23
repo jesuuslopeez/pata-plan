@@ -1,0 +1,96 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.animals {
+  @include flex-column;
+  gap: 1.25rem;
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__add-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background-color: $primary-600;
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: $primary-400;
+    }
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 0.75rem;
+
+    @media (max-width: 1023px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 1023px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__skeleton {
+    height: 14.5rem;
+    background-color: $neutral-100;
+    border-radius: $radius-lg;
+    animation: animals-pulse 1.4s ease-in-out infinite;
+  }
+
+  &__empty {
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-4;
+    padding: $spacing-12 $spacing-4;
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-lg;
+  }
+
+  &__empty-icon {
+    color: $neutral-300;
+  }
+
+  &__empty-text {
+    font-size: $font-size-md;
+    color: $neutral-600;
+  }
+}
+
+@keyframes animals-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}

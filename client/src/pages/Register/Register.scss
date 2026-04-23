@@ -1,0 +1,169 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.register {
+  display: flex;
+  min-height: 100vh;
+
+  @include mobile {
+    flex-direction: column;
+  }
+
+  &__left {
+    flex: 1;
+    background-color: $primary-800;
+    @include flex-center;
+    padding: $spacing-8;
+
+    @include mobile {
+      padding: $spacing-6 $spacing-4;
+      min-height: 10rem;
+    }
+  }
+
+  &__brand {
+    text-align: center;
+    color: $neutral-white;
+  }
+
+  &__logo {
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    margin-bottom: $spacing-6;
+
+    @include mobile {
+      max-width: 14rem;
+      margin-bottom: $spacing-3;
+    }
+  }
+
+  &__tagline {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-white;
+    opacity: 0.85;
+  }
+
+  &__right {
+    flex: 1;
+    background-color: $neutral-white;
+    @include flex-center;
+    padding: $spacing-8;
+
+    @include mobile {
+      padding: $spacing-6 $spacing-4;
+    }
+  }
+
+  &__form {
+    width: 100%;
+    max-width: 24rem;
+    @include flex-column;
+    gap: $spacing-5;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-2;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $neutral-800;
+    margin-bottom: $spacing-2;
+  }
+
+  &__subtitle {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-600;
+  }
+
+  &__alert {
+    background-color: rgba($danger, 0.1);
+    color: $danger;
+    padding: $spacing-3 $spacing-4;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+  }
+
+  &__field {
+    @include flex-column;
+    gap: $spacing-2;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $neutral-800;
+  }
+
+  &__input {
+    padding: $spacing-3 $spacing-4;
+    border: 1px solid $neutral-100;
+    border-radius: $radius-md;
+    font-size: $font-size-lg;
+    font-weight: 400;
+    color: $neutral-900;
+    background-color: $neutral-white;
+    transition: border-color 0.2s;
+
+    &::placeholder {
+      color: $neutral-300;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $primary-400;
+    }
+
+    &--error {
+      border-color: $danger;
+    }
+  }
+
+  &__error {
+    color: $danger;
+    font-size: $font-size-xs;
+  }
+
+  &__button {
+    width: 100%;
+    padding: $spacing-4;
+    background-color: $primary-600;
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-lg;
+    font-size: $font-size-lg;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-400;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  &__link {
+    font-size: $font-size-md;
+    font-weight: 400;
+    text-align: center;
+    color: $neutral-600;
+
+    a {
+      color: $primary-600;
+      font-weight: 400;
+
+      &:hover {
+        color: $primary-400;
+      }
+    }
+  }
+}

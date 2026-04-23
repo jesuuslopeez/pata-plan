@@ -1,0 +1,89 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.header {
+  @include flex-between;
+  padding: $spacing-5 $spacing-6;
+  background-color: $neutral-50;
+
+  &__menu {
+    display: none;
+    background: none;
+    border: none;
+    color: $neutral-800;
+    cursor: pointer;
+    padding: $spacing-2;
+
+    @include mobile {
+      display: block;
+    }
+  }
+
+  &__greeting {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  &__greeting-text {
+    font-size: $font-size-sm;
+    font-weight: 400;
+    color: $neutral-600;
+  }
+
+  &__greeting-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-md;
+  }
+
+  &__badge-icon {
+    color: $amber-600;
+    flex-shrink: 0;
+  }
+
+  &__badge-overdue {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $danger;
+  }
+
+  &__badge-separator {
+    color: $neutral-100;
+    font-size: 0.75rem;
+  }
+
+  &__badge-pending {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $amber-600;
+  }
+
+  &__avatar {
+    @include flex-center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 50%;
+    background-color: $primary-200;
+    color: $primary-800;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+}

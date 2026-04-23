@@ -1,0 +1,53 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.vet-visits-list {
+  @include flex-column;
+  gap: 0.75rem;
+
+  &__card {
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-lg;
+    padding: $spacing-4;
+    @include flex-column;
+    gap: 0.375rem;
+  }
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__date {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__cost {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__reason {
+    font-size: 0.8125rem;
+    color: $neutral-800;
+  }
+
+  &__field {
+    font-size: 0.8125rem;
+    color: $neutral-600;
+
+    strong {
+      font-weight: 600;
+      color: $neutral-800;
+    }
+  }
+
+  &__vet {
+    font-size: 0.75rem;
+    color: $neutral-600;
+    font-style: italic;
+  }
+}
