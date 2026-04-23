@@ -64,11 +64,14 @@ const animalRoutes = require('./routes/animal.routes');
 const weightRoutes = require('./routes/weight.routes');
 const eventRoutes = require('./routes/event.routes');
 const protocolRoutes = require('./routes/protocol.routes');
+const assignmentRoutes = require('./routes/assignment.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
 app.use('/api/animals', authenticate, weightRoutes);
 app.use('/api/animals', authenticate, eventRoutes);
+app.use('/api/animals', authenticate, assignmentRoutes);
+app.use('/api/assignments', authenticate, assignmentRoutes);
 app.use('/api/events', authenticate, eventRoutes);
 app.use('/api/protocols', authenticate, protocolRoutes);
 
