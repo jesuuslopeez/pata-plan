@@ -4,8 +4,7 @@
 .header {
   @include flex-between;
   padding: $spacing-5 $spacing-6;
-  background-color: $neutral-white;
-  border-bottom: 1px solid $neutral-100;
+  background-color: $neutral-50;
 
   &__menu {
     display: none;
@@ -24,10 +23,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
-
-    @include mobile {
-      display: none;
-    }
   }
 
   &__greeting-text {
@@ -45,33 +40,50 @@
   &__actions {
     display: flex;
     align-items: center;
-    gap: $spacing-3;
+    gap: 0.75rem;
   }
 
   &__badge {
-    @include flex-center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 50%;
-    background-color: $neutral-50;
-    color: $neutral-600;
-    cursor: pointer;
-    transition: background-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-md;
+  }
 
-    &:hover {
-      background-color: $neutral-100;
-    }
+  &__badge-icon {
+    color: $amber-600;
+    flex-shrink: 0;
+  }
+
+  &__badge-overdue {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $danger;
+  }
+
+  &__badge-separator {
+    color: $neutral-100;
+    font-size: 0.75rem;
+  }
+
+  &__badge-pending {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $amber-600;
   }
 
   &__avatar {
     @include flex-center;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.125rem;
+    height: 2.125rem;
     border-radius: 50%;
-    background-color: $primary-600;
-    color: $neutral-white;
-    font-size: $font-size-sm;
-    font-weight: 600;
+    background-color: $primary-200;
+    color: $primary-800;
+    font-size: 0.75rem;
+    font-weight: 700;
     cursor: pointer;
   }
 }

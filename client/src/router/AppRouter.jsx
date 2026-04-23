@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 import { MainLayout } from '../layouts/MainLayout';
 import { Login } from '../pages/Login/Login';
 import { Register } from '../pages/Register/Register';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
 
 function Placeholder({ title }) {
   return <h1>{title}</h1>;
@@ -25,7 +26,7 @@ export function AppRouter() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedLayout />}>
-            <Route path="/" element={<Placeholder title="Dashboard" />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/animals" element={<Placeholder title="Animals" />} />
             <Route path="/animals/:id" element={<Placeholder title="Animal Detail" />} />
             <Route path="/calendar" element={<Placeholder title="Calendar" />} />
