@@ -199,4 +199,158 @@ const remove = async (userId, protocolId) => {
   await prisma.protocol.delete({ where: { id: protocolId } });
 };
 
-module.exports = { getAll, getById, create, update, remove };
+const addStep = async (userId, protocolId, data) => {
+  await verifyOwnership(protocolId, userId);
+
+  if (!data.eventTypeId) {
+    throw new ApiError(400, 'eventTypeId is required');
+  }
+  if (data.dayOffset === undefined || data.dayOffset === null) {
+    throw new ApiError(400, 'dayOffset is required');
+  }
+  const dayOffset = parseInt(data.dayOffset, 10);
+  if (isNaN(dayOffset) || dayOffset < 0) {
+    throw new ApiError(400, 'dayOffset must be an integer >= 0');
+  }
+
+  const eventTypeId = parseInt(data.eventTypeId, 10);
+  const eventType = await prisma.eventType.findUnique({ where: { id: eventTypeId } });
+  if (!eventType) {
+    throw new ApiError(400, 'Invalid eventTypeId');
+  }
+
+  const maxStep = await prisma.protocolStep.findFirst({
+    where: { protocolId },
+    orderBy: { sortOrder: 'desc' },
+    select: { sortOrder: true },
+  });
+  const sortOrder = maxStep ? maxStep.sortOrder + 1 : 0;
+
+  const step = await prisma.protocolStep.create({
+    data: {
+      protocolId,
+      eventTypeId,
+      dayOffset,
+      product: data.product || null,
+      notes: data.notes || null,
+      sortOrder,
+    },
+    include: STEP_INCLUDE,
+  });
+
+  return step;
+};
+
+const verifyStepOwnership = async (protocolId, stepId, userId) => {
+  await verifyOwnership(protocolId, userId);
+  const step = await prisma.protocolStep.findFirst({
+    where: { id: stepId, protocolId },
+  });
+  if (!step) {
+    throw new ApiError(404, 'Step not found');
+  }
+  return step;
+};
+
+const updateStep = async (userId, protocolId, stepId, data) => {
+  await verifyStepOwnership(protocolId, stepId, userId);
+
+  const updateData = {};
+
+  if (data.eventTypeId !== undefined) {
+    const etId = parseInt(data.eventTypeId, 10);
+    const eventType = await prisma.eventType.findUnique({ where: { id: etId } });
+    if (!eventType) {
+      throw new ApiError(400, 'Invalid eventTypeId');
+    }
+    updateData.eventTypeId = etId;
+  }
+
+  if (data.dayOffset !== undefined) {
+    const d = parseInt(data.dayOffset, 10);
+    if (isNaN(d) || d < 0) {
+      throw new ApiError(400, 'dayOffset must be an integer >= 0');
+    }
+    updateData.dayOffset = d;
+  }
+
+  if (data.product !== undefined) {
+    updateData.product = data.product || null;
+  }
+  if (data.notes !== undefined) {
+    updateData.notes = data.notes || null;
+  }
+  if (data.sortOrder !== undefined) {
+    updateData.sortOrder = parseInt(data.sortOrder, 10);
+  }
+
+  const step = await prisma.protocolStep.update({
+    where: { id: stepId },
+    data: updateData,
+    include: STEP_INCLUDE,
+  });
+
+  return step;
+};
+
+const removeStep = async (userId, protocolId, stepId) => {
+  await verifyStepOwnership(protocolId, stepId, userId);
+
+  await prisma.protocolStep.delete({ where: { id: stepId } });
+
+  // Reorder remaining steps to remove gaps
+  const remaining = await prisma.protocolStep.findMany({
+    where: { protocolId },
+    orderBy: { sortOrder: 'asc' },
+    select: { id: true },
+  });
+
+  for (let i = 0; i < remaining.length; i++) {
+    await prisma.protocolStep.update({
+      where: { id: remaining[i].id },
+      data: { sortOrder: i },
+    });
+  }
+};
+
+const reorderSteps = async (userId, protocolId, stepIds) => {
+  await verifyOwnership(protocolId, userId);
+
+  if (!Array.isArray(stepIds) || stepIds.length === 0) {
+    throw new ApiError(400, 'stepIds must be a non-empty array');
+  }
+
+  const existingSteps = await prisma.protocolStep.findMany({
+    where: { protocolId },
+    select: { id: true },
+  });
+  const existingIds = new Set(existingSteps.map((s) => s.id));
+
+  for (const id of stepIds) {
+    if (!existingIds.has(id)) {
+      throw new ApiError(400, `Step ${id} does not belong to this protocol`);
+    }
+  }
+  if (stepIds.length !== existingIds.size) {
+    throw new ApiError(400, 'stepIds must include all steps of the protocol');
+  }
+
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < stepIds.length; i++) {
+      await tx.protocolStep.update({
+        where: { id: stepIds[i] },
+        data: { sortOrder: i },
+      });
+    }
+  });
+
+  const steps = await prisma.protocolStep.findMany({
+    where: { protocolId },
+    include: STEP_INCLUDE,
+    orderBy: { sortOrder: 'asc' },
+  });
+
+  return steps;
+};
+
+module.exports = { getAll, getById, create, update, remove, addStep, updateStep, removeStep, reorderSteps };
