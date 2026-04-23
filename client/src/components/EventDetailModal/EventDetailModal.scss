@@ -1,0 +1,118 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.event-detail-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  @include flex-center;
+  z-index: 200;
+  padding: $spacing-4;
+
+  &__content {
+    background-color: $neutral-white;
+    border-radius: $radius-lg;
+    width: 100%;
+    max-width: 28rem;
+    @include flex-column;
+    gap: 1rem;
+    padding: 1.25rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  &__header {
+    @include flex-between;
+    gap: 0.5rem;
+  }
+
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: $neutral-600;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: $neutral-900;
+    }
+  }
+
+  &__badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  &__fields {
+    @include flex-column;
+    gap: 0.75rem;
+  }
+
+  &__field {
+    @include flex-column;
+    gap: 0.125rem;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: $neutral-600;
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    color: $neutral-900;
+  }
+
+  &__link {
+    background: none;
+    border: none;
+    color: $primary-600;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+
+    &:hover {
+      color: $primary-400;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    border-top: 0.03125rem solid $neutral-100;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background-color: $primary-600;
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: $primary-400;
+    }
+  }
+}

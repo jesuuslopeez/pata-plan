@@ -3,9 +3,14 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDoc = require('./swagger.json');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
+
+// API docs
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
 // Security headers
 app.use(helmet());
@@ -58,12 +63,19 @@ const groupRoutes = require('./routes/group.routes');
 const animalRoutes = require('./routes/animal.routes');
 const weightRoutes = require('./routes/weight.routes');
 const eventRoutes = require('./routes/event.routes');
+const protocolRoutes = require('./routes/protocol.routes');
+const assignmentRoutes = require('./routes/assignment.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
 app.use('/api/animals', authenticate, weightRoutes);
 app.use('/api/animals', authenticate, eventRoutes);
+app.use('/api/animals', authenticate, assignmentRoutes);
+app.use('/api/assignments', authenticate, assignmentRoutes);
 app.use('/api/events', authenticate, eventRoutes);
+app.use('/api/protocols', authenticate, protocolRoutes);
+app.use('/api/dashboard', authenticate, dashboardRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
