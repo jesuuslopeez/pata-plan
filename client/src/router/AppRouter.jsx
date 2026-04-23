@@ -5,6 +5,7 @@ import { MainLayout } from '../layouts/MainLayout';
 import { Login } from '../pages/Login/Login';
 import { Register } from '../pages/Register/Register';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
+import { Animals } from '../pages/Animals/Animals';
 
 function Placeholder({ title }) {
   return <h1>{title}</h1>;
@@ -27,7 +28,7 @@ export function AppRouter() {
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/animals" element={<Placeholder title="Animals" />} />
+            <Route path="/animals" element={<Animals />} />
             <Route path="/animals/:id" element={<Placeholder title="Animal Detail" />} />
             <Route path="/calendar" element={<Placeholder title="Calendar" />} />
             <Route path="/protocols" element={<Placeholder title="Protocols" />} />
