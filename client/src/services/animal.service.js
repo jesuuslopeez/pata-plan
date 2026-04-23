@@ -10,3 +10,22 @@ export const getAnimals = (filters = {}) => {
 };
 
 export const getAnimal = (id) => api.get(`/animals/${id}`);
+
+export const deleteAnimal = (id) => api.delete(`/animals/${id}`);
+
+export const getAnimalEvents = (id) => api.get(`/animals/${id}/events`);
+
+export const completeEvent = (id, data = {}) => api.patch(`/events/${id}/complete`, data);
+
+export const getAnimalWeights = (id) => api.get(`/animals/${id}/weights`);
+
+export const getAnimalVisits = (id) => api.get(`/animals/${id}/visits`);
+
+export const getAnimalDocuments = (id) => api.get(`/animals/${id}/documents`);
+
+export const uploadDocument = (id, formData) =>
+  api.post(`/animals/${id}/documents`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+export const deleteDocument = (id) => api.delete(`/documents/${id}`);

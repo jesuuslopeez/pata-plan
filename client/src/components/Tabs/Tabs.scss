@@ -1,0 +1,41 @@
+@use '../../styles/variables' as *;
+
+.tabs {
+  border-bottom: 0.03125rem solid $neutral-100;
+
+  &__list {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__item {
+    padding: 0.75rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 0.125rem solid transparent;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    margin-bottom: -0.03125rem;
+
+    &:hover {
+      color: $neutral-800;
+    }
+
+    &--active {
+      color: $primary-600;
+      font-weight: 500;
+      border-bottom-color: $primary-600;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+@use '../../styles/variables' as *;
+
+.weight-chart {
+  --line-primary: #{$primary-600};
+  --area-primary: #{$primary-400};
+  --axis-color: #{$neutral-600};
+  --grid-color: #{$neutral-100};
+  --dot-primary: #{$primary-600};
+  --dot-danger: #{$danger};
+
+  background-color: $neutral-white;
+  border: 0.03125rem solid $neutral-100;
+  border-radius: $radius-lg;
+  padding: 1rem;
+
+  &__empty {
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-lg;
+    padding: 2.5rem 1rem;
+    text-align: center;
+    font-size: $font-size-sm;
+    color: $neutral-600;
+  }
+
+  &__tooltip {
+    background-color: $neutral-white;
+    border: 0.03125rem solid $neutral-100;
+    border-radius: $radius-md;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+    font-size: 0.75rem;
+  }
+
+  &__tooltip-date {
+    color: $neutral-600;
+    margin-bottom: 0.125rem;
+  }
+
+  &__tooltip-value {
+    color: $neutral-900;
+    font-weight: 700;
+  }
+
+  &__tooltip-anomaly {
+    color: $danger;
+    margin-top: 0.125rem;
+    font-weight: 500;
+  }
+}
