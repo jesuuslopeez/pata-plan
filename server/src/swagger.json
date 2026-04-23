@@ -1,0 +1,649 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PataPlan API",
+    "version": "0.1.0",
+    "description": "API for managing pet health, vaccination schedules, and veterinary records."
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Development" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": { "error": { "type": "string" } }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string", "enum": ["ADMIN", "COLLABORATOR"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Animal": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] },
+          "breed": { "type": "string", "nullable": true },
+          "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+          "dateOfBirth": { "type": "string", "format": "date", "nullable": true },
+          "microchip": { "type": "string", "nullable": true },
+          "photoUrl": { "type": "string", "nullable": true },
+          "notes": { "type": "string", "nullable": true },
+          "groupId": { "type": "integer" }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "_count": {
+            "type": "object",
+            "properties": { "animals": { "type": "integer" } }
+          }
+        }
+      },
+      "WeightRecord": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "valueKg": { "type": "number" },
+          "recordedAt": { "type": "string", "format": "date-time" },
+          "isAnomaly": { "type": "boolean" }
+        }
+      },
+      "HealthEvent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "eventTypeId": { "type": "integer" },
+          "scheduledDate": { "type": "string", "format": "date-time" },
+          "completedDate": { "type": "string", "format": "date-time", "nullable": true },
+          "product": { "type": "string", "nullable": true },
+          "vetName": { "type": "string", "nullable": true },
+          "notes": { "type": "string", "nullable": true },
+          "frequencyDays": { "type": "integer", "nullable": true },
+          "nextDueDate": { "type": "string", "format": "date-time", "nullable": true },
+          "status": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] }
+        }
+      },
+      "Protocol": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "steps": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProtocolStep" }
+          }
+        }
+      },
+      "ProtocolStep": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "protocolId": { "type": "integer" },
+          "eventTypeId": { "type": "integer" },
+          "dayOffset": { "type": "integer" },
+          "product": { "type": "string", "nullable": true },
+          "notes": { "type": "string", "nullable": true },
+          "sortOrder": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "Health", "description": "Server health check" },
+    { "name": "Auth", "description": "Authentication and user management" },
+    { "name": "Groups", "description": "Animal groups management" },
+    { "name": "Animals", "description": "Animal profiles management" },
+    { "name": "Weights", "description": "Weight history and anomaly detection" },
+    { "name": "Health Events", "description": "Vaccination, deworming, and health events" },
+    { "name": "Protocols", "description": "Health protocol templates" },
+    { "name": "Protocol Steps", "description": "Individual step management within protocols" }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "message": { "type": "string", "example": "PataPlan API" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string", "example": "Jesús López", "minLength": 2, "maxLength": 100 },
+                  "email": { "type": "string", "format": "email", "example": "jesus@example.com" },
+                  "password": { "type": "string", "minLength": 8, "example": "securePassword123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully" },
+          "400": { "description": "Validation error" },
+          "409": { "description": "Email already registered" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login and receive JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "admin@pataplan.com" },
+                  "password": { "type": "string", "example": "admin123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful, returns user and token" },
+          "400": { "description": "Validation error" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get authenticated user data",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Current user data" },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/api/groups": {
+      "get": {
+        "tags": ["Groups"],
+        "summary": "List groups of the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of groups with animal count" },
+          "401": { "description": "Not authenticated" }
+        }
+      },
+      "post": {
+        "tags": ["Groups"],
+        "summary": "Create a new group",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Casa", "maxLength": 100 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Group created" },
+          "400": { "description": "Validation error" },
+          "409": { "description": "Group name already exists" }
+        }
+      }
+    },
+    "/api/groups/{id}": {
+      "put": {
+        "tags": ["Groups"],
+        "summary": "Update a group",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Refugio" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Group updated" },
+          "404": { "description": "Group not found" },
+          "409": { "description": "Group name already exists" }
+        }
+      },
+      "delete": {
+        "tags": ["Groups"],
+        "summary": "Delete a group (must have no animals)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "204": { "description": "Group deleted" },
+          "400": { "description": "Group has animals" },
+          "404": { "description": "Group not found" }
+        }
+      }
+    },
+    "/api/animals": {
+      "get": {
+        "tags": ["Animals"],
+        "summary": "List animals with optional filters",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "groupId", "in": "query", "schema": { "type": "integer" }, "description": "Filter by group" },
+          { "name": "species", "in": "query", "schema": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] } },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by name" }
+        ],
+        "responses": {
+          "200": { "description": "List of animals with pending/overdue event counts" }
+        }
+      },
+      "post": {
+        "tags": ["Animals"],
+        "summary": "Create a new animal (supports photo upload)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "species", "sex", "groupId"],
+                "properties": {
+                  "name": { "type": "string", "example": "Rocky" },
+                  "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] },
+                  "breed": { "type": "string" },
+                  "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+                  "dateOfBirth": { "type": "string", "format": "date" },
+                  "microchip": { "type": "string" },
+                  "groupId": { "type": "integer" },
+                  "notes": { "type": "string" },
+                  "photo": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Animal created" },
+          "400": { "description": "Validation error or invalid group" }
+        }
+      }
+    },
+    "/api/animals/{id}": {
+      "get": {
+        "tags": ["Animals"],
+        "summary": "Get animal detail with latest weight and event counts",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Animal detail" },
+          "404": { "description": "Animal not found" }
+        }
+      },
+      "put": {
+        "tags": ["Animals"],
+        "summary": "Update an animal",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Animal updated" },
+          "404": { "description": "Animal not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Animals"],
+        "summary": "Delete an animal (cascade: events, weights, documents, expenses)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "204": { "description": "Animal deleted" },
+          "404": { "description": "Animal not found" }
+        }
+      }
+    },
+    "/api/animals/{id}/weights": {
+      "get": {
+        "tags": ["Weights"],
+        "summary": "Get weight history with trend data",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Weight records and trend (current, previous, change, average, min, max)" }
+        }
+      },
+      "post": {
+        "tags": ["Weights"],
+        "summary": "Add weight record (auto anomaly detection)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["valueKg", "recordedAt"],
+                "properties": {
+                  "valueKg": { "type": "number", "example": 29.5 },
+                  "recordedAt": { "type": "string", "format": "date", "example": "2026-04-10" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Weight recorded, includes anomalyDetected flag" }
+        }
+      }
+    },
+    "/api/animals/{id}/events": {
+      "get": {
+        "tags": ["Health Events"],
+        "summary": "List health events for an animal",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] } },
+          { "name": "eventTypeId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "List of health events with event type" }
+        }
+      },
+      "post": {
+        "tags": ["Health Events"],
+        "summary": "Create health event (auto-calculates status and nextDueDate)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["eventTypeId", "scheduledDate"],
+                "properties": {
+                  "eventTypeId": { "type": "integer" },
+                  "scheduledDate": { "type": "string", "format": "date" },
+                  "completedDate": { "type": "string", "format": "date" },
+                  "product": { "type": "string" },
+                  "vetName": { "type": "string" },
+                  "notes": { "type": "string" },
+                  "frequencyDays": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Event created" }
+        }
+      }
+    },
+    "/api/events/{id}": {
+      "put": {
+        "tags": ["Health Events"],
+        "summary": "Update a health event",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Event updated" },
+          "404": { "description": "Event not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Health Events"],
+        "summary": "Delete a health event",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "204": { "description": "Event deleted" },
+          "404": { "description": "Event not found" }
+        }
+      }
+    },
+    "/api/events/{id}/complete": {
+      "patch": {
+        "tags": ["Health Events"],
+        "summary": "Mark event as completed (auto-generates next if has frequency)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "completedDate": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event completed, returns completed event and next event if generated" },
+          "400": { "description": "Event already completed" }
+        }
+      }
+    },
+    "/api/protocols": {
+      "get": {
+        "tags": ["Protocols"],
+        "summary": "List protocols of the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "List of protocols with steps and active assignment count" }
+        }
+      },
+      "post": {
+        "tags": ["Protocols"],
+        "summary": "Create a health protocol with optional steps",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "New shelter cat" },
+                  "description": { "type": "string", "example": "Standard protocol for new cats" },
+                  "steps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["eventTypeId", "dayOffset"],
+                      "properties": {
+                        "eventTypeId": { "type": "integer" },
+                        "dayOffset": { "type": "integer" },
+                        "product": { "type": "string" },
+                        "notes": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Protocol created with steps" }
+        }
+      }
+    },
+    "/api/protocols/{id}": {
+      "get": {
+        "tags": ["Protocols"],
+        "summary": "Get protocol detail with steps and assignments",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Protocol with steps and assignments" },
+          "404": { "description": "Protocol not found" }
+        }
+      },
+      "put": {
+        "tags": ["Protocols"],
+        "summary": "Update protocol (replaces steps if provided)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Protocol updated" },
+          "404": { "description": "Protocol not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Protocols"],
+        "summary": "Delete protocol (blocks if has active assignments)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "204": { "description": "Protocol deleted" },
+          "400": { "description": "Has active assignments" },
+          "404": { "description": "Protocol not found" }
+        }
+      }
+    },
+    "/api/protocols/{id}/steps": {
+      "post": {
+        "tags": ["Protocol Steps"],
+        "summary": "Add a step to a protocol",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["eventTypeId", "dayOffset"],
+                "properties": {
+                  "eventTypeId": { "type": "integer" },
+                  "dayOffset": { "type": "integer", "example": 15 },
+                  "product": { "type": "string" },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Step added" }
+        }
+      }
+    },
+    "/api/protocols/{id}/steps/reorder": {
+      "put": {
+        "tags": ["Protocol Steps"],
+        "summary": "Reorder protocol steps",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["stepIds"],
+                "properties": {
+                  "stepIds": { "type": "array", "items": { "type": "integer" }, "example": [3, 1, 5, 2] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Steps reordered" }
+        }
+      }
+    },
+    "/api/protocols/{protocolId}/steps/{stepId}": {
+      "put": {
+        "tags": ["Protocol Steps"],
+        "summary": "Update a protocol step",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "protocolId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": { "description": "Step updated" },
+          "404": { "description": "Protocol or step not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Protocol Steps"],
+        "summary": "Delete a step (auto-recompacts sortOrder)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "protocolId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "204": { "description": "Step deleted" },
+          "404": { "description": "Protocol or step not found" }
+        }
+      }
+    }
+  }
+}
