@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -6,7 +6,6 @@ import {
   Edit,
   Trash,
   Plus,
-  Upload,
 } from 'lucide-react';
 import {
   getAnimal,
@@ -15,9 +14,6 @@ import {
   completeEvent,
   getAnimalWeights,
   getAnimalVisits,
-  getAnimalDocuments,
-  uploadDocument,
-  deleteDocument,
 } from '../../services/animal.service';
 import { Badge } from '../../components/Badge/Badge';
 import { Tabs } from '../../components/Tabs/Tabs';
@@ -56,7 +52,6 @@ function getHealthStatus(animal) {
 export function AnimalProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
 
   const [animal, setAnimal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +59,6 @@ export function AnimalProfile() {
 
   const [events, setEvents] = useState([]);
   const [visits, setVisits] = useState([]);
-  const [documents, setDocuments] = useState([]);
   const [weights, setWeights] = useState([]);
   const [trend, setTrend] = useState(null);
 
@@ -79,7 +73,6 @@ export function AnimalProfile() {
     loadAnimal();
     getAnimalEvents(id).then((r) => setEvents(r.data?.events || [])).catch(() => {});
     getAnimalVisits(id).then((r) => setVisits(r.data?.visits || [])).catch(() => {});
-    getAnimalDocuments(id).then((r) => setDocuments(r.data?.documents || [])).catch(() => {});
     getAnimalWeights(id)
       .then((r) => {
         setWeights(r.data?.weights || []);
@@ -108,37 +101,6 @@ export function AnimalProfile() {
       loadAnimal();
     } catch (err) {
       alert('Error al marcar como completado');
-    }
-  };
-
-  const handleUploadClick = () => fileInputRef.current?.click();
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      alert('El archivo supera el tamaño máximo de 10MB');
-      return;
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-    try {
-      await uploadDocument(id, formData);
-      const res = await getAnimalDocuments(id);
-      setDocuments(res.data?.documents || []);
-    } catch (err) {
-      alert('Error al subir el documento');
-    }
-    e.target.value = '';
-  };
-
-  const handleDeleteDocument = async (docId) => {
-    if (!window.confirm('¿Eliminar este documento?')) return;
-    try {
-      await deleteDocument(docId);
-      setDocuments((prev) => prev.filter((d) => d.id !== docId));
-    } catch (err) {
-      alert('Error al eliminar el documento');
     }
   };
 
@@ -268,29 +230,7 @@ export function AnimalProfile() {
 
         {activeTab === 'documents' && (
           <section>
-            <div className="animal-profile__section-header">
-              <h2 className="animal-profile__section-title">Documentos</h2>
-              <button
-                className="animal-profile__btn animal-profile__btn--primary"
-                onClick={handleUploadClick}
-                type="button"
-              >
-                <Upload size={16} />
-                <span>Subir documento</span>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,application/pdf"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
-            </div>
-            {documents.length > 0 ? (
-              <DocumentsGrid documents={documents} onDelete={handleDeleteDocument} />
-            ) : (
-              <EmptyState text="Sin documentos" />
-            )}
+            <DocumentsGrid animalId={parseInt(id, 10)} />
           </section>
         )}
 
