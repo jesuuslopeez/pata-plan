@@ -1,0 +1,165 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.expense-table {
+  display: grid;
+  grid-template-columns: 6.25rem 1fr 9rem 2fr 8rem;
+
+  &__head {
+    display: contents;
+
+    .expense-table__th {
+      background-color: $neutral-50;
+      color: $neutral-600;
+      font-size: $font-size-xs;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.625rem 0.75rem;
+
+      &:first-child {
+        border-top-left-radius: $radius-md;
+        border-bottom-left-radius: $radius-md;
+      }
+
+      &:last-child {
+        border-top-right-radius: $radius-md;
+        border-bottom-right-radius: $radius-md;
+      }
+    }
+  }
+
+  &__th {
+    text-align: left;
+
+    &--right {
+      text-align: right;
+    }
+  }
+
+  &__row {
+    display: contents;
+
+    > span {
+      padding: 0.75rem;
+      border-bottom: 0.0625rem solid $neutral-50;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.15s;
+    }
+
+    &:hover > span {
+      background-color: $neutral-50;
+    }
+  }
+
+  &__date {
+    color: $neutral-900;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  &__animal {
+    color: $neutral-800;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  &__desc {
+    color: $neutral-600;
+    font-size: 0.8125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    display: block;
+  }
+
+  &__amount {
+    justify-content: flex-end;
+    color: $neutral-900;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  &__amount-suffix {
+    color: $neutral-600;
+    font-weight: 500;
+    margin-left: 0.25rem;
+  }
+
+  &__empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: $neutral-600;
+    font-size: $font-size-sm;
+    background-color: $neutral-50;
+    border-radius: $radius-md;
+  }
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.expense-cards {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  @include mobile {
+    display: flex;
+  }
+
+  &__item {
+    background-color: $neutral-white;
+    border: 0.0625rem solid $neutral-100;
+    border-radius: $radius-md;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  &__animal {
+    color: $neutral-900;
+    font-size: $font-size-sm;
+    font-weight: 700;
+  }
+
+  &__date {
+    color: $neutral-600;
+    font-size: $font-size-xs;
+  }
+
+  &__desc {
+    color: $neutral-600;
+    font-size: 0.8125rem;
+  }
+
+  &__amount {
+    color: $neutral-900;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  &__amount-suffix {
+    color: $neutral-600;
+    font-weight: 500;
+    margin-left: 0.25rem;
+  }
+}

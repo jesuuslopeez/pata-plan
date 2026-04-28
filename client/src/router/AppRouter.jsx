@@ -8,6 +8,7 @@ import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Animals } from '../pages/Animals/Animals';
 import { AnimalProfile } from '../pages/AnimalProfile/AnimalProfile';
 import { Calendar } from '../pages/Calendar/Calendar';
+import { Expenses } from '../pages/Expenses/Expenses';
 
 function Placeholder({ title }) {
   return <h1>{title}</h1>;
@@ -34,7 +35,7 @@ export function AppRouter() {
             <Route path="/animals/:id" element={<AnimalProfile />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/protocols" element={<Placeholder title="Protocols" />} />
-            <Route path="/expenses" element={<Placeholder title="Expenses" />} />
+            <Route path="/expenses" element={<Expenses />} />
             <Route path="/settings" element={<Placeholder title="Settings" />} />
           </Route>
         </Routes>
