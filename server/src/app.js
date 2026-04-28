@@ -66,6 +66,7 @@ const eventRoutes = require('./routes/event.routes');
 const protocolRoutes = require('./routes/protocol.routes');
 const assignmentRoutes = require('./routes/assignment.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const eventTypeRoutes = require('./routes/eventType.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
@@ -74,6 +75,7 @@ app.use('/api/animals', authenticate, eventRoutes);
 app.use('/api/animals', authenticate, assignmentRoutes);
 app.use('/api/assignments', authenticate, assignmentRoutes);
 app.use('/api/events', authenticate, eventRoutes);
+app.use('/api/event-types', authenticate, eventTypeRoutes);
 app.use('/api/protocols', authenticate, protocolRoutes);
 app.use('/api/dashboard', authenticate, dashboardRoutes);
 
