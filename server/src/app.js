@@ -67,6 +67,7 @@ const protocolRoutes = require('./routes/protocol.routes');
 const assignmentRoutes = require('./routes/assignment.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const visitRoutes = require('./routes/visit.routes');
+const expenseRoutes = require('./routes/expense.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
@@ -79,6 +80,7 @@ app.use('/api/events', authenticate, eventRoutes);
 app.use('/api/protocols', authenticate, protocolRoutes);
 app.use('/api/dashboard', authenticate, dashboardRoutes);
 app.use('/api/visits', authenticate, visitRoutes);
+app.use('/api/expenses', authenticate, expenseRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
