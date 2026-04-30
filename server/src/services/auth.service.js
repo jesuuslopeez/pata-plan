@@ -75,4 +75,41 @@ const getMe = async (userId) => {
   return user;
 };
 
-module.exports = { register, login, getMe };
+const updateMe = async (userId, { name, email }) => {
+  const trimmedEmail = email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email: trimmedEmail } });
+  if (existing && existing.id !== userId) {
+    throw new ApiError(409, 'Email already in use');
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      name: name.trim(),
+      email: trimmedEmail,
+    },
+    select: { ...USER_SELECT, updatedAt: true },
+  });
+
+  return user;
+};
+
+const changePassword = async (userId, { currentPassword, newPassword }) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) {
+    throw new ApiError(401, 'Current password is incorrect');
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash },
+  });
+};
+
+module.exports = { register, login, getMe, updateMe, changePassword };

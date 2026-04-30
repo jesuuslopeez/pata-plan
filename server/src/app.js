@@ -71,6 +71,7 @@ const expenseRoutes = require('./routes/expense.routes');
 const documentRoutes = require('./routes/document.routes');
 const reportRoutes = require('./routes/report.routes');
 const eventTypeRoutes = require('./routes/eventType.routes');
+const collaboratorRoutes = require('./routes/collaborator.routes');
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', authenticate, groupRoutes);
 app.use('/api/animals', authenticate, animalRoutes);
@@ -88,6 +89,7 @@ app.use('/api/dashboard', authenticate, dashboardRoutes);
 app.use('/api/visits', authenticate, visitRoutes);
 app.use('/api/expenses', authenticate, expenseRoutes);
 app.use('/api/documents', authenticate, documentRoutes);
+app.use('/api/collaborators', authenticate, collaboratorRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);

@@ -11,10 +11,7 @@ import { Calendar } from '../pages/Calendar/Calendar';
 import { Protocols } from '../pages/Protocols/Protocols';
 import { ProtocolEditor } from '../pages/ProtocolEditor/ProtocolEditor';
 import { Expenses } from '../pages/Expenses/Expenses';
-
-function Placeholder({ title }) {
-  return <h1>{title}</h1>;
-}
+import { Settings } from '../pages/Settings/Settings';
 
 function ProtectedLayout() {
   return (
@@ -40,7 +37,7 @@ export function AppRouter() {
             <Route path="/protocols/new" element={<ProtocolEditor />} />
             <Route path="/protocols/:id/edit" element={<ProtocolEditor />} />
             <Route path="/expenses" element={<Expenses />} />
-            <Route path="/settings" element={<Placeholder title="Settings" />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </AuthProvider>
