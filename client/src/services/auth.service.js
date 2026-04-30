@@ -31,3 +31,11 @@ export const registerRequest = (name, email, password) => {
 export const getMeRequest = () => {
   return api.get('/auth/me');
 };
+
+export const updateMeRequest = (name, email) => {
+  return api.put('/auth/me', { name, email });
+};
+
+export const changePasswordRequest = (currentPassword, newPassword) => {
+  return api.put('/auth/password', { currentPassword, newPassword });
+};

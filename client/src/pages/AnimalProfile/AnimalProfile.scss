@@ -90,6 +90,15 @@
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
+
+    @include mobile {
+      width: 100%;
+
+      .animal-profile__btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
   }
 
   &__btn {
@@ -141,6 +150,10 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
 
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
     @include mobile {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -175,6 +188,15 @@
     @include flex-between;
     gap: $spacing-3;
     flex-wrap: wrap;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: stretch;
+
+      .animal-profile__btn {
+        justify-content: center;
+      }
+    }
   }
 
   &__section-title {
@@ -202,6 +224,10 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
 
     @include mobile {
       grid-template-columns: repeat(2, 1fr);

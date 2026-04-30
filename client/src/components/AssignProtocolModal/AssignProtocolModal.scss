@@ -1,0 +1,216 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.assign-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 30, 29, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: $spacing-4;
+
+  &__panel {
+    background-color: $neutral-white;
+    border-radius: $radius-lg;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 32rem;
+    @include flex-column;
+    gap: 1rem;
+    box-shadow: 0 1.25rem 2.5rem rgba(0, 0, 0, 0.18);
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  &__head {
+    @include flex-between;
+    align-items: flex-start;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__subtitle {
+    font-size: $font-size-sm;
+    color: $neutral-600;
+  }
+
+  &__close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: $neutral-600;
+    padding: 0.25rem;
+    border-radius: $radius-sm;
+
+    &:hover {
+      background-color: $neutral-50;
+      color: $neutral-900;
+    }
+  }
+
+  &__form {
+    @include flex-column;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    background-color: $neutral-50;
+    border-radius: $radius-md;
+  }
+
+  &__field {
+    @include flex-column;
+    gap: 0.375rem;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-800;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 0.0625rem solid $neutral-100;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    color: $neutral-900;
+    background-color: $neutral-white;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-400;
+      box-shadow: 0 0 0 0.1875rem rgba(42, 157, 120, 0.18);
+    }
+
+    &:disabled {
+      background-color: $neutral-50;
+      color: $neutral-600;
+    }
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: $neutral-600;
+  }
+
+  &__error {
+    background-color: rgba(220, 53, 69, 0.08);
+    color: $danger;
+    padding: 0.5rem 0.75rem;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+  }
+
+  &__submit {
+    align-self: flex-end;
+    padding: 0.5rem 1rem;
+    background-color: $primary-600;
+    color: $neutral-white;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-400;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__list {
+    @include flex-column;
+    gap: 0.5rem;
+  }
+
+  &__list-title {
+    font-size: $font-size-md;
+    font-weight: 700;
+    color: $neutral-900;
+  }
+
+  &__list-empty {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.625rem;
+    color: $neutral-600;
+    font-size: $font-size-sm;
+    background-color: $neutral-50;
+    border-radius: $radius-md;
+  }
+
+  &__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    @include flex-column;
+    gap: 0.375rem;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background-color: $neutral-white;
+    border: 0.0625rem solid $neutral-100;
+    border-radius: $radius-md;
+  }
+
+  &__item-body {
+    @include flex-column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  &__item-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__item-name {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-900;
+  }
+
+  &__item-meta {
+    font-size: $font-size-xs;
+    color: $neutral-600;
+  }
+
+  &__item-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    background-color: $neutral-white;
+    border: 0.0625rem solid $neutral-100;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $neutral-600;
+    cursor: pointer;
+
+    &:hover {
+      color: $danger;
+      border-color: rgba(220, 53, 69, 0.3);
+      background-color: rgba(220, 53, 69, 0.06);
+    }
+  }
+}

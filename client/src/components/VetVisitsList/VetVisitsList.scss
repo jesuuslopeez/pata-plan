@@ -16,6 +16,12 @@
 
   &__header {
     @include flex-between;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
   }
 
   &__date {

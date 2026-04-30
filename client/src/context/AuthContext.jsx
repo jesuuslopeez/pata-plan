@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate();
 
   const isAuthenticated = !!user;
+  const isAdmin = user?.role === 'ADMIN';
 
   useEffect(() => {
     const token = getToken();
@@ -60,7 +61,9 @@ export function AuthProvider({ children }) {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, register, logout, getToken }}>
+    <AuthContext.Provider
+      value={{ user, loading, isAuthenticated, isAdmin, login, register, logout, getToken, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -8,10 +8,10 @@ import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Animals } from '../pages/Animals/Animals';
 import { AnimalProfile } from '../pages/AnimalProfile/AnimalProfile';
 import { Calendar } from '../pages/Calendar/Calendar';
-
-function Placeholder({ title }) {
-  return <h1>{title}</h1>;
-}
+import { Protocols } from '../pages/Protocols/Protocols';
+import { ProtocolEditor } from '../pages/ProtocolEditor/ProtocolEditor';
+import { Expenses } from '../pages/Expenses/Expenses';
+import { Settings } from '../pages/Settings/Settings';
 
 function ProtectedLayout() {
   return (
@@ -33,9 +33,11 @@ export function AppRouter() {
             <Route path="/animals" element={<Animals />} />
             <Route path="/animals/:id" element={<AnimalProfile />} />
             <Route path="/calendar" element={<Calendar />} />
-            <Route path="/protocols" element={<Placeholder title="Protocols" />} />
-            <Route path="/expenses" element={<Placeholder title="Expenses" />} />
-            <Route path="/settings" element={<Placeholder title="Settings" />} />
+            <Route path="/protocols" element={<Protocols />} />
+            <Route path="/protocols/new" element={<ProtocolEditor />} />
+            <Route path="/protocols/:id/edit" element={<ProtocolEditor />} />
+            <Route path="/expenses" element={<Expenses />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </AuthProvider>
