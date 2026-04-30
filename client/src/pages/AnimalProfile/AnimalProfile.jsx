@@ -7,6 +7,7 @@ import {
   Trash,
   Plus,
   Upload,
+  ClipboardList,
 } from 'lucide-react';
 import {
   getAnimal,
@@ -19,12 +20,14 @@ import {
   uploadDocument,
   deleteDocument,
 } from '../../services/animal.service';
+import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/Badge/Badge';
 import { Tabs } from '../../components/Tabs/Tabs';
 import { HealthEventsTable } from '../../components/HealthEventsTable/HealthEventsTable';
 import { VetVisitsList } from '../../components/VetVisitsList/VetVisitsList';
 import { DocumentsGrid } from '../../components/DocumentsGrid/DocumentsGrid';
 import { WeightChart } from '../../components/WeightChart/WeightChart';
+import { AssignProtocolModal } from '../../components/AssignProtocolModal/AssignProtocolModal';
 import './AnimalProfile.scss';
 
 const SPECIES_LABEL = { DOG: 'Perro', CAT: 'Gato', OTHER: 'Otro' };
@@ -56,17 +59,22 @@ function getHealthStatus(animal) {
 export function AnimalProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const fileInputRef = useRef(null);
 
   const [animal, setAnimal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('health');
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const [events, setEvents] = useState([]);
   const [visits, setVisits] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [weights, setWeights] = useState([]);
   const [trend, setTrend] = useState(null);
+
+  const reloadEvents = () =>
+    getAnimalEvents(id).then((r) => setEvents(r.data?.events || [])).catch(() => {});
 
   const loadAnimal = () => {
     getAnimal(id)
@@ -193,20 +201,43 @@ export function AnimalProfile() {
         </div>
 
         <div className="animal-profile__actions">
+          {isAdmin && (
+            <button
+              className="animal-profile__btn animal-profile__btn--secondary"
+              type="button"
+              onClick={() => setAssignOpen(true)}
+            >
+              <ClipboardList size={16} />
+              <span>Asignar protocolo</span>
+            </button>
+          )}
           <button className="animal-profile__btn animal-profile__btn--secondary" type="button">
             <Edit size={16} />
             <span>Editar</span>
           </button>
-          <button
-            className="animal-profile__btn animal-profile__btn--danger"
-            onClick={handleDelete}
-            type="button"
-          >
-            <Trash size={16} />
-            <span>Eliminar</span>
-          </button>
+          {isAdmin && (
+            <button
+              className="animal-profile__btn animal-profile__btn--danger"
+              onClick={handleDelete}
+              type="button"
+            >
+              <Trash size={16} />
+              <span>Eliminar</span>
+            </button>
+          )}
         </div>
       </header>
+
+      <AssignProtocolModal
+        open={assignOpen}
+        animalId={parseInt(id, 10)}
+        animalName={animal.name}
+        onClose={() => setAssignOpen(false)}
+        onChanged={() => {
+          reloadEvents();
+          loadAnimal();
+        }}
+      />
 
       <div className="animal-profile__info">
         <div className="animal-profile__info-card">
