@@ -10,6 +10,7 @@ import { AnimalProfile } from '../pages/AnimalProfile/AnimalProfile';
 import { Calendar } from '../pages/Calendar/Calendar';
 import { Protocols } from '../pages/Protocols/Protocols';
 import { ProtocolEditor } from '../pages/ProtocolEditor/ProtocolEditor';
+import { Expenses } from '../pages/Expenses/Expenses';
 
 function Placeholder({ title }) {
   return <h1>{title}</h1>;
@@ -38,7 +39,7 @@ export function AppRouter() {
             <Route path="/protocols" element={<Protocols />} />
             <Route path="/protocols/new" element={<ProtocolEditor />} />
             <Route path="/protocols/:id/edit" element={<ProtocolEditor />} />
-            <Route path="/expenses" element={<Placeholder title="Expenses" />} />
+            <Route path="/expenses" element={<Expenses />} />
             <Route path="/settings" element={<Placeholder title="Settings" />} />
           </Route>
         </Routes>
