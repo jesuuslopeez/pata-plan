@@ -48,17 +48,42 @@ const getAll = async (userId, animalId) => {
   return { weights, trend };
 };
 
-const detectAnomaly = (newValue, recentValues) => {
+const ANOMALY_THRESHOLD = 0.1;
+const ANOMALY_EVENT_TYPE_NAME = 'Anomalía de peso';
+
+const computeAnomaly = (newValue, recentValues) => {
   if (recentValues.length < 3) {
-    return false;
+    return { isAnomaly: false, mean: null, deviationPercent: null };
   }
+  const mean = recentValues.reduce((a, b) => a + b, 0) / recentValues.length;
+  const deviationPercent = ((newValue - mean) / mean) * 100;
+  const isAnomaly = Math.abs(deviationPercent) > ANOMALY_THRESHOLD * 100;
+  return { isAnomaly, mean, deviationPercent };
+};
 
-  const sum = recentValues.reduce((a, b) => a + b, 0);
-  const mean = sum / recentValues.length;
-  const deviation = Math.abs(newValue - mean);
-  const threshold = mean * 0.1;
+const buildAnomalyMessage = (value, mean, deviationPercent) => {
+  const sign = deviationPercent >= 0 ? '+' : '';
+  return (
+    `Peso registrado: ${value.toFixed(2)} kg. ` +
+    `Media histórica: ${mean.toFixed(2)} kg. ` +
+    `Desviación: ${sign}${deviationPercent.toFixed(1)}%`
+  );
+};
 
-  return deviation > threshold;
+const findOrCreateAnomalyEventType = async (tx) => {
+  const existing = await tx.eventType.findFirst({
+    where: { name: ANOMALY_EVENT_TYPE_NAME, category: 'CHECKUP' },
+  });
+  if (existing) {
+    return existing;
+  }
+  return tx.eventType.create({
+    data: {
+      name: ANOMALY_EVENT_TYPE_NAME,
+      category: 'CHECKUP',
+      severityScore: 8,
+    },
+  });
 };
 
 const create = async (userId, animalId, { valueKg, recordedAt }) => {
@@ -85,21 +110,40 @@ const create = async (userId, animalId, { valueKg, recordedAt }) => {
   });
   const recentValues = recentRecords.map((r) => parseFloat(r.valueKg));
 
-  const isAnomaly = detectAnomaly(value, recentValues);
+  const { isAnomaly, mean, deviationPercent } = computeAnomaly(value, recentValues);
+  const anomalyMessage = isAnomaly
+    ? buildAnomalyMessage(value, mean, deviationPercent)
+    : null;
 
-  const weight = await prisma.weightRecord.create({
-    data: {
-      animalId,
-      valueKg: value,
-      recordedAt: date,
-      isAnomaly,
-    },
+  const weight = await prisma.$transaction(async (tx) => {
+    const created = await tx.weightRecord.create({
+      data: {
+        animalId,
+        valueKg: value,
+        recordedAt: date,
+        isAnomaly,
+      },
+    });
+
+    if (isAnomaly) {
+      const eventType = await findOrCreateAnomalyEventType(tx);
+      await tx.healthEvent.create({
+        data: {
+          animalId,
+          eventTypeId: eventType.id,
+          scheduledDate: new Date(),
+          status: 'PENDING',
+          notes: anomalyMessage,
+        },
+      });
+    }
+
+    return created;
   });
 
   const result = { weight, anomalyDetected: isAnomaly };
   if (isAnomaly) {
-    result.anomalyMessage =
-      'Peso registrado con una desviación significativa respecto al historial del animal';
+    result.anomalyMessage = anomalyMessage;
   }
 
   return result;
