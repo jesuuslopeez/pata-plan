@@ -1,28 +1,21 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const { getAccessibleGroupIds } = require('../utils/groupAccess');
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
     include: { group: { select: { id: true, name: true } } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
   }
   return animal;
 };
 
 const gatherReportData = async (userId, animalId) => {
-  const animal = await verifyAnimalOwnership(animalId, userId);
+  const animal = await verifyAnimalAccess(animalId, userId);
 
   const [healthEvents, vetVisits, weightRecords, expenses] = await Promise.all([
     prisma.healthEvent.findMany({

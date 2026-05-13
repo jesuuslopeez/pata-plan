@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { Plus, PawPrint } from 'lucide-react';
 import { getAnimals } from '../../services/animal.service';
 import { getGroups } from '../../services/dashboard.service';
+import { useAuth } from '../../hooks/useAuth';
 import { AnimalCard } from '../../components/AnimalCard/AnimalCard';
 import { SearchInput } from '../../components/SearchInput/SearchInput';
 import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
+import { AddAnimalModal } from '../../components/AddAnimalModal/AddAnimalModal';
 import './Animals.scss';
 
 const SPECIES_OPTIONS = [
@@ -15,12 +17,14 @@ const SPECIES_OPTIONS = [
 ];
 
 export function Animals() {
+  const { isAdmin } = useAuth();
   const [animals, setAnimals] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [groupId, setGroupId] = useState('');
   const [species, setSpecies] = useState('');
+  const [addOpen, setAddOpen] = useState(false);
 
   useEffect(() => {
     getGroups()
@@ -28,27 +32,43 @@ export function Animals() {
       .catch(() => setGroups([]));
   }, []);
 
-  useEffect(() => {
+  const loadAnimals = () => {
     setLoading(true);
     getAnimals({ search, groupId, species })
       .then((res) => setAnimals(res.data?.animals || []))
       .catch(() => setAnimals([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadAnimals();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, groupId, species]);
 
+  const groupLabel = (g) =>
+    g.role && g.role !== 'OWNER' && g.owner?.name
+      ? `${g.name} (de ${g.owner.name})`
+      : g.name;
   const groupOptions = [
     { value: '', label: 'Todos los grupos' },
-    ...groups.map((g) => ({ value: String(g.id), label: g.name })),
+    ...groups.map((g) => ({ value: String(g.id), label: groupLabel(g) })),
   ];
+  const editableGroups = groups.filter((g) => !g.role || g.role === 'OWNER' || g.role === 'EDITOR');
 
   return (
     <div className="animals">
       <header className="animals__header">
         <h1 className="animals__title">Animales</h1>
-        <button className="animals__add-button" type="button">
-          <Plus size={18} />
-          <span>Añadir animal</span>
-        </button>
+        {isAdmin && (
+          <button
+            className="animals__add-button"
+            type="button"
+            onClick={() => setAddOpen(true)}
+          >
+            <Plus size={18} />
+            <span>Añadir animal</span>
+          </button>
+        )}
       </header>
 
       <div className="animals__filters">
@@ -67,10 +87,16 @@ export function Animals() {
         <div className="animals__empty">
           <PawPrint className="animals__empty-icon" size={48} />
           <p className="animals__empty-text">No se encontraron animales</p>
-          <button className="animals__add-button" type="button">
-            <Plus size={18} />
-            <span>Añadir animal</span>
-          </button>
+          {isAdmin && (
+            <button
+              className="animals__add-button"
+              type="button"
+              onClick={() => setAddOpen(true)}
+            >
+              <Plus size={18} />
+              <span>Añadir animal</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="animals__grid">
@@ -79,6 +105,13 @@ export function Animals() {
           ))}
         </div>
       )}
+
+      <AddAnimalModal
+        open={addOpen}
+        groups={editableGroups}
+        onClose={() => setAddOpen(false)}
+        onSaved={() => loadAnimals()}
+      />
     </div>
   );
 }

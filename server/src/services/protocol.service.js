@@ -17,7 +17,7 @@ const verifyOwnership = async (protocolId, userId) => {
     where: { id: protocolId, userId },
   });
   if (!protocol) {
-    throw new ApiError(404, 'Protocol not found');
+    throw new ApiError(404, 'Protocolo no encontrado');
   }
   return protocol;
 };
@@ -26,20 +26,20 @@ const validateSteps = async (steps) => {
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
     if (!step.eventTypeId) {
-      throw new ApiError(400, `Step ${i}: eventTypeId is required`);
+      throw new ApiError(400, `Paso ${i + 1}: falta el tipo de evento`);
     }
     if (step.dayOffset === undefined || step.dayOffset === null) {
-      throw new ApiError(400, `Step ${i}: dayOffset is required`);
+      throw new ApiError(400, `Paso ${i + 1}: falta el día`);
     }
     const dayOffset = parseInt(step.dayOffset, 10);
     if (isNaN(dayOffset) || dayOffset < 0) {
-      throw new ApiError(400, `Step ${i}: dayOffset must be an integer >= 0`);
+      throw new ApiError(400, `Paso ${i + 1}: el día debe ser un entero mayor o igual a 0`);
     }
     const eventType = await prisma.eventType.findUnique({
       where: { id: parseInt(step.eventTypeId, 10) },
     });
     if (!eventType) {
-      throw new ApiError(400, `Step ${i}: invalid eventTypeId`);
+      throw new ApiError(400, `Paso ${i + 1}: tipo de evento no válido`);
     }
   }
 };
@@ -81,7 +81,7 @@ const getById = async (userId, protocolId) => {
   });
 
   if (!protocol) {
-    throw new ApiError(404, 'Protocol not found');
+    throw new ApiError(404, 'Protocolo no encontrado');
   }
 
   return protocol;
@@ -89,10 +89,10 @@ const getById = async (userId, protocolId) => {
 
 const create = async (userId, data) => {
   if (!data.name || typeof data.name !== 'string' || data.name.trim().length === 0) {
-    throw new ApiError(400, 'name is required');
+    throw new ApiError(400, 'Falta el nombre');
   }
   if (data.name.trim().length > 100) {
-    throw new ApiError(400, 'name must be at most 100 characters');
+    throw new ApiError(400, 'El nombre no puede superar los 100 caracteres');
   }
 
   const stepsData = [];
@@ -131,10 +131,10 @@ const update = async (userId, protocolId, data) => {
 
   if (data.name !== undefined) {
     if (typeof data.name !== 'string' || data.name.trim().length === 0) {
-      throw new ApiError(400, 'name cannot be empty');
+      throw new ApiError(400, 'El nombre no puede estar vacío');
     }
     if (data.name.trim().length > 100) {
-      throw new ApiError(400, 'name must be at most 100 characters');
+      throw new ApiError(400, 'El nombre no puede superar los 100 caracteres');
     }
   }
 
@@ -192,7 +192,7 @@ const remove = async (userId, protocolId) => {
   if (activeCount > 0) {
     throw new ApiError(
       400,
-      'Cannot delete protocol with active assignments. Cancel or complete them first'
+      'No se puede eliminar un protocolo con asignaciones activas. Cancélalas o complétalas primero.'
     );
   }
 
@@ -203,20 +203,20 @@ const addStep = async (userId, protocolId, data) => {
   await verifyOwnership(protocolId, userId);
 
   if (!data.eventTypeId) {
-    throw new ApiError(400, 'eventTypeId is required');
+    throw new ApiError(400, 'Falta el tipo de evento');
   }
   if (data.dayOffset === undefined || data.dayOffset === null) {
-    throw new ApiError(400, 'dayOffset is required');
+    throw new ApiError(400, 'Falta el día');
   }
   const dayOffset = parseInt(data.dayOffset, 10);
   if (isNaN(dayOffset) || dayOffset < 0) {
-    throw new ApiError(400, 'dayOffset must be an integer >= 0');
+    throw new ApiError(400, 'El día debe ser un entero mayor o igual a 0');
   }
 
   const eventTypeId = parseInt(data.eventTypeId, 10);
   const eventType = await prisma.eventType.findUnique({ where: { id: eventTypeId } });
   if (!eventType) {
-    throw new ApiError(400, 'Invalid eventTypeId');
+    throw new ApiError(400, 'Tipo de evento no válido');
   }
 
   const maxStep = await prisma.protocolStep.findFirst({
@@ -247,7 +247,7 @@ const verifyStepOwnership = async (protocolId, stepId, userId) => {
     where: { id: stepId, protocolId },
   });
   if (!step) {
-    throw new ApiError(404, 'Step not found');
+    throw new ApiError(404, 'Paso no encontrado');
   }
   return step;
 };
@@ -261,7 +261,7 @@ const updateStep = async (userId, protocolId, stepId, data) => {
     const etId = parseInt(data.eventTypeId, 10);
     const eventType = await prisma.eventType.findUnique({ where: { id: etId } });
     if (!eventType) {
-      throw new ApiError(400, 'Invalid eventTypeId');
+      throw new ApiError(400, 'Tipo de evento no válido');
     }
     updateData.eventTypeId = etId;
   }
@@ -269,7 +269,7 @@ const updateStep = async (userId, protocolId, stepId, data) => {
   if (data.dayOffset !== undefined) {
     const d = parseInt(data.dayOffset, 10);
     if (isNaN(d) || d < 0) {
-      throw new ApiError(400, 'dayOffset must be an integer >= 0');
+      throw new ApiError(400, 'El día debe ser un entero mayor o igual a 0');
     }
     updateData.dayOffset = d;
   }
@@ -317,7 +317,7 @@ const reorderSteps = async (userId, protocolId, stepIds) => {
   await verifyOwnership(protocolId, userId);
 
   if (!Array.isArray(stepIds) || stepIds.length === 0) {
-    throw new ApiError(400, 'stepIds must be a non-empty array');
+    throw new ApiError(400, 'La lista de pasos no puede estar vacía');
   }
 
   const existingSteps = await prisma.protocolStep.findMany({
@@ -328,11 +328,11 @@ const reorderSteps = async (userId, protocolId, stepIds) => {
 
   for (const id of stepIds) {
     if (!existingIds.has(id)) {
-      throw new ApiError(400, `Step ${id} does not belong to this protocol`);
+      throw new ApiError(400, `El paso ${id} no pertenece a este protocolo`);
     }
   }
   if (stepIds.length !== existingIds.size) {
-    throw new ApiError(400, 'stepIds must include all steps of the protocol');
+    throw new ApiError(400, 'Debes incluir todos los pasos del protocolo');
   }
 
   await prisma.$transaction(async (tx) => {

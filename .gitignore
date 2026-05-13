@@ -46,3 +46,7 @@ temp/
 
 # Claude Code
 CLAUDE.md
+.claude/
+
+# Uploaded documents (runtime data)
+server/uploads/documents/

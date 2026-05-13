@@ -1,3 +1,4 @@
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './AnimalAlertCard.scss';
 
 const SPECIES_LABEL = {
@@ -7,7 +8,7 @@ const SPECIES_LABEL = {
 };
 
 function formatEventText(alert) {
-  const typeName = alert.eventType?.name || 'Evento';
+  const typeName = translateEventType(alert.eventType?.name);
   if (alert.status === 'OVERDUE') {
     return `${typeName} — ${alert.daysOverdue} ${alert.daysOverdue === 1 ? 'día' : 'días'} vencida`;
   }

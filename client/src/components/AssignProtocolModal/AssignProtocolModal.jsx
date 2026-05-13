@@ -7,6 +7,7 @@ import {
   getProtocols,
 } from '../../services/protocol.service';
 import { Badge } from '../Badge/Badge';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import './AssignProtocolModal.scss';
 
 const STATUS_VARIANT = {
@@ -30,6 +31,8 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [cancelingAssignment, setCancelingAssignment] = useState(null);
+  const [alertDialog, setAlertDialog] = useState(null);
 
   const refreshAssignments = () =>
     getAnimalAssignments(animalId)
@@ -79,16 +82,16 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
     }
   };
 
-  const handleCancel = async (assignment) => {
-    if (!window.confirm(`¿Cancelar la asignación de "${assignment.protocol?.name}"?`)) {
-      return;
-    }
+  const confirmCancel = async () => {
     try {
-      await cancelAssignment(assignment.id);
+      await cancelAssignment(cancelingAssignment.id);
       await refreshAssignments();
       onChanged?.();
     } catch (err) {
-      window.alert(err?.response?.data?.error || 'No se ha podido cancelar la asignación');
+      setAlertDialog({
+        title: 'No se ha podido cancelar',
+        message: err?.response?.data?.error || 'Inténtalo de nuevo más tarde.',
+      });
     }
   };
 
@@ -192,7 +195,7 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
                     <button
                       type="button"
                       className="assign-modal__item-cancel"
-                      onClick={() => handleCancel(a)}
+                      onClick={() => setCancelingAssignment(a)}
                       aria-label="Cancelar asignación"
                     >
                       <Ban size={14} />
@@ -205,6 +208,30 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
           )}
         </section>
       </div>
+
+      <ConfirmDialog
+        open={!!cancelingAssignment}
+        title="Cancelar asignación"
+        message={
+          cancelingAssignment
+            ? `¿Cancelar la asignación de "${cancelingAssignment.protocol?.name}"?`
+            : ''
+        }
+        confirmText="Cancelar asignación"
+        cancelText="Volver"
+        danger
+        onClose={() => setCancelingAssignment(null)}
+        onConfirm={confirmCancel}
+      />
+
+      <ConfirmDialog
+        open={!!alertDialog}
+        title={alertDialog?.title || 'Aviso'}
+        message={alertDialog?.message}
+        confirmText="Entendido"
+        hideCancel
+        onClose={() => setAlertDialog(null)}
+      />
     </div>
   );
 }

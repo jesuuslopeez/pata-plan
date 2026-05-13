@@ -1,28 +1,35 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
 const { recalculateCascade } = require('./recalculation.service');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
   }
   return animal;
 };
 
-const verifyEventOwnership = async (eventId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
+  }
+  return animal;
+};
+
+const verifyEventEditAccess = async (eventId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
   const event = await prisma.healthEvent.findFirst({
     where: {
       id: eventId,
@@ -31,7 +38,7 @@ const verifyEventOwnership = async (eventId, userId) => {
     include: { eventType: true },
   });
   if (!event) {
-    throw new ApiError(404, 'Event not found');
+    throw new ApiError(403, 'No tienes permiso para modificar este evento');
   }
   return event;
 };
@@ -65,7 +72,7 @@ const EVENT_INCLUDE = {
 };
 
 const getAll = async (userId, animalId, query) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalAccess(animalId, userId);
 
   const where = { animalId };
 
@@ -95,34 +102,34 @@ const getAll = async (userId, animalId, query) => {
 };
 
 const create = async (userId, animalId, data) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   if (!data.eventTypeId) {
-    throw new ApiError(400, 'eventTypeId is required');
+    throw new ApiError(400, 'Falta el tipo de evento');
   }
   if (!data.scheduledDate) {
-    throw new ApiError(400, 'scheduledDate is required');
+    throw new ApiError(400, 'Falta la fecha programada');
   }
 
   const eventTypeId = parseInt(data.eventTypeId, 10);
   const eventType = await prisma.eventType.findUnique({ where: { id: eventTypeId } });
   if (!eventType) {
-    throw new ApiError(400, 'Invalid eventTypeId');
+    throw new ApiError(400, 'Tipo de evento no válido');
   }
 
   const scheduledDate = new Date(data.scheduledDate);
   if (isNaN(scheduledDate.getTime())) {
-    throw new ApiError(400, 'scheduledDate must be a valid date');
+    throw new ApiError(400, 'La fecha programada no es válida');
   }
 
   const completedDate = data.completedDate ? new Date(data.completedDate) : null;
   if (data.completedDate && isNaN(completedDate.getTime())) {
-    throw new ApiError(400, 'completedDate must be a valid date');
+    throw new ApiError(400, 'La fecha de finalización no es válida');
   }
 
   const frequencyDays = data.frequencyDays ? parseInt(data.frequencyDays, 10) : null;
   if (frequencyDays !== null && (isNaN(frequencyDays) || frequencyDays <= 0)) {
-    throw new ApiError(400, 'frequencyDays must be a positive integer');
+    throw new ApiError(400, 'La frecuencia debe ser un número entero positivo');
   }
 
   const status = calcStatus(scheduledDate, completedDate);
@@ -148,7 +155,7 @@ const create = async (userId, animalId, data) => {
 };
 
 const update = async (userId, eventId, data) => {
-  const existing = await verifyEventOwnership(eventId, userId);
+  const existing = await verifyEventEditAccess(eventId, userId);
 
   const updateData = {};
 
@@ -156,7 +163,7 @@ const update = async (userId, eventId, data) => {
     const etId = parseInt(data.eventTypeId, 10);
     const eventType = await prisma.eventType.findUnique({ where: { id: etId } });
     if (!eventType) {
-      throw new ApiError(400, 'Invalid eventTypeId');
+      throw new ApiError(400, 'Tipo de evento no válido');
     }
     updateData.eventTypeId = etId;
   }
@@ -164,7 +171,7 @@ const update = async (userId, eventId, data) => {
   if (data.scheduledDate !== undefined) {
     const d = new Date(data.scheduledDate);
     if (isNaN(d.getTime())) {
-      throw new ApiError(400, 'scheduledDate must be a valid date');
+      throw new ApiError(400, 'La fecha programada no es válida');
     }
     updateData.scheduledDate = d;
   }
@@ -175,7 +182,7 @@ const update = async (userId, eventId, data) => {
     } else {
       const d = new Date(data.completedDate);
       if (isNaN(d.getTime())) {
-        throw new ApiError(400, 'completedDate must be a valid date');
+        throw new ApiError(400, 'La fecha de finalización no es válida');
       }
       updateData.completedDate = d;
     }
@@ -187,7 +194,7 @@ const update = async (userId, eventId, data) => {
     } else {
       const fd = parseInt(data.frequencyDays, 10);
       if (isNaN(fd) || fd <= 0) {
-        throw new ApiError(400, 'frequencyDays must be a positive integer');
+        throw new ApiError(400, 'La frecuencia debe ser un número entero positivo');
       }
       updateData.frequencyDays = fd;
     }
@@ -223,15 +230,15 @@ const update = async (userId, eventId, data) => {
 };
 
 const complete = async (userId, eventId, data) => {
-  const existing = await verifyEventOwnership(eventId, userId);
+  const existing = await verifyEventEditAccess(eventId, userId);
 
   if (existing.status === 'COMPLETED') {
-    throw new ApiError(400, 'Event is already completed');
+    throw new ApiError(400, 'El evento ya está completado');
   }
 
   const completedDate = data.completedDate ? new Date(data.completedDate) : new Date();
   if (isNaN(completedDate.getTime())) {
-    throw new ApiError(400, 'completedDate must be a valid date');
+    throw new ApiError(400, 'La fecha de finalización no es válida');
   }
 
   const nextDueDate = calcNextDueDate(
@@ -275,7 +282,7 @@ const complete = async (userId, eventId, data) => {
 };
 
 const remove = async (userId, eventId) => {
-  await verifyEventOwnership(eventId, userId);
+  await verifyEventEditAccess(eventId, userId);
   await prisma.healthEvent.delete({ where: { id: eventId } });
 };
 

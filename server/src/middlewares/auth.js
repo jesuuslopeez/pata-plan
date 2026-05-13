@@ -6,7 +6,7 @@ const authenticate = async (req, _res, next) => {
   try {
     const header = req.headers.authorization;
     if (!header || !header.startsWith('Bearer ')) {
-      throw new ApiError(401, 'Authentication required');
+      throw new ApiError(401, 'Autenticación requerida');
     }
 
     const token = header.split(' ')[1];
@@ -25,7 +25,7 @@ const authenticate = async (req, _res, next) => {
     });
 
     if (!user) {
-      throw new ApiError(401, 'User not found');
+      throw new ApiError(401, 'Usuario no encontrado');
     }
 
     req.user = user;
@@ -34,7 +34,7 @@ const authenticate = async (req, _res, next) => {
     if (err instanceof ApiError) {
       return next(err);
     }
-    next(new ApiError(401, 'Invalid or expired token'));
+    next(new ApiError(401, 'Sesión inválida o expirada'));
   }
 };
 

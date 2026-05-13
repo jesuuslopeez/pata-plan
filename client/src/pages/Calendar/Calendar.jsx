@@ -5,6 +5,7 @@ import { getGroups } from '../../services/dashboard.service';
 import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
 import { CalendarGrid } from '../../components/CalendarGrid/CalendarGrid';
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import './Calendar.scss';
 
 const MONTH_LABELS = [
@@ -36,6 +37,7 @@ export function Calendar() {
   const [typeFilter, setTypeFilter] = useState('');
 
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [alertDialog, setAlertDialog] = useState(null);
 
   useEffect(() => {
     getGroups().then((r) => setGroups(r.data?.groups || [])).catch(() => {});
@@ -121,7 +123,10 @@ export function Calendar() {
       );
       setSelectedEvent(null);
     } catch (err) {
-      alert('Error al marcar como completado');
+      setAlertDialog({
+        title: 'No se ha podido completar el evento',
+        message: 'Inténtalo de nuevo más tarde.',
+      });
     }
   };
 
@@ -129,9 +134,13 @@ export function Calendar() {
     { value: '', label: 'Todos los animales' },
     ...animals.map((a) => ({ value: String(a.id), label: a.name })),
   ];
+  const groupLabel = (g) =>
+    g.role && g.role !== 'OWNER' && g.owner?.name
+      ? `${g.name} (de ${g.owner.name})`
+      : g.name;
   const groupOptions = [
     { value: '', label: 'Todos los grupos' },
-    ...groups.map((g) => ({ value: String(g.id), label: g.name })),
+    ...groups.map((g) => ({ value: String(g.id), label: groupLabel(g) })),
   ];
 
   return (
@@ -198,6 +207,15 @@ export function Calendar() {
           onComplete={handleComplete}
         />
       )}
+
+      <ConfirmDialog
+        open={!!alertDialog}
+        title={alertDialog?.title || 'Aviso'}
+        message={alertDialog?.message}
+        confirmText="Entendido"
+        hideCancel
+        onClose={() => setAlertDialog(null)}
+      />
     </div>
   );
 }

@@ -2,28 +2,36 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+  assertCanEditGroup,
+} = require('../utils/groupAccess');
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
+  }
+  return animal;
+};
+
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
   }
   return animal;
 };
 
 const getAll = async (userId, query) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
   if (groupIds.length === 0) {
     return [];
   }
@@ -78,7 +86,7 @@ const getAll = async (userId, query) => {
 };
 
 const getById = async (userId, animalId) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
 
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
@@ -93,7 +101,7 @@ const getById = async (userId, animalId) => {
   });
 
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
   }
 
   const eventCounts = await prisma.healthEvent.groupBy({
@@ -117,12 +125,11 @@ const getById = async (userId, animalId) => {
 };
 
 const create = async (userId, data, file) => {
-  const groupIds = await getUserGroupIds(userId);
   const groupId = parseInt(data.groupId, 10);
-
-  if (!groupIds.includes(groupId)) {
-    throw new ApiError(400, 'Invalid group');
+  if (isNaN(groupId)) {
+    throw new ApiError(400, 'Grupo no válido');
   }
+  await assertCanEditGroup(userId, groupId);
 
   const animalData = {
     name: data.name.trim(),
@@ -166,7 +173,7 @@ const deletePhotoFile = (photoUrl) => {
 };
 
 const update = async (userId, animalId, data, file) => {
-  const existing = await verifyAnimalOwnership(animalId, userId);
+  const existing = await verifyAnimalEditAccess(animalId, userId);
 
   const updateData = {};
 
@@ -193,17 +200,20 @@ const update = async (userId, animalId, data, file) => {
   }
 
   if (data.groupId !== undefined) {
-    const groupIds = await getUserGroupIds(userId);
     const newGroupId = parseInt(data.groupId, 10);
-    if (!groupIds.includes(newGroupId)) {
-      throw new ApiError(400, 'Invalid group');
+    if (isNaN(newGroupId)) {
+      throw new ApiError(400, 'Grupo no válido');
     }
+    await assertCanEditGroup(userId, newGroupId);
     updateData.groupId = newGroupId;
   }
 
   if (file) {
     deletePhotoFile(existing.photoUrl);
     updateData.photoUrl = `/uploads/animals/${file.filename}`;
+  } else if (data.removePhoto === 'true' || data.removePhoto === true) {
+    deletePhotoFile(existing.photoUrl);
+    updateData.photoUrl = null;
   }
 
   const animal = await prisma.animal.update({
@@ -216,7 +226,7 @@ const update = async (userId, animalId, data, file) => {
 };
 
 const remove = async (userId, animalId) => {
-  const existing = await verifyAnimalOwnership(animalId, userId);
+  const existing = await verifyAnimalEditAccess(animalId, userId);
   deletePhotoFile(existing.photoUrl);
   await prisma.animal.delete({ where: { id: animalId } });
 };

@@ -15,6 +15,8 @@ export const reorderProtocolSteps = (protocolId, stepIds) =>
 
 export const getEventTypes = () => api.get('/event-types');
 
+export const createEventType = (data) => api.post('/event-types', data);
+
 export const assignProtocolToAnimal = (animalId, payload) =>
   api.post(`/animals/${animalId}/assign-protocol`, payload);
 

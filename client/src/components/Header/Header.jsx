@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Menu, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getDashboard } from '../../services/dashboard.service';
 import './Header.scss';
+
+const REFRESH_INTERVAL_MS = 30000;
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -28,9 +31,10 @@ function getFirstName(name) {
 
 export function Header({ onMenuClick }) {
   const { user } = useAuth();
+  const location = useLocation();
   const [counts, setCounts] = useState({ overdue: 0, pending: 0 });
 
-  useEffect(() => {
+  const loadCounts = useCallback(() => {
     getDashboard()
       .then((res) => {
         setCounts({
@@ -40,6 +44,24 @@ export function Header({ onMenuClick }) {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadCounts();
+  }, [loadCounts, location.pathname]);
+
+  useEffect(() => {
+    const interval = setInterval(loadCounts, REFRESH_INTERVAL_MS);
+    const onVisible = () => {
+      if (!document.hidden) loadCounts();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', loadCounts);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', loadCounts);
+    };
+  }, [loadCounts]);
 
   return (
     <header className="header">

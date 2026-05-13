@@ -15,6 +15,8 @@ import {
   completeEvent,
   getAnimalWeights,
   getAnimalVisits,
+  deleteVisit,
+  deleteWeight,
 } from '../../services/animal.service';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/Badge/Badge';
@@ -24,6 +26,14 @@ import { VetVisitsList } from '../../components/VetVisitsList/VetVisitsList';
 import { DocumentsGrid } from '../../components/DocumentsGrid/DocumentsGrid';
 import { WeightChart } from '../../components/WeightChart/WeightChart';
 import { AssignProtocolModal } from '../../components/AssignProtocolModal/AssignProtocolModal';
+import { AddEventModal } from '../../components/AddEventModal/AddEventModal';
+import { AddVisitModal } from '../../components/AddVisitModal/AddVisitModal';
+import { AddWeightModal } from '../../components/AddWeightModal/AddWeightModal';
+import { AddAnimalModal } from '../../components/AddAnimalModal/AddAnimalModal';
+import { WeightHistoryList } from '../../components/WeightHistoryList/WeightHistoryList';
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { getGroups } from '../../services/group.service';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import './AnimalProfile.scss';
 
 const SPECIES_LABEL = { DOG: 'Perro', CAT: 'Gato', OTHER: 'Otro' };
@@ -61,6 +71,17 @@ export function AnimalProfile() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('health');
   const [assignOpen, setAssignOpen] = useState(false);
+  const [addEventOpen, setAddEventOpen] = useState(false);
+  const [addVisitOpen, setAddVisitOpen] = useState(false);
+  const [editingVisit, setEditingVisit] = useState(null);
+  const [addWeightOpen, setAddWeightOpen] = useState(false);
+  const [editingWeight, setEditingWeight] = useState(null);
+  const [deletingWeight, setDeletingWeight] = useState(null);
+  const [editAnimalOpen, setEditAnimalOpen] = useState(false);
+  const [groups, setGroups] = useState([]);
+  const [deletingAnimal, setDeletingAnimal] = useState(false);
+  const [deletingVisit, setDeletingVisit] = useState(null);
+  const [alertDialog, setAlertDialog] = useState(null);
 
   const [events, setEvents] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -69,6 +90,17 @@ export function AnimalProfile() {
 
   const reloadEvents = () =>
     getAnimalEvents(id).then((r) => setEvents(r.data?.events || [])).catch(() => {});
+
+  const reloadVisits = () =>
+    getAnimalVisits(id).then((r) => setVisits(r.data?.visits || [])).catch(() => {});
+
+  const reloadWeights = () =>
+    getAnimalWeights(id)
+      .then((r) => {
+        setWeights(r.data?.weights || []);
+        setTrend(r.data?.trend || null);
+      })
+      .catch(() => {});
 
   const loadAnimal = () => {
     getAnimal(id)
@@ -89,16 +121,16 @@ export function AnimalProfile() {
       .catch(() => {});
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!window.confirm('¿Seguro que quieres eliminar este animal? Esta acción no se puede deshacer.')) {
-      return;
-    }
-    try {
-      await deleteAnimal(id);
-      navigate('/animals');
-    } catch (err) {
-      alert('Error al eliminar el animal');
-    }
+  useEffect(() => {
+    if (!isAdmin) return;
+    getGroups()
+      .then((r) => setGroups(r.data?.groups || []))
+      .catch(() => setGroups([]));
+  }, [isAdmin]);
+
+  const handleEditVisit = (visit) => {
+    setEditingVisit(visit);
+    setAddVisitOpen(true);
   };
 
   const handleCompleteEvent = async (eventId) => {
@@ -108,7 +140,10 @@ export function AnimalProfile() {
       setEvents(res.data?.events || []);
       loadAnimal();
     } catch (err) {
-      alert('Error al marcar como completado');
+      setAlertDialog({
+        title: 'No se ha podido completar el evento',
+        message: 'Inténtalo de nuevo más tarde.',
+      });
     }
   };
 
@@ -145,7 +180,7 @@ export function AnimalProfile() {
       <header className="animal-profile__header">
         <div className="animal-profile__photo">
           {animal.photoUrl ? (
-            <img src={animal.photoUrl} alt={animal.name} className="animal-profile__photo-img" />
+            <img src={resolveAssetUrl(animal.photoUrl)} alt={animal.name} className="animal-profile__photo-img" />
           ) : (
             <PawPrint className="animal-profile__photo-placeholder" size={40} />
           )}
@@ -173,14 +208,20 @@ export function AnimalProfile() {
               <span>Asignar protocolo</span>
             </button>
           )}
-          <button className="animal-profile__btn animal-profile__btn--secondary" type="button">
-            <Edit size={16} />
-            <span>Editar</span>
-          </button>
+          {isAdmin && (
+            <button
+              className="animal-profile__btn animal-profile__btn--secondary"
+              type="button"
+              onClick={() => setEditAnimalOpen(true)}
+            >
+              <Edit size={16} />
+              <span>Editar</span>
+            </button>
+          )}
           {isAdmin && (
             <button
               className="animal-profile__btn animal-profile__btn--danger"
-              onClick={handleDelete}
+              onClick={() => setDeletingAnimal(true)}
               type="button"
             >
               <Trash size={16} />
@@ -199,6 +240,130 @@ export function AnimalProfile() {
           reloadEvents();
           loadAnimal();
         }}
+      />
+
+      <AddEventModal
+        open={addEventOpen}
+        animalId={parseInt(id, 10)}
+        onClose={() => setAddEventOpen(false)}
+        onCreated={() => {
+          reloadEvents();
+          loadAnimal();
+        }}
+      />
+
+      <AddVisitModal
+        open={addVisitOpen}
+        animalId={parseInt(id, 10)}
+        initial={editingVisit}
+        onClose={() => {
+          setAddVisitOpen(false);
+          setEditingVisit(null);
+        }}
+        onSaved={() => {
+          reloadVisits();
+        }}
+      />
+
+      <AddWeightModal
+        open={addWeightOpen || !!editingWeight}
+        animalId={parseInt(id, 10)}
+        initial={editingWeight}
+        onClose={() => {
+          setAddWeightOpen(false);
+          setEditingWeight(null);
+        }}
+        onSaved={(payload) => {
+          reloadWeights();
+          loadAnimal();
+          if (payload?.anomalyDetected) {
+            reloadEvents();
+            setAlertDialog({
+              title: 'Variación anómala detectada',
+              message:
+                'Se ha detectado una variación anómala en el peso. Se ha generado un evento de revisión.',
+            });
+          }
+        }}
+      />
+
+      <AddAnimalModal
+        open={editAnimalOpen}
+        groups={groups}
+        initial={animal}
+        onClose={() => setEditAnimalOpen(false)}
+        onSaved={() => loadAnimal()}
+      />
+
+      <ConfirmDialog
+        open={!!deletingWeight}
+        title="Eliminar registro de peso"
+        message={
+          deletingWeight
+            ? `¿Eliminar el registro de ${Number(deletingWeight.valueKg).toFixed(2)} kg del ${new Date(deletingWeight.recordedAt).toLocaleDateString('es-ES')}?`
+            : ''
+        }
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingWeight(null)}
+        onConfirm={async () => {
+          await deleteWeight(deletingWeight.id);
+          reloadWeights();
+          loadAnimal();
+        }}
+      />
+
+      <ConfirmDialog
+        open={deletingAnimal}
+        title="Eliminar animal"
+        message="¿Seguro que quieres eliminar este animal? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingAnimal(false)}
+        onConfirm={async () => {
+          try {
+            await deleteAnimal(id);
+            navigate('/animals');
+          } catch (err) {
+            setAlertDialog({
+              title: 'No se ha podido eliminar el animal',
+              message: err?.response?.data?.error || 'Inténtalo de nuevo más tarde.',
+            });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!deletingVisit}
+        title="Eliminar visita"
+        message={
+          deletingVisit
+            ? `¿Eliminar la visita del ${new Date(deletingVisit.visitDate).toLocaleDateString('es-ES')}?`
+            : ''
+        }
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingVisit(null)}
+        onConfirm={async () => {
+          try {
+            await deleteVisit(deletingVisit.id);
+            reloadVisits();
+          } catch (err) {
+            setAlertDialog({
+              title: 'No se ha podido eliminar la visita',
+              message: err?.response?.data?.error || 'Inténtalo de nuevo más tarde.',
+            });
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!alertDialog}
+        title={alertDialog?.title || 'Aviso'}
+        message={alertDialog?.message}
+        confirmText="Entendido"
+        hideCancel
+        onClose={() => setAlertDialog(null)}
       />
 
       <div className="animal-profile__info">
@@ -229,7 +394,11 @@ export function AnimalProfile() {
           <section>
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Eventos sanitarios</h2>
-              <button className="animal-profile__btn animal-profile__btn--primary" type="button">
+              <button
+                className="animal-profile__btn animal-profile__btn--primary"
+                type="button"
+                onClick={() => setAddEventOpen(true)}
+              >
                 <Plus size={16} />
                 <span>Añadir evento</span>
               </button>
@@ -246,13 +415,27 @@ export function AnimalProfile() {
           <section>
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Visitas veterinarias</h2>
-              <button className="animal-profile__btn animal-profile__btn--primary" type="button">
-                <Plus size={16} />
-                <span>Añadir visita</span>
-              </button>
+              {isAdmin && (
+                <button
+                  className="animal-profile__btn animal-profile__btn--primary"
+                  type="button"
+                  onClick={() => {
+                    setEditingVisit(null);
+                    setAddVisitOpen(true);
+                  }}
+                >
+                  <Plus size={16} />
+                  <span>Añadir visita</span>
+                </button>
+              )}
             </div>
             {visits.length > 0 ? (
-              <VetVisitsList visits={visits} />
+              <VetVisitsList
+                visits={visits}
+                canManage={isAdmin}
+                onEdit={handleEditVisit}
+                onDelete={(visit) => setDeletingVisit(visit)}
+              />
             ) : (
               <EmptyState text="Sin visitas registradas" />
             )}
@@ -269,10 +452,16 @@ export function AnimalProfile() {
           <section className="animal-profile__weight">
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Evolución de peso</h2>
-              <button className="animal-profile__btn animal-profile__btn--primary" type="button">
-                <Plus size={16} />
-                <span>Registrar peso</span>
-              </button>
+              {isAdmin && (
+                <button
+                  className="animal-profile__btn animal-profile__btn--primary"
+                  type="button"
+                  onClick={() => setAddWeightOpen(true)}
+                >
+                  <Plus size={16} />
+                  <span>Registrar peso</span>
+                </button>
+              )}
             </div>
             <WeightChart weights={weights} />
             {trend && (
@@ -293,6 +482,12 @@ export function AnimalProfile() {
                 <TrendCard label="Registros" value={trend.totalRecords} />
               </div>
             )}
+            <WeightHistoryList
+              weights={weights}
+              canManage={isAdmin}
+              onEdit={(w) => setEditingWeight(w)}
+              onDelete={(w) => setDeletingWeight(w)}
+            />
           </section>
         )}
       </div>

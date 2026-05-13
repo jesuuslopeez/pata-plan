@@ -12,6 +12,11 @@ enum Role {
   COLLABORATOR
 }
 
+enum CollaboratorRole {
+  VIEWER
+  EDITOR
+}
+
 enum Species {
   DOG
   CAT
@@ -55,24 +60,39 @@ enum ExpenseCategory {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  name         String
-  email        String     @unique
-  passwordHash String
-  role         Role       @default(COLLABORATOR)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  groups       Group[]
-  protocols    Protocol[]
+  id              Int                 @id @default(autoincrement())
+  name            String
+  email           String              @unique
+  passwordHash    String
+  role            Role                @default(COLLABORATOR)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  groups          Group[]
+  protocols       Protocol[]
+  collaborations  GroupCollaborator[]
 }
 
 model Group {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id            Int                 @id @default(autoincrement())
+  name          String
+  userId        Int
+  inviteCode    String?             @unique
+  createdAt     DateTime            @default(now())
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  animals       Animal[]
+  collaborators GroupCollaborator[]
+}
+
+model GroupCollaborator {
+  id        Int              @id @default(autoincrement())
+  groupId   Int
   userId    Int
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  animals   Animal[]
+  role      CollaboratorRole @default(VIEWER)
+  createdAt DateTime         @default(now())
+  group     Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
 }
 
 model Animal {
@@ -111,6 +131,7 @@ model EventType {
   name          String
   category      EventCategory
   severityScore Int           @default(5)
+  isCustom      Boolean       @default(false)
   healthEvents  HealthEvent[]
   protocolSteps ProtocolStep[]
 }

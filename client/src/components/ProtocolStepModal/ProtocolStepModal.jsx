@@ -1,12 +1,23 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { createEventType } from '../../services/protocol.service';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './ProtocolStepModal.scss';
 
-const EMPTY_FORM = { eventTypeId: '', dayOffset: 0, product: '', notes: '' };
+const OTHER_OPTION = '__OTHER__';
+
+const EMPTY_FORM = {
+  eventTypeId: '',
+  customName: '',
+  dayOffset: 0,
+  product: '',
+  notes: '',
+};
 
 export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -14,6 +25,7 @@ export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit
         initial
           ? {
               eventTypeId: String(initial.eventTypeId ?? initial.eventType?.id ?? ''),
+              customName: '',
               dayOffset: initial.dayOffset ?? 0,
               product: initial.product ?? '',
               notes: initial.notes ?? '',
@@ -21,19 +33,26 @@ export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit
           : EMPTY_FORM
       );
       setError('');
+      setSubmitting(false);
     }
   }, [open, initial]);
 
   if (!open) return null;
 
+  const isOther = form.eventTypeId === OTHER_OPTION;
+
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.eventTypeId) {
       setError('Selecciona un tipo de evento');
+      return;
+    }
+    if (isOther && !form.customName.trim()) {
+      setError('Indica el nombre del tipo personalizado');
       return;
     }
     const day = parseInt(form.dayOffset, 10);
@@ -41,12 +60,39 @@ export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit
       setError('El día debe ser un número entero positivo o cero');
       return;
     }
-    onSubmit({
-      eventTypeId: parseInt(form.eventTypeId, 10),
-      dayOffset: day,
-      product: form.product.trim() || null,
-      notes: form.notes.trim() || null,
-    });
+
+    setSubmitting(true);
+    setError('');
+    try {
+      let eventTypeId;
+      let eventType;
+      if (isOther) {
+        const res = await createEventType({
+          name: form.customName.trim(),
+          category: 'TREATMENT',
+          isCustom: true,
+        });
+        eventType = res.data?.eventType;
+        eventTypeId = eventType?.id;
+        if (!eventTypeId) {
+          throw new Error('No se ha podido crear el tipo personalizado');
+        }
+      } else {
+        eventTypeId = parseInt(form.eventTypeId, 10);
+      }
+
+      onSubmit({
+        eventTypeId,
+        eventType,
+        dayOffset: day,
+        product: form.product.trim() || null,
+        notes: form.notes.trim() || null,
+      });
+    } catch (err) {
+      setError(err?.response?.data?.error || err.message || 'No se ha podido guardar el paso');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -82,11 +128,29 @@ export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit
             <option value="">Selecciona…</option>
             {eventTypes.map((et) => (
               <option key={et.id} value={et.id}>
-                {et.name} ({et.category})
+                {translateEventType(et.name)}
               </option>
             ))}
+            <option value={OTHER_OPTION}>Otro…</option>
           </select>
         </div>
+
+        {isOther && (
+          <div className="step-modal__field">
+            <label className="step-modal__label" htmlFor="step-custom-name">
+              Nombre del tipo personalizado
+            </label>
+            <input
+              id="step-custom-name"
+              type="text"
+              className="step-modal__input"
+              value={form.customName}
+              onChange={handleChange('customName')}
+              placeholder="p. ej. Revisión post-operatoria"
+              required
+            />
+          </div>
+        )}
 
         <div className="step-modal__field">
           <label className="step-modal__label" htmlFor="step-day-offset">
@@ -133,11 +197,20 @@ export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit
         {error && <p className="step-modal__error">{error}</p>}
 
         <footer className="step-modal__actions">
-          <button type="button" className="step-modal__btn step-modal__btn--secondary" onClick={onClose}>
+          <button
+            type="button"
+            className="step-modal__btn step-modal__btn--secondary"
+            onClick={onClose}
+            disabled={submitting}
+          >
             Cancelar
           </button>
-          <button type="submit" className="step-modal__btn step-modal__btn--primary">
-            {initial ? 'Guardar cambios' : 'Añadir paso'}
+          <button
+            type="submit"
+            className="step-modal__btn step-modal__btn--primary"
+            disabled={submitting}
+          >
+            {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Añadir paso'}
           </button>
         </footer>
       </form>

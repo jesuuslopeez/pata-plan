@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
-import { FileText, Trash, Upload } from 'lucide-react';
+import { FileText, Pencil, Trash, Upload } from 'lucide-react';
 import {
   getAnimalDocuments,
   deleteDocument,
+  updateDocument,
 } from '../../services/animal.service';
 import { DocumentUpload } from '../DocumentUpload/DocumentUpload';
 import { DocumentPreview } from '../DocumentPreview/DocumentPreview';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+import { RenameDocumentModal } from '../RenameDocumentModal/RenameDocumentModal';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import './DocumentsGrid.scss';
 
 const SKELETON_COUNT = 4;
@@ -28,6 +32,8 @@ export function DocumentsGrid({ animalId }) {
   const [loading, setLoading] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [previewDoc, setPreviewDoc] = useState(null);
+  const [renameDoc, setRenameDoc] = useState(null);
+  const [deleteDoc, setDeleteDoc] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -46,18 +52,23 @@ export function DocumentsGrid({ animalId }) {
     if (isImage(doc.fileType)) {
       setPreviewDoc(doc);
     } else {
-      window.open(doc.fileUrl, '_blank', 'noopener,noreferrer');
+      window.open(resolveAssetUrl(doc.fileUrl), '_blank', 'noopener,noreferrer');
     }
   };
 
-  const handleDelete = async (doc) => {
-    if (!window.confirm('¿Eliminar este documento?')) return;
-    try {
-      await deleteDocument(doc.id);
-      setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
-    } catch (err) {
-      window.alert(err?.response?.data?.error || 'No se ha podido eliminar el documento');
-    }
+  const confirmDelete = async () => {
+    if (!deleteDoc) return;
+    await deleteDocument(deleteDoc.id);
+    setDocuments((prev) => prev.filter((d) => d.id !== deleteDoc.id));
+  };
+
+  const submitRename = async (filename) => {
+    if (!renameDoc) return;
+    const res = await updateDocument(renameDoc.id, { filename });
+    const updated = res.data?.document;
+    setDocuments((prev) =>
+      prev.map((d) => (d.id === renameDoc.id ? { ...d, ...(updated || { filename }) } : d))
+    );
   };
 
   return (
@@ -109,22 +120,37 @@ export function DocumentsGrid({ animalId }) {
                 }
               }}
             >
-              <button
-                type="button"
-                className="document-card__delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(doc);
-                }}
-                aria-label="Eliminar documento"
-              >
-                <Trash size={14} />
-              </button>
+              <div className="document-card__actions">
+                <button
+                  type="button"
+                  className="document-card__action document-card__action--rename"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRenameDoc(doc);
+                  }}
+                  aria-label="Renombrar documento"
+                  title="Renombrar"
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="document-card__action document-card__action--delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteDoc(doc);
+                  }}
+                  aria-label="Eliminar documento"
+                  title="Eliminar"
+                >
+                  <Trash size={14} />
+                </button>
+              </div>
 
               <div className="document-card__preview">
                 {isImage(doc.fileType) ? (
                   <img
-                    src={doc.fileUrl}
+                    src={resolveAssetUrl(doc.fileUrl)}
                     alt={doc.filename}
                     className="document-card__thumb"
                     loading="lazy"
@@ -165,6 +191,27 @@ export function DocumentsGrid({ animalId }) {
         open={!!previewDoc}
         document={previewDoc}
         onClose={() => setPreviewDoc(null)}
+      />
+
+      <RenameDocumentModal
+        open={!!renameDoc}
+        initialName={renameDoc?.filename || ''}
+        onClose={() => setRenameDoc(null)}
+        onSubmit={submitRename}
+      />
+
+      <ConfirmDialog
+        open={!!deleteDoc}
+        title="Eliminar documento"
+        message={
+          deleteDoc
+            ? `¿Seguro que quieres eliminar "${deleteDoc.filename}"? Esta acción no se puede deshacer.`
+            : ''
+        }
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeleteDoc(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );

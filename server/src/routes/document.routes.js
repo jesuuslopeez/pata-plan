@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { getAll, create, createMany, remove } = require('../controllers/document.controller');
+const { getAll, create, createMany, update, remove } = require('../controllers/document.controller');
 const { authorize } = require('../middlewares/roles');
 const { uploadDocument, uploadDocuments, handleUploadErrors } = require('../middlewares/upload');
 
@@ -21,6 +21,7 @@ router.post(
 );
 
 // Direct by document id under /api/documents/:id
+router.patch('/:id', authorize('ADMIN'), update);
 router.delete('/:id', authorize('ADMIN'), remove);
 
 module.exports = router;

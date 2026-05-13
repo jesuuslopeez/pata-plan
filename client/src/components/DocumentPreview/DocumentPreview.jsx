@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import './DocumentPreview.scss';
 
 export function DocumentPreview({ open, document, onClose }) {
@@ -33,7 +34,7 @@ export function DocumentPreview({ open, document, onClose }) {
 
       <figure className="document-preview__figure" onClick={(e) => e.stopPropagation()}>
         <img
-          src={document.fileUrl}
+          src={resolveAssetUrl(document.fileUrl)}
           alt={document.filename}
           className="document-preview__image"
         />

@@ -1,21 +1,28 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
+  }
+  return animal;
+};
+
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
   }
   return animal;
 };
@@ -27,19 +34,19 @@ const addDays = (date, days) => {
 };
 
 const assignProtocol = async (userId, animalId, data) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   if (!data.protocolId) {
-    throw new ApiError(400, 'protocolId is required');
+    throw new ApiError(400, 'Falta el protocolo');
   }
   if (!data.startDate) {
-    throw new ApiError(400, 'startDate is required');
+    throw new ApiError(400, 'Falta la fecha de inicio');
   }
 
   const protocolId = parseInt(data.protocolId, 10);
   const startDate = new Date(data.startDate);
   if (isNaN(startDate.getTime())) {
-    throw new ApiError(400, 'startDate must be a valid date');
+    throw new ApiError(400, 'La fecha de inicio no es válida');
   }
 
   const protocol = await prisma.protocol.findFirst({
@@ -54,14 +61,14 @@ const assignProtocol = async (userId, animalId, data) => {
     },
   });
   if (!protocol) {
-    throw new ApiError(404, 'Protocol not found');
+    throw new ApiError(404, 'Protocolo no encontrado');
   }
 
   const existingActive = await prisma.protocolAssignment.findFirst({
     where: { animalId, protocolId, status: 'ACTIVE' },
   });
   if (existingActive) {
-    throw new ApiError(400, 'This protocol is already active for this animal');
+    throw new ApiError(400, 'Este protocolo ya está activo para este animal');
   }
 
   const now = new Date();
@@ -111,7 +118,7 @@ const assignProtocol = async (userId, animalId, data) => {
 };
 
 const getAssignments = async (userId, animalId) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalAccess(animalId, userId);
 
   const assignments = await prisma.protocolAssignment.findMany({
     where: { animalId },
@@ -141,16 +148,16 @@ const cancelAssignment = async (userId, assignmentId) => {
     include: { animal: { select: { groupId: true } } },
   });
   if (!assignment) {
-    throw new ApiError(404, 'Assignment not found');
+    throw new ApiError(404, 'Asignación no encontrada');
   }
 
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getEditableGroupIds(userId);
   if (!groupIds.includes(assignment.animal.groupId)) {
-    throw new ApiError(404, 'Assignment not found');
+    throw new ApiError(403, 'No tienes permiso para modificar esta asignación');
   }
 
   if (assignment.status !== 'ACTIVE') {
-    throw new ApiError(400, 'Assignment is not active');
+    throw new ApiError(400, 'La asignación no está activa');
   }
 
   const result = await prisma.$transaction(async (tx) => {

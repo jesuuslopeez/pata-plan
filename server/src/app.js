@@ -53,8 +53,15 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'PataPlan API' });
 });
 
-// Static files
-app.use('/uploads', express.static('uploads'));
+// Static files (relax CORP so the SPA on a different origin can embed images)
+app.use(
+  '/uploads',
+  express.static('uploads', {
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  })
+);
 
 // Routes
 const { authenticate } = require('./middlewares/auth');
@@ -87,9 +94,10 @@ app.use('/api/event-types', authenticate, eventTypeRoutes);
 app.use('/api/protocols', authenticate, protocolRoutes);
 app.use('/api/dashboard', authenticate, dashboardRoutes);
 app.use('/api/visits', authenticate, visitRoutes);
+app.use('/api/weights', authenticate, weightRoutes);
 app.use('/api/expenses', authenticate, expenseRoutes);
 app.use('/api/documents', authenticate, documentRoutes);
-app.use('/api/collaborators', authenticate, collaboratorRoutes);
+app.use('/api', authenticate, collaboratorRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);

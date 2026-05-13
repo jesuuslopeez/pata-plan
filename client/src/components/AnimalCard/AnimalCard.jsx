@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { PawPrint } from 'lucide-react';
 import { Badge } from '../Badge/Badge';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import './AnimalCard.scss';
 
 const SPECIES_LABEL = {
@@ -49,7 +50,7 @@ export function AnimalCard({ animal }) {
         {animal.photoUrl ? (
           <img
             className="animal-card__image"
-            src={animal.photoUrl}
+            src={resolveAssetUrl(animal.photoUrl)}
             alt={animal.name}
           />
         ) : (
