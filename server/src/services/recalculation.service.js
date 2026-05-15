@@ -42,12 +42,15 @@ const recalculateCascade = async (completedEvent, completedDate) => {
     return null;
   }
 
-  const now = new Date();
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
 
   await prisma.$transaction(async (tx) => {
     for (const event of pendingEvents) {
       const newDate = addDays(event.scheduledDate, delayDays);
-      const newStatus = newDate < now ? 'OVERDUE' : 'PENDING';
+      const compareDate = new Date(newDate);
+      compareDate.setHours(0, 0, 0, 0);
+      const newStatus = compareDate < startOfToday ? 'OVERDUE' : 'PENDING';
 
       await tx.healthEvent.update({
         where: { id: event.id },

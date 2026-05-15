@@ -4,6 +4,8 @@ import { Plus, Pencil, Trash, ClipboardList } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getProtocols, deleteProtocol } from '../../services/protocol.service';
 import { Badge } from '../../components/Badge/Badge';
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './Protocols.scss';
 
 const CATEGORY_LABEL = {
@@ -28,6 +30,8 @@ export function Protocols() {
 
   const [protocols, setProtocols] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingProtocol, setDeletingProtocol] = useState(null);
+  const [alertDialog, setAlertDialog] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -41,20 +45,15 @@ export function Protocols() {
     load();
   }, []);
 
-  const handleDelete = async (protocol) => {
-    if (
-      !window.confirm(
-        `¿Eliminar el protocolo "${protocol.name}"? Esta acción no se puede deshacer.`
-      )
-    ) {
-      return;
-    }
+  const confirmDelete = async () => {
     try {
-      await deleteProtocol(protocol.id);
+      await deleteProtocol(deletingProtocol.id);
       load();
     } catch (err) {
-      const msg = err?.response?.data?.error || 'No se ha podido eliminar el protocolo';
-      window.alert(msg);
+      setAlertDialog({
+        title: 'No se ha podido eliminar',
+        message: err?.response?.data?.error || 'No se ha podido eliminar el protocolo',
+      });
     }
   };
 
@@ -124,7 +123,7 @@ export function Protocols() {
                       text={CATEGORY_LABEL[step.eventType?.category] || step.eventType?.category}
                       variant={CATEGORY_VARIANT[step.eventType?.category] || 'neutral'}
                     />
-                    <span className="protocol-card__step-name">{step.eventType?.name}</span>
+                    <span className="protocol-card__step-name">{translateEventType(step.eventType?.name)}</span>
                   </li>
                 ))}
                 {(protocol.steps || []).length > 4 && (
@@ -152,7 +151,7 @@ export function Protocols() {
                   <button
                     className="protocol-card__btn protocol-card__btn--danger"
                     type="button"
-                    onClick={() => handleDelete(protocol)}
+                    onClick={() => setDeletingProtocol(protocol)}
                   >
                     <Trash size={14} />
                     <span>Eliminar</span>
@@ -163,6 +162,29 @@ export function Protocols() {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deletingProtocol}
+        title="Eliminar protocolo"
+        message={
+          deletingProtocol
+            ? `¿Eliminar el protocolo "${deletingProtocol.name}"? Esta acción no se puede deshacer.`
+            : ''
+        }
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingProtocol(null)}
+        onConfirm={confirmDelete}
+      />
+
+      <ConfirmDialog
+        open={!!alertDialog}
+        title={alertDialog?.title || 'Aviso'}
+        message={alertDialog?.message}
+        confirmText="Entendido"
+        hideCancel
+        onClose={() => setAlertDialog(null)}
+      />
     </div>
   );
 }

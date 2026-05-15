@@ -11,16 +11,13 @@ const ANIMAL_INCLUDE = {
   vetVisit: { select: { id: true, reason: true } },
 };
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
 const getUserAnimalIds = async (userId) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
   if (groupIds.length === 0) {
     return [];
   }
@@ -31,19 +28,30 @@ const getUserAnimalIds = async (userId) => {
   return animals;
 };
 
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
   }
   return animal;
 };
 
-const verifyExpenseOwnership = async (expenseId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
+  }
+  return animal;
+};
+
+const verifyExpenseEditAccess = async (expenseId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
   const expense = await prisma.expense.findFirst({
     where: {
       id: expenseId,
@@ -51,7 +59,7 @@ const verifyExpenseOwnership = async (expenseId, userId) => {
     },
   });
   if (!expense) {
-    throw new ApiError(404, 'Expense not found');
+    throw new ApiError(403, 'No tienes permiso para modificar este gasto');
   }
   return expense;
 };
@@ -61,7 +69,7 @@ const verifyVisitBelongsToAnimal = async (vetVisitId, animalId) => {
     where: { id: vetVisitId, animalId },
   });
   if (!visit) {
-    throw new ApiError(400, 'vetVisitId does not belong to the given animal');
+    throw new ApiError(400, 'La visita indicada no pertenece a este animal');
   }
   return visit;
 };
@@ -69,7 +77,7 @@ const verifyVisitBelongsToAnimal = async (vetVisitId, animalId) => {
 const parseDate = (value, field) => {
   const d = new Date(value);
   if (isNaN(d.getTime())) {
-    throw new ApiError(400, `${field} must be a valid date`);
+    throw new ApiError(400, `El campo ${field} no es una fecha válida`);
   }
   return d;
 };
@@ -80,37 +88,37 @@ const validateExpenseData = (data, { partial = false } = {}) => {
   if (data.amount !== undefined) {
     const n = Number(data.amount);
     if (isNaN(n) || n <= 0) {
-      throw new ApiError(400, 'amount must be a positive number');
+      throw new ApiError(400, 'El importe debe ser un número positivo');
     }
     out.amount = n;
   } else if (!partial) {
-    throw new ApiError(400, 'amount is required');
+    throw new ApiError(400, 'Falta el importe');
   }
 
   if (data.category !== undefined) {
     if (!VALID_CATEGORIES.includes(data.category)) {
-      throw new ApiError(400, `category must be one of ${VALID_CATEGORIES.join(', ')}`);
+      throw new ApiError(400, `La categoría debe ser una de: ${VALID_CATEGORIES.join(', ')}`);
     }
     out.category = data.category;
   } else if (!partial) {
-    throw new ApiError(400, 'category is required');
+    throw new ApiError(400, 'Falta la categoría');
   }
 
   if (data.expenseDate !== undefined) {
     out.expenseDate = parseDate(data.expenseDate, 'expenseDate');
   } else if (!partial) {
-    throw new ApiError(400, 'expenseDate is required');
+    throw new ApiError(400, 'Falta la fecha del gasto');
   }
 
   if (data.description !== undefined) {
     if (data.description === null || data.description === '') {
       out.description = null;
     } else if (typeof data.description !== 'string') {
-      throw new ApiError(400, 'description must be a string');
+      throw new ApiError(400, 'La descripción debe ser texto');
     } else {
       const trimmed = data.description.trim();
       if (trimmed.length > 300) {
-        throw new ApiError(400, 'description must be at most 300 characters');
+        throw new ApiError(400, 'La descripción no puede superar los 300 caracteres');
       }
       out.description = trimmed || null;
     }
@@ -122,7 +130,7 @@ const validateExpenseData = (data, { partial = false } = {}) => {
     } else {
       const id = parseInt(data.vetVisitId, 10);
       if (isNaN(id)) {
-        throw new ApiError(400, 'vetVisitId must be an integer');
+        throw new ApiError(400, 'El identificador de visita no es válido');
       }
       out.vetVisitId = id;
     }
@@ -132,7 +140,7 @@ const validateExpenseData = (data, { partial = false } = {}) => {
 };
 
 const buildListWhere = async (userId, query) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
   if (groupIds.length === 0) {
     return null;
   }
@@ -142,14 +150,14 @@ const buildListWhere = async (userId, query) => {
   if (query.animalId !== undefined) {
     const id = parseInt(query.animalId, 10);
     if (isNaN(id)) {
-      throw new ApiError(400, 'animalId must be an integer');
+      throw new ApiError(400, 'El identificador de animal no es válido');
     }
     where.animalId = id;
   }
 
   if (query.category !== undefined) {
     if (!VALID_CATEGORIES.includes(query.category)) {
-      throw new ApiError(400, `category must be one of ${VALID_CATEGORIES.join(', ')}`);
+      throw new ApiError(400, `La categoría debe ser una de: ${VALID_CATEGORIES.join(', ')}`);
     }
     where.category = query.category;
   }
@@ -179,7 +187,7 @@ const getAll = async (userId, query = {}) => {
     if (query.limit === undefined) return DEFAULT_LIMIT;
     const n = parseInt(query.limit, 10);
     if (isNaN(n) || n <= 0) {
-      throw new ApiError(400, 'limit must be a positive integer');
+      throw new ApiError(400, 'El límite debe ser un número entero positivo');
     }
     return Math.min(n, MAX_LIMIT);
   })();
@@ -188,7 +196,7 @@ const getAll = async (userId, query = {}) => {
     if (query.offset === undefined) return 0;
     const n = parseInt(query.offset, 10);
     if (isNaN(n) || n < 0) {
-      throw new ApiError(400, 'offset must be a non-negative integer');
+      throw new ApiError(400, 'El offset debe ser un número entero no negativo');
     }
     return n;
   })();
@@ -209,14 +217,14 @@ const getAll = async (userId, query = {}) => {
 
 const create = async (userId, data) => {
   if (!data.animalId) {
-    throw new ApiError(400, 'animalId is required');
+    throw new ApiError(400, 'Falta el animal');
   }
   const animalId = parseInt(data.animalId, 10);
   if (isNaN(animalId)) {
     throw new ApiError(400, 'animalId must be an integer');
   }
 
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   const validated = validateExpenseData(data, { partial: false });
 
@@ -240,7 +248,7 @@ const create = async (userId, data) => {
 };
 
 const update = async (userId, expenseId, data) => {
-  const existing = await verifyExpenseOwnership(expenseId, userId);
+  const existing = await verifyExpenseEditAccess(expenseId, userId);
 
   const validated = validateExpenseData(data, { partial: true });
 
@@ -249,9 +257,9 @@ const update = async (userId, expenseId, data) => {
   if (data.animalId !== undefined) {
     const newAnimalId = parseInt(data.animalId, 10);
     if (isNaN(newAnimalId)) {
-      throw new ApiError(400, 'animalId must be an integer');
+      throw new ApiError(400, 'El identificador de animal no es válido');
     }
-    await verifyAnimalOwnership(newAnimalId, userId);
+    await verifyAnimalEditAccess(newAnimalId, userId);
     targetAnimalId = newAnimalId;
   }
 
@@ -277,14 +285,14 @@ const update = async (userId, expenseId, data) => {
 };
 
 const remove = async (userId, expenseId) => {
-  await verifyExpenseOwnership(expenseId, userId);
+  await verifyExpenseEditAccess(expenseId, userId);
   await prisma.expense.delete({ where: { id: expenseId } });
 };
 
 const toNumber = (decimal) => (decimal == null ? 0 : Number(decimal));
 
 const getStats = async (userId, query = {}) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
   if (groupIds.length === 0) {
     return emptyStats(query.year);
   }
@@ -301,7 +309,7 @@ const getStats = async (userId, query = {}) => {
     if (query.year === undefined) return now.getFullYear();
     const n = parseInt(query.year, 10);
     if (isNaN(n)) {
-      throw new ApiError(400, 'year must be an integer');
+      throw new ApiError(400, 'El año no es válido');
     }
     return n;
   })();

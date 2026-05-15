@@ -1,3 +1,5 @@
+import { translateEventType } from '../../utils/eventTypeLabels';
+import { resolveAssetUrl } from '../../utils/assetUrl';
 import './AnimalAlertCard.scss';
 
 const SPECIES_LABEL = {
@@ -7,7 +9,7 @@ const SPECIES_LABEL = {
 };
 
 function formatEventText(alert) {
-  const typeName = alert.eventType?.name || 'Evento';
+  const typeName = translateEventType(alert.eventType?.name);
   if (alert.status === 'OVERDUE') {
     return `${typeName} — ${alert.daysOverdue} ${alert.daysOverdue === 1 ? 'día' : 'días'} vencida`;
   }
@@ -31,7 +33,17 @@ export function AnimalAlertCard({ animal, group, alerts }) {
       <div className={`animal-alert-card__bar ${barClass}`} />
       <div className="animal-alert-card__content">
         <div className="animal-alert-card__header">
-          <div className="animal-alert-card__avatar">{initial}</div>
+          <div className="animal-alert-card__avatar">
+            {animal.photoUrl ? (
+              <img
+                className="animal-alert-card__avatar-img"
+                src={resolveAssetUrl(animal.photoUrl)}
+                alt={animal.name}
+              />
+            ) : (
+              initial
+            )}
+          </div>
           <div className="animal-alert-card__info">
             <div className="animal-alert-card__name">{animal.name}</div>
             <div className="animal-alert-card__meta">

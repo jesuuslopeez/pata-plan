@@ -1,32 +1,39 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
 const VISIT_INCLUDE = {
   documents: true,
   expenses: true,
 };
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
   }
   return animal;
 };
 
-const verifyVisitOwnership = async (visitId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
+  }
+  return animal;
+};
+
+const verifyVisitAccess = async (visitId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const visit = await prisma.vetVisit.findFirst({
     where: {
       id: visitId,
@@ -35,7 +42,22 @@ const verifyVisitOwnership = async (visitId, userId) => {
     include: VISIT_INCLUDE,
   });
   if (!visit) {
-    throw new ApiError(404, 'Visit not found');
+    throw new ApiError(404, 'Visita no encontrada');
+  }
+  return visit;
+};
+
+const verifyVisitEditAccess = async (visitId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const visit = await prisma.vetVisit.findFirst({
+    where: {
+      id: visitId,
+      animal: { groupId: { in: groupIds } },
+    },
+    include: VISIT_INCLUDE,
+  });
+  if (!visit) {
+    throw new ApiError(403, 'No tienes permiso para modificar esta visita');
   }
   return visit;
 };
@@ -43,7 +65,7 @@ const verifyVisitOwnership = async (visitId, userId) => {
 const parseDate = (value, field) => {
   const d = new Date(value);
   if (isNaN(d.getTime())) {
-    throw new ApiError(400, `${field} must be a valid date`);
+    throw new ApiError(400, `El campo ${field} no es una fecha válida`);
   }
   return d;
 };
@@ -54,24 +76,24 @@ const validateVisitData = (data, { partial = false } = {}) => {
   if (data.visitDate !== undefined) {
     const d = parseDate(data.visitDate, 'visitDate');
     if (d.getTime() > Date.now()) {
-      throw new ApiError(400, 'visitDate cannot be in the future');
+      throw new ApiError(400, 'La fecha de la visita no puede ser futura');
     }
     out.visitDate = d;
   } else if (!partial) {
-    throw new ApiError(400, 'visitDate is required');
+    throw new ApiError(400, 'Falta la fecha de la visita');
   }
 
   if (data.reason !== undefined) {
     if (typeof data.reason !== 'string' || data.reason.trim().length === 0) {
-      throw new ApiError(400, 'reason is required');
+      throw new ApiError(400, 'Falta el motivo');
     }
     const trimmed = data.reason.trim();
     if (trimmed.length > 200) {
-      throw new ApiError(400, 'reason must be at most 200 characters');
+      throw new ApiError(400, 'El motivo no puede superar los 200 caracteres');
     }
     out.reason = trimmed;
   } else if (!partial) {
-    throw new ApiError(400, 'reason is required');
+    throw new ApiError(400, 'Falta el motivo');
   }
 
   if (data.diagnosis !== undefined) {
@@ -86,9 +108,9 @@ const validateVisitData = (data, { partial = false } = {}) => {
     if (data.vetName === null || data.vetName === '') {
       out.vetName = null;
     } else if (typeof data.vetName !== 'string') {
-      throw new ApiError(400, 'vetName must be a string');
+      throw new ApiError(400, 'El veterinario debe ser texto');
     } else if (data.vetName.trim().length > 100) {
-      throw new ApiError(400, 'vetName must be at most 100 characters');
+      throw new ApiError(400, 'El veterinario no puede superar los 100 caracteres');
     } else {
       out.vetName = data.vetName.trim();
     }
@@ -104,7 +126,7 @@ const validateVisitData = (data, { partial = false } = {}) => {
     } else {
       const n = Number(data.cost);
       if (isNaN(n) || n <= 0) {
-        throw new ApiError(400, 'cost must be a positive number');
+        throw new ApiError(400, 'El coste debe ser un número positivo');
       }
       out.cost = n;
     }
@@ -114,7 +136,7 @@ const validateVisitData = (data, { partial = false } = {}) => {
 };
 
 const getAll = async (userId, animalId, query = {}) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalAccess(animalId, userId);
 
   const where = { animalId };
 
@@ -140,11 +162,11 @@ const getAll = async (userId, animalId, query = {}) => {
 };
 
 const getById = async (userId, visitId) => {
-  return verifyVisitOwnership(visitId, userId);
+  return verifyVisitAccess(visitId, userId);
 };
 
 const create = async (userId, animalId, data) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   const validated = validateVisitData(data, { partial: false });
 
@@ -185,7 +207,7 @@ const create = async (userId, animalId, data) => {
 };
 
 const update = async (userId, visitId, data) => {
-  const existing = await verifyVisitOwnership(visitId, userId);
+  const existing = await verifyVisitEditAccess(visitId, userId);
 
   const validated = validateVisitData(data, { partial: true });
 
@@ -206,32 +228,38 @@ const update = async (userId, visitId, data) => {
       });
     }
 
-    if (validated.cost !== undefined) {
-      const existingExpense = await tx.expense.findFirst({
-        where: { vetVisitId: visitId },
-      });
+    const finalCost = validated.cost !== undefined ? validated.cost : existing.cost;
+    const finalDate = validated.visitDate !== undefined ? validated.visitDate : existing.visitDate;
+    const finalReason = validated.reason !== undefined ? validated.reason : existing.reason;
 
-      if (validated.cost === null) {
-        if (existingExpense) {
-          await tx.expense.delete({ where: { id: existingExpense.id } });
-        }
-      } else if (existingExpense) {
-        await tx.expense.update({
-          where: { id: existingExpense.id },
-          data: { amount: validated.cost },
-        });
-      } else {
-        await tx.expense.create({
-          data: {
-            animalId: existing.animalId,
-            vetVisitId: visitId,
-            amount: validated.cost,
-            category: 'OTHER',
-            description: validated.reason ?? existing.reason,
-            expenseDate: validated.visitDate ?? existing.visitDate,
-          },
-        });
+    const existingExpense = await tx.expense.findFirst({
+      where: { vetVisitId: visitId },
+    });
+
+    if (finalCost === null || finalCost === undefined) {
+      if (existingExpense) {
+        await tx.expense.delete({ where: { id: existingExpense.id } });
       }
+    } else if (existingExpense) {
+      await tx.expense.update({
+        where: { id: existingExpense.id },
+        data: {
+          amount: finalCost,
+          expenseDate: finalDate,
+          description: finalReason,
+        },
+      });
+    } else {
+      await tx.expense.create({
+        data: {
+          animalId: existing.animalId,
+          vetVisitId: visitId,
+          amount: finalCost,
+          category: 'OTHER',
+          description: finalReason,
+          expenseDate: finalDate,
+        },
+      });
     }
 
     return tx.vetVisit.findUnique({
@@ -244,8 +272,11 @@ const update = async (userId, visitId, data) => {
 };
 
 const remove = async (userId, visitId) => {
-  await verifyVisitOwnership(visitId, userId);
-  await prisma.vetVisit.delete({ where: { id: visitId } });
+  await verifyVisitEditAccess(visitId, userId);
+  await prisma.$transaction(async (tx) => {
+    await tx.expense.deleteMany({ where: { vetVisitId: visitId } });
+    await tx.vetVisit.delete({ where: { id: visitId } });
+  });
 };
 
 module.exports = { getAll, getById, create, update, remove };

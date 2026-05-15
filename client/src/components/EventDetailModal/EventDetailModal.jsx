@@ -1,6 +1,7 @@
 import { X, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../Badge/Badge';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './EventDetailModal.scss';
 
 const STATUS_CONFIG = {
@@ -38,7 +39,7 @@ export function EventDetailModal({ event, onClose, onComplete }) {
     <div className="event-detail-modal" onClick={onClose}>
       <div className="event-detail-modal__content" onClick={(e) => e.stopPropagation()}>
         <header className="event-detail-modal__header">
-          <h2 className="event-detail-modal__title">{event.eventType?.name}</h2>
+          <h2 className="event-detail-modal__title">{translateEventType(event.eventType?.name)}</h2>
           <button className="event-detail-modal__close" onClick={onClose} type="button">
             <X size={18} />
           </button>

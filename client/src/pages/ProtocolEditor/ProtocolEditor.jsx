@@ -26,6 +26,8 @@ import {
 } from '../../services/protocol.service';
 import { Badge } from '../../components/Badge/Badge';
 import { ProtocolStepModal } from '../../components/ProtocolStepModal/ProtocolStepModal';
+import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './ProtocolEditor.scss';
 
 const CATEGORY_LABEL = {
@@ -62,6 +64,7 @@ export function ProtocolEditor() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
+  const [deletingKey, setDeletingKey] = useState(null);
 
   useEffect(() => {
     getEventTypes()
@@ -114,17 +117,19 @@ export function ProtocolEditor() {
   };
 
   const handleAddStep = (data) => {
-    const eventType = eventTypes.find((et) => et.id === data.eventTypeId);
+    const eventType =
+      data.eventType || eventTypes.find((et) => et.id === data.eventTypeId);
+    const { eventType: _omit, ...stepData } = data;
     if (editingKey) {
       setSteps((prev) =>
         prev.map((s) =>
-          s.key === editingKey ? { ...s, ...data, eventType } : s
+          s.key === editingKey ? { ...s, ...stepData, eventType } : s
         )
       );
     } else {
       setSteps((prev) => [
         ...prev,
-        { key: nextLocalKey(), ...data, eventType },
+        { key: nextLocalKey(), ...stepData, eventType },
       ]);
     }
     setModalOpen(false);
@@ -137,8 +142,12 @@ export function ProtocolEditor() {
   };
 
   const handleRemoveStep = (key) => {
-    if (!window.confirm('¿Eliminar este paso?')) return;
-    setSteps((prev) => prev.filter((s) => s.key !== key));
+    setDeletingKey(key);
+  };
+
+  const confirmRemoveStep = () => {
+    setSteps((prev) => prev.filter((s) => s.key !== deletingKey));
+    setDeletingKey(null);
   };
 
   const handleSave = async (e) => {
@@ -322,6 +331,16 @@ export function ProtocolEditor() {
         }}
         onSubmit={handleAddStep}
       />
+
+      <ConfirmDialog
+        open={!!deletingKey}
+        title="Eliminar paso"
+        message="¿Eliminar este paso del protocolo?"
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingKey(null)}
+        onConfirm={confirmRemoveStep}
+      />
     </div>
   );
 }
@@ -369,7 +388,7 @@ function SortableStep({ step, index, readOnly, onEdit, onRemove }) {
             />
           )}
         </div>
-        <p className="protocol-step__name">{step.eventType?.name || 'Evento sin tipo'}</p>
+        <p className="protocol-step__name">{step.eventType?.name ? translateEventType(step.eventType.name) : 'Evento sin tipo'}</p>
         {step.product && <p className="protocol-step__meta">Producto: {step.product}</p>}
         {step.notes && <p className="protocol-step__notes">{step.notes}</p>}
       </div>

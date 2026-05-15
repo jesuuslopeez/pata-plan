@@ -2,22 +2,29 @@ const fs = require('fs');
 const path = require('path');
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
-
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
+  }
+  return animal;
+};
+
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
   }
   return animal;
 };
@@ -27,13 +34,13 @@ const verifyVisitBelongsToAnimal = async (vetVisitId, animalId) => {
     where: { id: vetVisitId, animalId },
   });
   if (!visit) {
-    throw new ApiError(400, 'vetVisitId does not belong to the given animal');
+    throw new ApiError(400, 'La visita indicada no pertenece a este animal');
   }
   return visit;
 };
 
-const verifyDocumentOwnership = async (documentId, userId) => {
-  const groupIds = await getUserGroupIds(userId);
+const verifyDocumentEditAccess = async (documentId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
   const document = await prisma.document.findFirst({
     where: {
       id: documentId,
@@ -41,7 +48,7 @@ const verifyDocumentOwnership = async (documentId, userId) => {
     },
   });
   if (!document) {
-    throw new ApiError(404, 'Document not found');
+    throw new ApiError(403, 'No tienes permiso para modificar este documento');
   }
   return document;
 };
@@ -66,7 +73,7 @@ const parseVetVisitId = (raw) => {
   }
   const id = parseInt(raw, 10);
   if (isNaN(id)) {
-    throw new ApiError(400, 'vetVisitId must be an integer');
+    throw new ApiError(400, 'El identificador de visita no es válido');
   }
   return id;
 };
@@ -88,7 +95,7 @@ const buildDocumentRecord = (animalId, vetVisitId, description, file) => ({
 });
 
 const getAll = async (userId, animalId, query = {}) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalAccess(animalId, userId);
 
   const where = { animalId };
 
@@ -108,10 +115,10 @@ const getAll = async (userId, animalId, query = {}) => {
 };
 
 const create = async (userId, animalId, data, file) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   if (!file) {
-    throw new ApiError(400, 'File is required');
+    throw new ApiError(400, 'Falta el archivo');
   }
 
   const vetVisitId = parseVetVisitId(data.vetVisitId);
@@ -129,10 +136,10 @@ const create = async (userId, animalId, data, file) => {
 };
 
 const createMany = async (userId, animalId, data, files) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   if (!files || files.length === 0) {
-    throw new ApiError(400, 'At least one file is required');
+    throw new ApiError(400, 'Se requiere al menos un archivo');
   }
 
   const vetVisitId = parseVetVisitId(data.vetVisitId);
@@ -153,6 +160,36 @@ const createMany = async (userId, animalId, data, files) => {
   return documents;
 };
 
+const update = async (userId, documentId, data) => {
+  await verifyDocumentEditAccess(documentId, userId);
+
+  const updateData = {};
+
+  if (data.filename !== undefined) {
+    if (typeof data.filename !== 'string' || !data.filename.trim()) {
+      throw new ApiError(400, 'El nombre del archivo no puede estar vacío');
+    }
+    const trimmed = data.filename.trim();
+    if (trimmed.length > 255) {
+      throw new ApiError(400, 'El nombre del archivo no puede superar los 255 caracteres');
+    }
+    updateData.filename = trimmed;
+  }
+
+  if (data.description !== undefined) {
+    updateData.description = sanitizeDescription(data.description);
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw new ApiError(400, 'No hay campos que actualizar');
+  }
+
+  return prisma.document.update({
+    where: { id: documentId },
+    data: updateData,
+  });
+};
+
 const remove = async (userId, documentId) => {
   const existing = await verifyDocumentOwnership(documentId, userId);
 
@@ -161,4 +198,4 @@ const remove = async (userId, documentId) => {
   removeFileFromDisk(existing.fileUrl);
 };
 
-module.exports = { getAll, create, createMany, remove };
+module.exports = { getAll, create, createMany, update, remove };

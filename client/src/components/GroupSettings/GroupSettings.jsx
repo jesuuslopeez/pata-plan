@@ -6,6 +6,7 @@ import {
   getGroups,
   updateGroup,
 } from '../../services/group.service';
+import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import './GroupSettings.scss';
 
 export function GroupSettings() {
@@ -16,11 +17,16 @@ export function GroupSettings() {
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [deletingGroup, setDeletingGroup] = useState(null);
+  const [alertDialog, setAlertDialog] = useState(null);
 
   const load = () => {
     setLoading(true);
     getGroups()
-      .then((res) => setGroups(res.data?.groups || []))
+      .then((res) => {
+        const all = res.data?.groups || [];
+        setGroups(all.filter((g) => !g.role || g.role === 'OWNER'));
+      })
       .catch(() => setGroups([]))
       .finally(() => setLoading(false));
   };
@@ -57,18 +63,15 @@ export function GroupSettings() {
     }
   };
 
-  const handleDelete = async (group) => {
+  const handleDelete = (group) => {
     if (animalCount(group) > 0) {
-      window.alert('No se puede eliminar un grupo con animales');
+      setAlertDialog({
+        title: 'No se puede eliminar',
+        message: 'No se puede eliminar un grupo con animales asignados.',
+      });
       return;
     }
-    if (!window.confirm(`¿Eliminar el grupo "${group.name}"?`)) return;
-    try {
-      await deleteGroup(group.id);
-      load();
-    } catch (err) {
-      setError(err?.response?.data?.error || 'No se ha podido eliminar el grupo');
-    }
+    setDeletingGroup(group);
   };
 
   const handleCreate = async (e) => {
@@ -168,6 +171,32 @@ export function GroupSettings() {
       </form>
 
       {error && <p className="group-settings__error">{error}</p>}
+
+      <ConfirmDialog
+        open={!!deletingGroup}
+        title="Eliminar grupo"
+        message={deletingGroup ? `¿Eliminar el grupo "${deletingGroup.name}"?` : ''}
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingGroup(null)}
+        onConfirm={async () => {
+          try {
+            await deleteGroup(deletingGroup.id);
+            load();
+          } catch (err) {
+            setError(err?.response?.data?.error || 'No se ha podido eliminar el grupo');
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!alertDialog}
+        title={alertDialog?.title || 'Aviso'}
+        message={alertDialog?.message}
+        confirmText="Entendido"
+        hideCancel
+        onClose={() => setAlertDialog(null)}
+      />
     </section>
   );
 }

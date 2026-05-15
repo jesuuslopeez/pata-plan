@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { resendVerificationRequest } from '../../services/auth.service';
 import './Register.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,6 +15,8 @@ export function Register() {
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resendStatus, setResendStatus] = useState('');
 
   const validate = () => {
     const errs = {};
@@ -49,7 +52,10 @@ export function Register() {
 
     setSubmitting(true);
     try {
-      await register(name.trim(), email.trim(), password);
+      const data = await register(name.trim(), email.trim(), password);
+      if (data?.requiresVerification) {
+        setRegisteredEmail(email.trim());
+      }
     } catch (err) {
       const msg = err.response?.data?.error || 'Error al registrarse';
       setApiError(msg);
@@ -57,6 +63,64 @@ export function Register() {
       setSubmitting(false);
     }
   };
+
+  const handleResend = async () => {
+    setResendStatus('sending');
+    try {
+      await resendVerificationRequest(registeredEmail);
+      setResendStatus('ok');
+    } catch {
+      setResendStatus('error');
+    }
+  };
+
+  if (registeredEmail) {
+    return (
+      <div className="register">
+        <div className="register__left">
+          <div className="register__brand">
+            <img className="register__logo" src="/pataplan.png" alt="PataPlan" />
+            <p className="register__tagline">La salud de tus animales, bajo control</p>
+          </div>
+        </div>
+        <div className="register__right">
+          <div className="register__form">
+            <div className="register__header">
+              <h2 className="register__title">Revisa tu correo</h2>
+              <p className="register__subtitle">
+                Hemos enviado un enlace de verificación a <strong>{registeredEmail}</strong>.
+                Haz clic en él para activar tu cuenta.
+              </p>
+            </div>
+
+            <p className="register__hint">
+              ¿No te ha llegado? Mira en spam o vuelve a enviarlo.
+            </p>
+
+            <button
+              type="button"
+              className="register__button"
+              onClick={handleResend}
+              disabled={resendStatus === 'sending'}
+            >
+              {resendStatus === 'sending' ? 'Reenviando…' : 'Reenviar correo'}
+            </button>
+
+            {resendStatus === 'ok' && (
+              <p className="register__hint">Correo reenviado.</p>
+            )}
+            {resendStatus === 'error' && (
+              <p className="register__error">No se ha podido reenviar. Inténtalo más tarde.</p>
+            )}
+
+            <p className="register__link">
+              ¿Ya lo has verificado? <Link to="/login">Inicia sesión</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="register">

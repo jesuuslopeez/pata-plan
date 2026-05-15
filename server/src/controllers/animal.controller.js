@@ -24,13 +24,13 @@ const create = async (req, res, next) => {
   try {
     const { name, species, sex, groupId } = req.body;
     if (!name || !species || !sex || !groupId) {
-      throw new ApiError(400, 'name, species, sex, and groupId are required');
+      throw new ApiError(400, 'Faltan campos obligatorios: nombre, especie, sexo y grupo');
     }
     if (!['DOG', 'CAT', 'OTHER'].includes(species)) {
-      throw new ApiError(400, 'species must be DOG, CAT, or OTHER');
+      throw new ApiError(400, 'La especie debe ser perro, gato u otro');
     }
     if (!['MALE', 'FEMALE', 'UNKNOWN'].includes(sex)) {
-      throw new ApiError(400, 'sex must be MALE, FEMALE, or UNKNOWN');
+      throw new ApiError(400, 'El sexo debe ser macho, hembra o desconocido');
     }
     const animal = await animalService.create(req.user.id, req.body, req.file);
     res.status(201).json({ animal });
@@ -43,10 +43,10 @@ const update = async (req, res, next) => {
   try {
     const animalId = parseInt(req.params.id, 10);
     if (req.body.species && !['DOG', 'CAT', 'OTHER'].includes(req.body.species)) {
-      throw new ApiError(400, 'species must be DOG, CAT, or OTHER');
+      throw new ApiError(400, 'La especie debe ser perro, gato u otro');
     }
     if (req.body.sex && !['MALE', 'FEMALE', 'UNKNOWN'].includes(req.body.sex)) {
-      throw new ApiError(400, 'sex must be MALE, FEMALE, or UNKNOWN');
+      throw new ApiError(400, 'El sexo debe ser macho, hembra o desconocido');
     }
     const animal = await animalService.update(req.user.id, animalId, req.body, req.file);
     res.json({ animal });

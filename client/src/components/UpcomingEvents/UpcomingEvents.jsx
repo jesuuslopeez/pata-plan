@@ -1,4 +1,5 @@
 import { Calendar } from 'lucide-react';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './UpcomingEvents.scss';
 
 const CATEGORY_LABEL = {
@@ -49,7 +50,7 @@ export function UpcomingEvents({ events }) {
             <li key={event.id} className="upcoming-events__item">
               <span className="upcoming-events__date">{formatDate(event.scheduledDate)}</span>
               <span className="upcoming-events__label">
-                {event.animal?.name} - {event.eventType?.name}
+                {event.animal?.name} - {translateEventType(event.eventType?.name)}
               </span>
               <span className={`upcoming-events__badge ${CATEGORY_CLASS[event.eventType?.category] || ''}`}>
                 {CATEGORY_LABEL[event.eventType?.category] || event.eventType?.category}

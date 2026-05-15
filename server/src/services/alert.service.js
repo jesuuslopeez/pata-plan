@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const { getAccessibleGroupIds } = require('../utils/groupAccess');
 
 const DEFAULT_SEVERITY = {
   TREATMENT: 10,
@@ -73,11 +74,7 @@ const getUrgencyLabel = (score) => {
 };
 
 const getAlerts = async (userId, limit = 20) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  const groupIds = groups.map((g) => g.id);
+  const groupIds = await getAccessibleGroupIds(userId);
 
   if (groupIds.length === 0) {
     return [];

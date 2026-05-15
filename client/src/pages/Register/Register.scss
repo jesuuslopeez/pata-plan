@@ -129,6 +129,12 @@
     font-size: $font-size-xs;
   }
 
+  &__hint {
+    font-size: $font-size-sm;
+    color: $neutral-600;
+    margin: 0;
+  }
+
   &__button {
     width: 100%;
     padding: $spacing-4;

@@ -20,4 +20,24 @@ const create = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create };
+const update = async (req, res, next) => {
+  try {
+    const weightId = parseInt(req.params.id, 10);
+    const weight = await weightService.update(req.user.id, weightId, req.body);
+    res.json({ weight });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const remove = async (req, res, next) => {
+  try {
+    const weightId = parseInt(req.params.id, 10);
+    await weightService.remove(req.user.id, weightId);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getAll, create, update, remove };

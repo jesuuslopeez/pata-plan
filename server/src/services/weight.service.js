@@ -1,24 +1,34 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
+const {
+  getAccessibleGroupIds,
+  getEditableGroupIds,
+} = require('../utils/groupAccess');
 
-const verifyAnimalOwnership = async (animalId, userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  const groupIds = groups.map((g) => g.id);
-
+const verifyAnimalAccess = async (animalId, userId) => {
+  const groupIds = await getAccessibleGroupIds(userId);
   const animal = await prisma.animal.findFirst({
     where: { id: animalId, groupId: { in: groupIds } },
   });
   if (!animal) {
-    throw new ApiError(404, 'Animal not found');
+    throw new ApiError(404, 'Animal no encontrado');
+  }
+  return animal;
+};
+
+const verifyAnimalEditAccess = async (animalId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const animal = await prisma.animal.findFirst({
+    where: { id: animalId, groupId: { in: groupIds } },
+  });
+  if (!animal) {
+    throw new ApiError(403, 'No tienes permiso para modificar este animal');
   }
   return animal;
 };
 
 const getAll = async (userId, animalId) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalAccess(animalId, userId);
 
   const weights = await prisma.weightRecord.findMany({
     where: { animalId },
@@ -87,19 +97,19 @@ const findOrCreateAnomalyEventType = async (tx) => {
 };
 
 const create = async (userId, animalId, { valueKg, recordedAt }) => {
-  await verifyAnimalOwnership(animalId, userId);
+  await verifyAnimalEditAccess(animalId, userId);
 
   const value = parseFloat(valueKg);
   if (isNaN(value) || value <= 0 || value > 200) {
-    throw new ApiError(400, 'valueKg must be a positive number up to 200');
+    throw new ApiError(400, 'El peso debe ser un número positivo de hasta 200 kg');
   }
 
   const date = new Date(recordedAt);
   if (isNaN(date.getTime())) {
-    throw new ApiError(400, 'recordedAt must be a valid date');
+    throw new ApiError(400, 'La fecha del registro no es válida');
   }
   if (date > new Date()) {
-    throw new ApiError(400, 'recordedAt cannot be a future date');
+    throw new ApiError(400, 'La fecha del registro no puede ser futura');
   }
 
   const recentRecords = await prisma.weightRecord.findMany({
@@ -149,4 +159,64 @@ const create = async (userId, animalId, { valueKg, recordedAt }) => {
   return result;
 };
 
-module.exports = { getAll, create };
+const verifyWeightEditAccess = async (weightId, userId) => {
+  const groupIds = await getEditableGroupIds(userId);
+  const weight = await prisma.weightRecord.findFirst({
+    where: {
+      id: weightId,
+      animal: { groupId: { in: groupIds } },
+    },
+  });
+  if (!weight) {
+    throw new ApiError(403, 'No tienes permiso para modificar este registro');
+  }
+  return weight;
+};
+
+const validateWeightInput = ({ valueKg, recordedAt }, { partial = false } = {}) => {
+  const out = {};
+
+  if (valueKg !== undefined) {
+    const value = parseFloat(valueKg);
+    if (isNaN(value) || value <= 0 || value > 200) {
+      throw new ApiError(400, 'El peso debe ser un número positivo de hasta 200 kg');
+    }
+    out.valueKg = value;
+  } else if (!partial) {
+    throw new ApiError(400, 'Falta el peso');
+  }
+
+  if (recordedAt !== undefined) {
+    const date = new Date(recordedAt);
+    if (isNaN(date.getTime())) {
+      throw new ApiError(400, 'La fecha del registro no es válida');
+    }
+    if (date > new Date()) {
+      throw new ApiError(400, 'La fecha del registro no puede ser futura');
+    }
+    out.recordedAt = date;
+  } else if (!partial) {
+    throw new ApiError(400, 'Falta la fecha del registro');
+  }
+
+  return out;
+};
+
+const update = async (userId, weightId, data) => {
+  await verifyWeightEditAccess(weightId, userId);
+  const validated = validateWeightInput(data, { partial: true });
+  if (Object.keys(validated).length === 0) {
+    throw new ApiError(400, 'No hay campos que actualizar');
+  }
+  return prisma.weightRecord.update({
+    where: { id: weightId },
+    data: validated,
+  });
+};
+
+const remove = async (userId, weightId) => {
+  await verifyWeightEditAccess(weightId, userId);
+  await prisma.weightRecord.delete({ where: { id: weightId } });
+};
+
+module.exports = { getAll, create, update, remove };
