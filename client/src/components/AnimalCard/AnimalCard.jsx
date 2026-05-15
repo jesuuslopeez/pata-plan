@@ -47,6 +47,14 @@ export function AnimalCard({ animal }) {
       tabIndex={0}
     >
       <div className="animal-card__photo">
+        {animal.photoUrl && (
+          <img
+            className="animal-card__blur"
+            src={resolveAssetUrl(animal.photoUrl)}
+            alt=""
+            aria-hidden="true"
+          />
+        )}
         {animal.photoUrl ? (
           <img
             className="animal-card__image"

@@ -49,11 +49,19 @@ const addDays = (date, days) => {
   return result;
 };
 
+const startOfToday = () => {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now;
+};
+
 const calcStatus = (scheduledDate, completedDate) => {
   if (completedDate) {
     return 'COMPLETED';
   }
-  if (new Date(scheduledDate) < new Date()) {
+  const scheduled = new Date(scheduledDate);
+  scheduled.setHours(0, 0, 0, 0);
+  if (scheduled < startOfToday()) {
     return 'OVERDUE';
   }
   return 'PENDING';

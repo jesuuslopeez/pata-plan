@@ -31,6 +31,7 @@ async function main() {
       email: 'admin@pataplan.com',
       passwordHash,
       role: 'ADMIN',
+      emailVerified: true,
     },
   });
 

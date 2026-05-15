@@ -69,3 +69,6 @@ export const uploadDocument = (id, formData) =>
 export const deleteDocument = (id) => api.delete(`/documents/${id}`);
 
 export const updateDocument = (id, data) => api.patch(`/documents/${id}`, data);
+
+export const downloadAnimalReport = (id) =>
+  api.get(`/animals/${id}/report`, { responseType: 'blob' });

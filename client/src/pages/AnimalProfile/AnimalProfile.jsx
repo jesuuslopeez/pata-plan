@@ -7,6 +7,7 @@ import {
   Trash,
   Plus,
   ClipboardList,
+  FileDown,
 } from 'lucide-react';
 import {
   getAnimal,
@@ -17,6 +18,7 @@ import {
   getAnimalVisits,
   deleteVisit,
   deleteWeight,
+  downloadAnimalReport,
 } from '../../services/animal.service';
 import { useAuth } from '../../hooks/useAuth';
 import { Badge } from '../../components/Badge/Badge';
@@ -82,6 +84,7 @@ export function AnimalProfile() {
   const [deletingAnimal, setDeletingAnimal] = useState(false);
   const [deletingVisit, setDeletingVisit] = useState(null);
   const [alertDialog, setAlertDialog] = useState(null);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   const [events, setEvents] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -131,6 +134,33 @@ export function AnimalProfile() {
   const handleEditVisit = (visit) => {
     setEditingVisit(visit);
     setAddVisitOpen(true);
+  };
+
+  const handleDownloadReport = async () => {
+    if (downloadingReport) return;
+    setDownloadingReport(true);
+    try {
+      const res = await downloadAnimalReport(id);
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const disposition = res.headers?.['content-disposition'] || '';
+      const match = /filename="?([^";]+)"?/i.exec(disposition);
+      const filename = match ? match[1] : `informe-${animal?.name || 'animal'}.pdf`;
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setAlertDialog({
+        title: 'No se ha podido generar el informe',
+        message: err?.response?.data?.error || 'Inténtalo de nuevo más tarde.',
+      });
+    } finally {
+      setDownloadingReport(false);
+    }
   };
 
   const handleCompleteEvent = async (eventId) => {
@@ -198,6 +228,15 @@ export function AnimalProfile() {
         </div>
 
         <div className="animal-profile__actions">
+          <button
+            className="animal-profile__btn animal-profile__btn--secondary"
+            type="button"
+            onClick={handleDownloadReport}
+            disabled={downloadingReport}
+          >
+            <FileDown size={16} />
+            <span>{downloadingReport ? 'Generando…' : 'Descargar informe'}</span>
+          </button>
           {isAdmin && (
             <button
               className="animal-profile__btn animal-profile__btn--secondary"

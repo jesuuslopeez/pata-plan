@@ -9,6 +9,42 @@ const register = async (req, res, next) => {
   }
 };
 
+const verifyEmail = async (req, res, next) => {
+  try {
+    const result = await authService.verifyEmail(req.query.token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resendVerification = async (req, res, next) => {
+  try {
+    await authService.resendVerification(req.body?.email);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
+const forgotPassword = async (req, res, next) => {
+  try {
+    await authService.requestPasswordReset(req.body?.email);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    await authService.resetPassword(req.body?.token, req.body?.password);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
 const login = async (req, res, next) => {
   try {
     const result = await authService.login(req.body);
@@ -45,4 +81,14 @@ const changePassword = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, me, updateMe, changePassword };
+module.exports = {
+  register,
+  login,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
+  me,
+  updateMe,
+  changePassword,
+};

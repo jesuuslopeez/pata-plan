@@ -71,7 +71,8 @@ const assignProtocol = async (userId, animalId, data) => {
     throw new ApiError(400, 'Este protocolo ya está activo para este animal');
   }
 
-  const now = new Date();
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
 
   const result = await prisma.$transaction(async (tx) => {
     const assignment = await tx.protocolAssignment.create({
@@ -86,7 +87,9 @@ const assignProtocol = async (userId, animalId, data) => {
     const events = [];
     for (const step of protocol.steps) {
       const scheduledDate = addDays(startDate, step.dayOffset);
-      const status = scheduledDate < now ? 'OVERDUE' : 'PENDING';
+      const compareDate = new Date(scheduledDate);
+      compareDate.setHours(0, 0, 0, 0);
+      const status = compareDate < startOfToday ? 'OVERDUE' : 'PENDING';
 
       const event = await tx.healthEvent.create({
         data: {
