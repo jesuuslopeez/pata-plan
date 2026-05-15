@@ -35,6 +35,16 @@ const createMany = async (req, res, next) => {
   }
 };
 
+const update = async (req, res, next) => {
+  try {
+    const documentId = parseInt(req.params.id, 10);
+    const document = await documentService.update(req.user.id, documentId, req.body);
+    res.json({ document });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const remove = async (req, res, next) => {
   try {
     const documentId = parseInt(req.params.id, 10);
@@ -45,4 +55,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, create, createMany, remove };
+module.exports = { getAll, create, createMany, update, remove };

@@ -4,6 +4,9 @@ import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 import { MainLayout } from '../layouts/MainLayout';
 import { Login } from '../pages/Login/Login';
 import { Register } from '../pages/Register/Register';
+import { VerifyEmail } from '../pages/VerifyEmail/VerifyEmail';
+import { ForgotPassword } from '../pages/ForgotPassword/ForgotPassword';
+import { ResetPassword } from '../pages/ResetPassword/ResetPassword';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { Animals } from '../pages/Animals/Animals';
 import { AnimalProfile } from '../pages/AnimalProfile/AnimalProfile';
@@ -28,6 +31,9 @@ export function AppRouter() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/animals" element={<Animals />} />

@@ -1,5 +1,6 @@
 import { CheckCircle } from 'lucide-react';
 import { Badge } from '../Badge/Badge';
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './HealthEventsTable.scss';
 
 const STATUS_CONFIG = {
@@ -33,7 +34,7 @@ export function HealthEventsTable({ events, onComplete }) {
           <div key={event.id} className="health-events-table__row">
             <span className="health-events-table__date">{formatDate(event.scheduledDate)}</span>
             <div className="health-events-table__info">
-              <span className="health-events-table__type">{event.eventType?.name || 'Evento'}</span>
+              <span className="health-events-table__type">{translateEventType(event.eventType?.name)}</span>
               {event.product && (
                 <span className="health-events-table__product">{event.product}</span>
               )}

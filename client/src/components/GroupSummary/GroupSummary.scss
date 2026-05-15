@@ -41,6 +41,11 @@
     color: $neutral-800;
   }
 
+  &__owner {
+    color: $neutral-600;
+    font-weight: 400;
+  }
+
   &__count {
     font-size: 0.75rem;
     color: $neutral-600;

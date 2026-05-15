@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { resendVerificationRequest } from '../../services/auth.service';
 import './Login.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -9,8 +10,11 @@ export function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendStatus, setResendStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const validate = () => {
@@ -31,18 +35,36 @@ export function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError('');
+    setUnverifiedEmail('');
+    setResendStatus('');
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al iniciar sesión';
-      setApiError(msg);
+      const data = err.response?.data;
+      if (data?.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(data.email || email.trim());
+        setApiError(data.error || 'Debes verificar tu correo antes de iniciar sesión.');
+      } else {
+        setApiError(data?.error || 'Error al iniciar sesión');
+      }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unverifiedEmail) return;
+    setResendStatus('sending');
+    try {
+      await resendVerificationRequest(unverifiedEmail);
+      setResendStatus('ok');
+    } catch {
+      setResendStatus('error');
     }
   };
 
@@ -61,7 +83,27 @@ export function Login() {
             <p className="login__subtitle">Introduce tus credenciales para acceder</p>
           </div>
 
-          {apiError && <div className="login__alert">{apiError}</div>}
+          {apiError && (
+            <div className="login__alert">
+              <span>{apiError}</span>
+              {unverifiedEmail && (
+                <button
+                  type="button"
+                  className="login__resend"
+                  onClick={handleResend}
+                  disabled={resendStatus === 'sending'}
+                >
+                  {resendStatus === 'sending' ? 'Reenviando…' : 'Reenviar correo de verificación'}
+                </button>
+              )}
+              {resendStatus === 'ok' && (
+                <span className="login__resend-status">Correo reenviado. Revisa tu bandeja.</span>
+              )}
+              {resendStatus === 'error' && (
+                <span className="login__resend-status">No se ha podido reenviar.</span>
+              )}
+            </div>
+          )}
 
           <div className="login__field">
             <label className="login__label" htmlFor="email">Correo electrónico</label>
@@ -89,8 +131,18 @@ export function Login() {
             {errors.password && <span className="login__error">{errors.password}</span>}
           </div>
 
-          <div className="login__forgot">
-            <span>¿Olvidaste tu contraseña?</span>
+          <div className="login__options">
+            <label className="login__remember">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span>Mantener sesión iniciada</span>
+            </label>
+            <Link to="/forgot-password" className="login__forgot">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           <button className="login__button" type="submit" disabled={submitting}>

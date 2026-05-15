@@ -2,6 +2,10 @@ const { Router } = require('express');
 const {
   register,
   login,
+  verifyEmail,
+  resendVerification,
+  forgotPassword,
+  resetPassword,
   me,
   updateMe,
   changePassword,
@@ -34,8 +38,25 @@ const changePasswordSchema = {
   newPassword: { required: true, type: 'string', min: 8 },
 };
 
+const resendSchema = {
+  email: { required: true, type: 'string', pattern: EMAIL_REGEX },
+};
+
+const forgotSchema = {
+  email: { required: true, type: 'string', pattern: EMAIL_REGEX },
+};
+
+const resetSchema = {
+  token: { required: true, type: 'string' },
+  password: { required: true, type: 'string', min: 8 },
+};
+
 router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
+router.get('/verify-email', verifyEmail);
+router.post('/resend-verification', validate(resendSchema), resendVerification);
+router.post('/forgot-password', validate(forgotSchema), forgotPassword);
+router.post('/reset-password', validate(resetSchema), resetPassword);
 router.get('/me', authenticate, me);
 router.put('/me', authenticate, validate(updateMeSchema), updateMe);
 router.put('/password', authenticate, validate(changePasswordSchema), changePassword);

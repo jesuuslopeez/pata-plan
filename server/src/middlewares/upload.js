@@ -39,7 +39,7 @@ const buildFileFilter = (allowedTypes, rejectMessage) => (_req, file, cb) => {
 
 const uploadAnimalPhoto = multer({
   storage: buildStorage(ANIMALS_DIR),
-  fileFilter: buildFileFilter(IMAGE_TYPES, 'Only jpeg, jpg, png, and webp images are allowed'),
+  fileFilter: buildFileFilter(IMAGE_TYPES, 'Solo se permiten imágenes JPEG, JPG, PNG o WebP'),
   limits: { fileSize: MAX_SIZE },
 }).single('photo');
 
@@ -47,7 +47,7 @@ const documentUploader = multer({
   storage: buildStorage(DOCUMENTS_DIR),
   fileFilter: buildFileFilter(
     DOCUMENT_TYPES,
-    'Only images (JPEG, PNG, WebP) and PDFs are accepted'
+    'Solo se aceptan imágenes (JPEG, PNG, WebP) y PDFs'
   ),
   limits: { fileSize: MAX_SIZE },
 });
@@ -62,20 +62,20 @@ const handleUploadErrors = (mw) => (req, res, next) => {
     }
     if (err instanceof multer.MulterError) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return next(new ApiError(400, 'File size exceeds 10MB limit'));
+        return next(new ApiError(400, 'El archivo supera el límite de 10 MB'));
       }
       if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-        return next(new ApiError(400, 'Unexpected file field'));
+        return next(new ApiError(400, 'Campo de archivo no esperado'));
       }
       if (err.code === 'LIMIT_FILE_COUNT') {
-        return next(new ApiError(400, `A maximum of ${MAX_BULK_FILES} files is allowed`));
+        return next(new ApiError(400, `Se permite un máximo de ${MAX_BULK_FILES} archivos`));
       }
       return next(new ApiError(400, err.message));
     }
     if (err instanceof ApiError) {
       return next(err);
     }
-    return next(new ApiError(400, err.message || 'Upload failed'));
+    return next(new ApiError(400, err.message || 'Error al subir el archivo'));
   });
 };
 

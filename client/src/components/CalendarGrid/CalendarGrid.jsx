@@ -1,3 +1,4 @@
+import { translateEventType } from '../../utils/eventTypeLabels';
 import './CalendarGrid.scss';
 
 const WEEKDAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
@@ -86,11 +87,11 @@ export function CalendarGrid({ year, month, events, onEventClick }) {
                       key={event.id}
                       className={`calendar-grid__event ${colorClass}`}
                       onClick={() => onEventClick?.(event)}
-                      title={`${event.animal?.name} - ${event.eventType?.name}`}
+                      title={`${event.animal?.name} - ${translateEventType(event.eventType?.name)}`}
                       type="button"
                     >
                       <span className="calendar-grid__event-text">
-                        {event.animal?.name} - {event.eventType?.name}
+                        {event.animal?.name} - {translateEventType(event.eventType?.name)}
                       </span>
                     </button>
                   );

@@ -5,6 +5,7 @@ import { getExpenses, getExpenseStats } from '../../services/expense.service';
 import { ExpenseTable } from '../../components/ExpenseTable/ExpenseTable';
 import { MonthlyChart } from '../../components/MonthlyChart/MonthlyChart';
 import { CategoryChart } from '../../components/CategoryChart/CategoryChart';
+import { AddExpenseModal } from '../../components/AddExpenseModal/AddExpenseModal';
 import './Expenses.scss';
 
 const PAGE_SIZE = 20;
@@ -45,6 +46,8 @@ export function Expenses() {
     dateTo: '',
   });
   const [page, setPage] = useState(0);
+  const [addOpen, setAddOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -56,7 +59,7 @@ export function Expenses() {
         .then((res) => setAnimals(res.data?.animals || []))
         .catch(() => setAnimals([])),
     ]).finally(() => setLoading(false));
-  }, []);
+  }, [reloadKey]);
 
   useEffect(() => {
     const offset = page * PAGE_SIZE;
@@ -71,7 +74,7 @@ export function Expenses() {
         setTotal(0);
         setError(err?.response?.data?.error || 'No se han podido cargar los gastos');
       });
-  }, [filters, page]);
+  }, [filters, page, reloadKey]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
@@ -92,7 +95,12 @@ export function Expenses() {
     <div className="expenses">
       <header className="expenses__header">
         <h1 className="expenses__title">Gastos</h1>
-        <button className="expenses__add-btn" type="button" disabled>
+        <button
+          className="expenses__add-btn"
+          type="button"
+          onClick={() => setAddOpen(true)}
+          disabled={animals.length === 0}
+        >
           <Plus size={16} />
           <span>Añadir gasto</span>
         </button>
@@ -192,6 +200,16 @@ export function Expenses() {
         ) : (
           <ExpenseTable expenses={expenses} />
         )}
+
+        <AddExpenseModal
+          open={addOpen}
+          animals={animals}
+          onClose={() => setAddOpen(false)}
+          onSaved={() => {
+            setPage(0);
+            setReloadKey((k) => k + 1);
+          }}
+        />
 
         {total > 0 && (
           <footer className="expenses__pagination">

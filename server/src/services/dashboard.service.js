@@ -1,16 +1,9 @@
 const prisma = require('../utils/prisma');
 const { getAlerts } = require('./alert.service');
-
-const getUserGroupIds = async (userId) => {
-  const groups = await prisma.group.findMany({
-    where: { userId },
-    select: { id: true },
-  });
-  return groups.map((g) => g.id);
-};
+const { getAccessibleGroupIds } = require('../utils/groupAccess');
 
 const getSummary = async (userId) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
 
   if (groupIds.length === 0) {
     return {
@@ -116,7 +109,7 @@ const getSummary = async (userId) => {
 };
 
 const getUpcoming = async (userId, days = 7) => {
-  const groupIds = await getUserGroupIds(userId);
+  const groupIds = await getAccessibleGroupIds(userId);
 
   if (groupIds.length === 0) {
     return [];

@@ -35,9 +35,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(
-    async (email, password) => {
-      const res = await loginRequest(email, password);
-      setToken(res.data.token);
+    async (email, password, rememberMe = false) => {
+      const res = await loginRequest(email, password, rememberMe);
+      setToken(res.data.token, { persist: rememberMe });
       setUser(res.data.user);
       navigate('/');
     },
@@ -47,8 +47,20 @@ export function AuthProvider({ children }) {
   const register = useCallback(
     async (name, email, password) => {
       const res = await registerRequest(name, email, password);
-      setToken(res.data.token);
-      setUser(res.data.user);
+      if (res.data.token) {
+        setToken(res.data.token);
+        setUser(res.data.user);
+        navigate('/');
+      }
+      return res.data;
+    },
+    [navigate]
+  );
+
+  const completeVerification = useCallback(
+    (userData, token) => {
+      setToken(token);
+      setUser(userData);
       navigate('/');
     },
     [navigate]
@@ -62,7 +74,18 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isAuthenticated, isAdmin, login, register, logout, getToken, setUser }}
+      value={{
+        user,
+        loading,
+        isAuthenticated,
+        isAdmin,
+        login,
+        register,
+        completeVerification,
+        logout,
+        getToken,
+        setUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -20,7 +20,12 @@ export function GroupSummary({ groups }) {
             return (
               <li key={group.id} className="group-summary__item">
                 <div className="group-summary__row">
-                  <span className="group-summary__name">{group.name}</span>
+                  <span className="group-summary__name">
+                    {group.name}
+                    {group.role && group.role !== 'OWNER' && group.owner?.name && (
+                      <span className="group-summary__owner"> · de {group.owner.name}</span>
+                    )}
+                  </span>
                   <span className="group-summary__count">
                     {count} {count === 1 ? 'animal' : 'animales'}
                   </span>

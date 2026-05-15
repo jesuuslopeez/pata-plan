@@ -1,4 +1,7 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
+
+const LOGO_PATH = path.join(__dirname, '..', 'assets', 'pataplan.png');
 
 const COLORS = {
   primary600: '#1A7A5C',
@@ -98,18 +101,41 @@ const sectionTitle = (doc, title) => {
 };
 
 const drawHeader = (doc, animalName, generatedAt) => {
+  const badgeWidth = 110;
+  const badgeHeight = 44;
+  const badgeRadius = 8;
+  const textX = PAGE_MARGIN + badgeWidth + 14;
+  const textWidth = CONTENT_WIDTH - badgeWidth - 14;
+
+  doc
+    .save()
+    .fillColor(COLORS.primary800)
+    .roundedRect(PAGE_MARGIN, PAGE_MARGIN - 6, badgeWidth, badgeHeight, badgeRadius)
+    .fill()
+    .restore();
+
+  try {
+    doc.image(LOGO_PATH, PAGE_MARGIN + 8, PAGE_MARGIN - 2, {
+      fit: [badgeWidth - 16, badgeHeight - 12],
+      align: 'center',
+      valign: 'center',
+    });
+  } catch {
+    // logo missing — fall back silently
+  }
+
   doc
     .font('Helvetica-Bold')
     .fontSize(20)
     .fillColor(COLORS.gray900)
-    .text('PataPlan — Informe Sanitario', PAGE_MARGIN, PAGE_MARGIN, {
-      width: CONTENT_WIDTH,
+    .text('Informe Sanitario', textX, PAGE_MARGIN, {
+      width: textWidth,
     });
   doc
     .font('Helvetica')
     .fontSize(10)
     .fillColor(COLORS.gray600)
-    .text(animalName, PAGE_MARGIN, doc.y + 4, { width: CONTENT_WIDTH * 0.6, continued: false });
+    .text(animalName, textX, doc.y + 4, { width: textWidth * 0.6, continued: false });
   doc
     .font('Helvetica')
     .fontSize(10)
