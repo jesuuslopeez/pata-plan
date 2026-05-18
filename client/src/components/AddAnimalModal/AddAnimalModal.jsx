@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PawPrint, Upload, X } from 'lucide-react';
 import { createAnimal, updateAnimal } from '../../services/animal.service';
 import { resolveAssetUrl } from '../../utils/assetUrl';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddAnimalModal.scss';
 
 const SPECIES_OPTIONS = [
@@ -47,6 +48,8 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [removeExistingPhoto, setRemoveExistingPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEscapeKey(onClose, open);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
 

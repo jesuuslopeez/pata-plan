@@ -2,6 +2,7 @@ import { X, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../Badge/Badge';
 import { translateEventType } from '../../utils/eventTypeLabels';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './EventDetailModal.scss';
 
 const STATUS_CONFIG = {
@@ -30,17 +31,31 @@ function formatDate(iso) {
 
 export function EventDetailModal({ event, onClose, onComplete }) {
   const navigate = useNavigate();
+  useEscapeKey(onClose, Boolean(event));
   if (!event) return null;
 
   const status = STATUS_CONFIG[event.status] || STATUS_CONFIG.PENDING;
   const canComplete = event.status === 'PENDING' || event.status === 'OVERDUE';
 
   return (
-    <div className="event-detail-modal" onClick={onClose}>
+    <div
+      className="event-detail-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="event-detail-title"
+      onClick={onClose}
+    >
       <div className="event-detail-modal__content" onClick={(e) => e.stopPropagation()}>
         <header className="event-detail-modal__header">
-          <h2 className="event-detail-modal__title">{translateEventType(event.eventType?.name)}</h2>
-          <button className="event-detail-modal__close" onClick={onClose} type="button">
+          <h2 id="event-detail-title" className="event-detail-modal__title">
+            {translateEventType(event.eventType?.name)}
+          </h2>
+          <button
+            className="event-detail-modal__close"
+            onClick={onClose}
+            type="button"
+            aria-label="Cerrar"
+          >
             <X size={18} />
           </button>
         </header>

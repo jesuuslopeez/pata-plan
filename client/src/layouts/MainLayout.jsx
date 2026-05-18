@@ -9,10 +9,13 @@ export function MainLayout() {
 
   return (
     <div className="main-layout">
+      <a className="skip-link" href="#main-content">
+        Saltar al contenido principal
+      </a>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="main-layout__content">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        <main className="main-layout__main">
+        <main id="main-content" className="main-layout__main" tabIndex={-1}>
           <Outlet />
         </main>
       </div>

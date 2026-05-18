@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { createAnimalEvent } from '../../services/animal.service';
 import { getEventTypes, createEventType } from '../../services/protocol.service';
 import { translateEventType } from '../../utils/eventTypeLabels';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddEventModal.scss';
 
 const OTHER_OPTION = '__OTHER__';
@@ -23,6 +24,8 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
   const [eventTypes, setEventTypes] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  useEscapeKey(onClose, open);
 
   useEffect(() => {
     if (!open) return;

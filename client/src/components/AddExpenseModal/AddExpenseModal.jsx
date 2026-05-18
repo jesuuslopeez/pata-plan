@@ -4,6 +4,7 @@ import {
   createExpense,
   updateExpense,
 } from '../../services/expense.service';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddExpenseModal.scss';
 
 const CATEGORY_OPTIONS = [
@@ -45,6 +46,8 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
   const [form, setForm] = useState(buildEmptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  useEscapeKey(onClose, open);
 
   useEffect(() => {
     if (!open) return;

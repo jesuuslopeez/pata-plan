@@ -8,6 +8,7 @@ import {
 } from '../../services/protocol.service';
 import { Badge } from '../Badge/Badge';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AssignProtocolModal.scss';
 
 const STATUS_VARIANT = {
@@ -32,6 +33,8 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [cancelingAssignment, setCancelingAssignment] = useState(null);
+
+  useEscapeKey(onClose, open && !cancelingAssignment);
   const [alertDialog, setAlertDialog] = useState(null);
 
   const refreshAssignments = () =>

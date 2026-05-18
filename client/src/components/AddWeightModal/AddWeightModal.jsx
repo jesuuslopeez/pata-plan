@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { createAnimalWeight, updateWeight } from '../../services/animal.service';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddWeightModal.scss';
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -17,6 +18,8 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
   const [form, setForm] = useState({ valueKg: '', recordedAt: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEscapeKey(onClose, open);
 
   useEffect(() => {
     if (!open) return;

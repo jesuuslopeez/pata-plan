@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './RenameDocumentModal.scss';
 
 export function RenameDocumentModal({ open, initialName = '', onClose, onSubmit }) {
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEscapeKey(onClose, open);
 
   useEffect(() => {
     if (!open) return;

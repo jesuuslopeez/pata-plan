@@ -40,7 +40,12 @@ export function Sidebar({ isOpen, onClose }) {
           <div className="sidebar__brand">
             <img className="sidebar__logo" src="/pataplan.png" alt="PataPlan" />
           </div>
-          <button className="sidebar__close" onClick={onClose} type="button">
+          <button
+            className="sidebar__close"
+            onClick={onClose}
+            type="button"
+            aria-label="Cerrar menú"
+          >
             <X size={20} />
           </button>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { FileText, Upload, X } from 'lucide-react';
 import { uploadDocument } from '../../services/animal.service';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './DocumentUpload.scss';
 
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
@@ -17,6 +18,8 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
   const [error, setError] = useState('');
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  useEscapeKey(onClose, open && !uploading);
 
   useEffect(() => {
     if (!open) return;

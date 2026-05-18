@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './ConfirmDialog.scss';
 
 export function ConfirmDialog({
@@ -18,6 +19,8 @@ export function ConfirmDialog({
   useEffect(() => {
     if (!open) setBusy(false);
   }, [open]);
+
+  useEscapeKey(onClose, open && !busy);
 
   if (!open) return null;
 

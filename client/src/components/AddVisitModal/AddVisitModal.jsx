@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { createAnimalVisit, updateVisit } from '../../services/animal.service';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddVisitModal.scss';
 
 const EMPTY_FORM = {
@@ -32,6 +33,8 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  useEscapeKey(onClose, open);
 
   useEffect(() => {
     if (!open) return;
