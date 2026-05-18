@@ -1,0 +1,145 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.rename-document-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  @include flex-center;
+  padding: 1rem;
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &__content {
+    position: relative;
+    background-color: $neutral-white;
+    border-radius: $radius-lg;
+    width: 100%;
+    max-width: 26rem;
+    padding: 1.25rem;
+    @include flex-column;
+    gap: 1rem;
+    box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.18);
+  }
+
+  &__header {
+    @include flex-between;
+    gap: 0.5rem;
+  }
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: $neutral-900;
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: $neutral-600;
+    cursor: pointer;
+    padding: 0.25rem;
+    @include flex-center;
+
+    &:hover {
+      color: $neutral-900;
+    }
+  }
+
+  &__form {
+    @include flex-column;
+    gap: 0.75rem;
+  }
+
+  &__field {
+    @include flex-column;
+    gap: 0.25rem;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-800;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 0.0625rem solid $neutral-100;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    color: $neutral-900;
+    background-color: $neutral-white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-400;
+      box-shadow: 0 0 0 0.1875rem rgba(42, 157, 120, 0.18);
+    }
+  }
+
+  &__error {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(220, 53, 69, 0.08);
+    color: $danger;
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+
+    @include mobile {
+      flex-direction: column-reverse;
+    }
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: $radius-md;
+    font-family: $font-family;
+    font-size: $font-size-md;
+    font-weight: 600;
+    cursor: pointer;
+    border: 0.0625rem solid transparent;
+    transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--primary {
+      background-color: $primary-600;
+      color: $neutral-white;
+
+      &:hover:not(:disabled) {
+        background-color: $primary-400;
+      }
+    }
+
+    &--secondary {
+      background-color: $neutral-white;
+      color: $neutral-800;
+      border-color: $neutral-100;
+
+      &:hover:not(:disabled) {
+        border-color: $neutral-300;
+      }
+    }
+  }
+}

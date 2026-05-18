@@ -1,22 +1,24 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Sidebar } from '../components/Sidebar/Sidebar';
+import { Header } from '../components/Header/Header';
+import './MainLayout.scss';
 
 export function MainLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="main-layout">
-      <aside className="main-layout__sidebar">
-        <div className="main-layout__logo">PataPlan</div>
-        <nav className="main-layout__nav">
-          <a href="/">Dashboard</a>
-          <a href="/animals">Animals</a>
-          <a href="/calendar">Calendar</a>
-          <a href="/protocols">Protocols</a>
-          <a href="/expenses">Expenses</a>
-          <a href="/settings">Settings</a>
-        </nav>
-      </aside>
-      <main className="main-layout__content">
-        <Outlet />
-      </main>
+      <a className="skip-link" href="#main-content">
+        Saltar al contenido principal
+      </a>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="main-layout__content">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main id="main-content" className="main-layout__main" tabIndex={-1}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

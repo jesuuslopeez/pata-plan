@@ -1,0 +1,97 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.verify-email {
+  display: flex;
+  min-height: 100vh;
+
+  @include mobile {
+    flex-direction: column;
+  }
+
+  &__left {
+    flex: 1;
+    background-color: $primary-800;
+    @include flex-center;
+    padding: $spacing-8;
+
+    @include mobile {
+      padding: $spacing-6 $spacing-4;
+      min-height: 10rem;
+    }
+  }
+
+  &__brand {
+    text-align: center;
+    color: $neutral-white;
+  }
+
+  &__logo {
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    margin-bottom: $spacing-6;
+
+    @include mobile {
+      max-width: 14rem;
+      margin-bottom: $spacing-3;
+    }
+  }
+
+  &__tagline {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-white;
+    opacity: 0.85;
+  }
+
+  &__right {
+    flex: 1;
+    background-color: $neutral-white;
+    @include flex-center;
+    padding: $spacing-8;
+
+    @include mobile {
+      padding: $spacing-6 $spacing-4;
+    }
+  }
+
+  &__content {
+    width: 100%;
+    max-width: 24rem;
+    text-align: center;
+    @include flex-column;
+    gap: $spacing-4;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    color: $neutral-800;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-600;
+    margin: 0;
+  }
+
+  &__link {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: $neutral-600;
+    margin: 0;
+
+    a {
+      color: $primary-600;
+      font-weight: 400;
+      text-decoration: none;
+
+      &:hover {
+        color: $primary-400;
+      }
+    }
+  }
+}

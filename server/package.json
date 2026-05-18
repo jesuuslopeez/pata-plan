@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.js\" \"prisma/**/*.js\""
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.5.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -19,7 +20,22 @@
     "express-rate-limit": "^8.3.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "multer": "^2.1.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.7",
+    "pdfkit": "^0.18.0",
+    "pg": "^8.20.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "./src/tests/setup.js"
+    ],
+    "testMatch": [
+      "**/src/tests/**/*.test.js"
+    ]
   },
   "prisma": {
     "seed": "node prisma/seed.js"

@@ -3,9 +3,14 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDoc = require('./swagger.json');
 const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
+
+// API docs
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 
 // Security headers
 app.use(helmet());
@@ -48,8 +53,53 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'PataPlan API' });
 });
 
-// TODO: Register routes here
-// app.use('/api/auth', require('./routes/auth'));
+// Static files (relax CORP so the SPA on a different origin can embed images)
+app.use(
+  '/uploads',
+  express.static('uploads', {
+    setHeaders: (res) => {
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    },
+  })
+);
+
+// Routes
+const { authenticate } = require('./middlewares/auth');
+const authRoutes = require('./routes/auth.routes');
+const groupRoutes = require('./routes/group.routes');
+const animalRoutes = require('./routes/animal.routes');
+const weightRoutes = require('./routes/weight.routes');
+const eventRoutes = require('./routes/event.routes');
+const protocolRoutes = require('./routes/protocol.routes');
+const assignmentRoutes = require('./routes/assignment.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+const visitRoutes = require('./routes/visit.routes');
+const expenseRoutes = require('./routes/expense.routes');
+const documentRoutes = require('./routes/document.routes');
+const reportRoutes = require('./routes/report.routes');
+const eventTypeRoutes = require('./routes/eventType.routes');
+const collaboratorRoutes = require('./routes/collaborator.routes');
+const devRoutes = require('./routes/dev.routes');
+app.use('/api/auth', authRoutes);
+app.use('/api/groups', authenticate, groupRoutes);
+app.use('/api/animals', authenticate, animalRoutes);
+app.use('/api/animals', authenticate, weightRoutes);
+app.use('/api/animals', authenticate, eventRoutes);
+app.use('/api/animals', authenticate, assignmentRoutes);
+app.use('/api/animals', authenticate, visitRoutes);
+app.use('/api/animals', authenticate, documentRoutes);
+app.use('/api/animals', authenticate, reportRoutes);
+app.use('/api/assignments', authenticate, assignmentRoutes);
+app.use('/api/events', authenticate, eventRoutes);
+app.use('/api/event-types', authenticate, eventTypeRoutes);
+app.use('/api/protocols', authenticate, protocolRoutes);
+app.use('/api/dashboard', authenticate, dashboardRoutes);
+app.use('/api/visits', authenticate, visitRoutes);
+app.use('/api/weights', authenticate, weightRoutes);
+app.use('/api/expenses', authenticate, expenseRoutes);
+app.use('/api/documents', authenticate, documentRoutes);
+app.use('/api/dev', devRoutes);
+app.use('/api', authenticate, collaboratorRoutes);
 
 // Global error handler (must be last)
 app.use(errorHandler);
