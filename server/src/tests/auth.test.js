@@ -7,8 +7,14 @@ jest.mock('../utils/prisma', () => ({
   user: {
     findUnique: jest.fn(),
     create: jest.fn(),
+    update: jest.fn(),
   },
   $disconnect: jest.fn(),
+}));
+
+jest.mock('../utils/mailer', () => ({
+  sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
 }));
 
 const prisma = require('../utils/prisma');
@@ -32,6 +38,7 @@ const DB_USER = {
   email: 'test@pataplan.com',
   passwordHash: HASHED_PASSWORD,
   role: 'ADMIN',
+  emailVerified: true,
   createdAt: new Date('2026-03-25T10:00:00.000Z'),
   updatedAt: new Date('2026-03-25T10:00:00.000Z'),
 };
@@ -52,6 +59,7 @@ describe('POST /api/auth/register', () => {
   it('should register a new user successfully', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     prisma.user.create.mockResolvedValue(SAFE_USER);
+    prisma.user.update.mockResolvedValue(SAFE_USER);
 
     const res = await request(app).post('/api/auth/register').send(VALID_USER);
 
@@ -62,12 +70,7 @@ describe('POST /api/auth/register', () => {
     expect(res.body.user.email).toBe('test@pataplan.com');
     expect(res.body.user.role).toBe('ADMIN');
     expect(res.body.user.passwordHash).toBeUndefined();
-    expect(res.body.token).toBeDefined();
-
-    // Verify token is valid
-    const decoded = jwt.verify(res.body.token, process.env.JWT_SECRET);
-    expect(decoded.userId).toBe(1);
-    expect(decoded.role).toBe('ADMIN');
+    expect(res.body.requiresVerification).toBe(true);
   });
 
   it('should return 409 if email already exists', async () => {
@@ -76,7 +79,7 @@ describe('POST /api/auth/register', () => {
     const res = await request(app).post('/api/auth/register').send(VALID_USER);
 
     expect(res.status).toBe(409);
-    expect(res.body.error).toBe('Email already registered');
+    expect(res.body.error).toBe('El correo ya está registrado');
   });
 
   it('should return 400 if name is missing', async () => {
@@ -163,7 +166,7 @@ describe('POST /api/auth/login', () => {
       .send({ email: 'nobody@pataplan.com', password: 'password123' });
 
     expect(res.status).toBe(401);
-    expect(res.body.error).toBe('Invalid credentials');
+    expect(res.body.error).toBe('Credenciales inválidas');
   });
 
   it('should return 401 if password is wrong', async () => {
@@ -174,7 +177,7 @@ describe('POST /api/auth/login', () => {
       .send({ email: 'test@pataplan.com', password: 'wrongpassword' });
 
     expect(res.status).toBe(401);
-    expect(res.body.error).toBe('Invalid credentials');
+    expect(res.body.error).toBe('Credenciales inválidas');
   });
 
   it('should return 400 if email is missing', async () => {

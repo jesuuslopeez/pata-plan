@@ -104,7 +104,14 @@ const mockGroups = (userId, groups) => {
     }
     return Promise.resolve([]);
   });
+  prisma.groupCollaborator.findMany.mockResolvedValue([]);
 };
+
+// Default empty collaborator memberships across all tests
+beforeEach(() => {
+  jest.clearAllMocks();
+  prisma.groupCollaborator.findMany.mockResolvedValue([]);
+});
 
 // --- Tests ---
 
@@ -158,7 +165,7 @@ describe('POST /api/animals', () => {
       .send({ name: 'Parrot', species: 'BIRD', sex: 'MALE', groupId: 1 });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/species/i);
+    expect(res.body.error).toMatch(/especie/i);
   });
 
   it('should return 400 if sex is invalid', async () => {
@@ -170,10 +177,10 @@ describe('POST /api/animals', () => {
       .send({ name: 'Rocky', species: 'DOG', sex: 'OTHER', groupId: 1 });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/sex/i);
+    expect(res.body.error).toMatch(/sexo/i);
   });
 
-  it('should return 400 if groupId belongs to another user', async () => {
+  it('should return 403 if groupId belongs to another user', async () => {
     mockAuth(ADMIN_USER);
     mockGroups(1, [CASA_GROUP, REFUGIO_GROUP]);
 
@@ -182,11 +189,11 @@ describe('POST /api/animals', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: 'Rocky', species: 'DOG', sex: 'MALE', groupId: 3 });
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/invalid group/i);
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/permiso/i);
   });
 
-  it('should return 400 if groupId does not exist', async () => {
+  it('should return 403 if groupId does not exist', async () => {
     mockAuth(ADMIN_USER);
     mockGroups(1, [CASA_GROUP]);
 
@@ -195,8 +202,8 @@ describe('POST /api/animals', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: 'Rocky', species: 'DOG', sex: 'MALE', groupId: 999 });
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/invalid group/i);
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/permiso/i);
   });
 
   it('should create an animal with only required fields', async () => {
@@ -397,7 +404,7 @@ describe('PUT /api/animals/:id', () => {
     expect(res.body.animal.name).toBe('Rocky Jr.');
   });
 
-  it('should return 404 for animal of another user', async () => {
+  it('should return 403 for animal of another user', async () => {
     mockAuth(OTHER_USER);
     mockGroups(2, [OTHER_GROUP]);
     prisma.animal.findFirst.mockResolvedValue(null);
@@ -407,13 +414,12 @@ describe('PUT /api/animals/:id', () => {
       .set('Authorization', `Bearer ${otherToken}`)
       .send({ name: 'Stolen' });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
-  it('should return 400 when changing to groupId of another user', async () => {
+  it('should return 403 when changing to groupId of another user', async () => {
     mockAuth(ADMIN_USER);
-    // First call for verifyAnimalOwnership, second for groupId validation
-    prisma.group.findMany.mockResolvedValue([CASA_GROUP]);
+    mockGroups(1, [CASA_GROUP]);
     prisma.animal.findFirst.mockResolvedValue(ROCKY);
 
     const res = await request(app)
@@ -421,11 +427,11 @@ describe('PUT /api/animals/:id', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ groupId: 3 });
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/invalid group/i);
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/permiso/i);
   });
 
-  it('should return 404 for non-existent animal', async () => {
+  it('should return 403 for non-existent animal', async () => {
     mockAuth(ADMIN_USER);
     mockGroups(1, [CASA_GROUP]);
     prisma.animal.findFirst.mockResolvedValue(null);
@@ -435,7 +441,7 @@ describe('PUT /api/animals/:id', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ name: 'Ghost' });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
   it('should return 401 without authentication', async () => {
@@ -464,7 +470,7 @@ describe('DELETE /api/animals/:id', () => {
     expect(prisma.animal.delete).toHaveBeenCalledWith({ where: { id: 1 } });
   });
 
-  it('should return 404 for animal of another user', async () => {
+  it('should return 403 for animal of another user', async () => {
     mockAuth(OTHER_USER);
     mockGroups(2, [OTHER_GROUP]);
     prisma.animal.findFirst.mockResolvedValue(null);
@@ -473,10 +479,10 @@ describe('DELETE /api/animals/:id', () => {
       .delete('/api/animals/1')
       .set('Authorization', `Bearer ${otherToken}`);
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
-  it('should return 404 for non-existent animal', async () => {
+  it('should return 403 for non-existent animal', async () => {
     mockAuth(ADMIN_USER);
     mockGroups(1, [CASA_GROUP]);
     prisma.animal.findFirst.mockResolvedValue(null);
@@ -485,7 +491,7 @@ describe('DELETE /api/animals/:id', () => {
       .delete('/api/animals/999')
       .set('Authorization', `Bearer ${adminToken}`);
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 
   it('should return 401 without authentication', async () => {
