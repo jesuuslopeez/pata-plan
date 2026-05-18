@@ -8,6 +8,7 @@ const {
   resetPassword,
   me,
   updateMe,
+  updateNotifications,
   changePassword,
 } = require('../controllers/auth.controller');
 const { validate } = require('../middlewares/validate');
@@ -59,6 +60,7 @@ router.post('/forgot-password', validate(forgotSchema), forgotPassword);
 router.post('/reset-password', validate(resetSchema), resetPassword);
 router.get('/me', authenticate, me);
 router.put('/me', authenticate, validate(updateMeSchema), updateMe);
+router.put('/notifications', authenticate, updateNotifications);
 router.put('/password', authenticate, validate(changePasswordSchema), changePassword);
 
 module.exports = router;

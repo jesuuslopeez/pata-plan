@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { updateMeRequest, changePasswordRequest } from '../../services/auth.service';
+import {
+  updateMeRequest,
+  changePasswordRequest,
+  updateNotificationsRequest,
+} from '../../services/auth.service';
 import { Input } from '../Input/Input';
 import './ProfileSettings.scss';
 
@@ -18,10 +22,40 @@ export function ProfileSettings() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState(null);
 
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    user?.emailNotificationsEnabled ?? true
+  );
+  const [notificationsSaving, setNotificationsSaving] = useState(false);
+  const [notificationsMessage, setNotificationsMessage] = useState(null);
+
   useEffect(() => {
     setName(user?.name || '');
     setEmail(user?.email || '');
+    setNotificationsEnabled(user?.emailNotificationsEnabled ?? true);
   }, [user]);
+
+  const handleToggleNotifications = async (e) => {
+    const next = e.target.checked;
+    setNotificationsEnabled(next);
+    setNotificationsMessage(null);
+    setNotificationsSaving(true);
+    try {
+      const res = await updateNotificationsRequest(next);
+      setUser?.(res.data?.user || null);
+      setNotificationsMessage({
+        type: 'success',
+        text: next ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
+      });
+    } catch (err) {
+      setNotificationsEnabled(!next);
+      setNotificationsMessage({
+        type: 'error',
+        text: err?.response?.data?.error || 'No se ha podido actualizar la preferencia',
+      });
+    } finally {
+      setNotificationsSaving(false);
+    }
+  };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
@@ -158,6 +192,30 @@ export function ProfileSettings() {
           </p>
         )}
       </form>
+
+      <hr className="profile-settings__divider" />
+
+      <h3 className="profile-settings__subtitle">Notificaciones por correo</h3>
+
+      <label className="profile-settings__toggle">
+        <input
+          type="checkbox"
+          checked={notificationsEnabled}
+          onChange={handleToggleNotifications}
+          disabled={notificationsSaving}
+        />
+        <span>Recibir avisos de eventos próximos, del día y vencidos</span>
+      </label>
+      <p className="profile-settings__hint">
+        Te enviaremos un correo cuando queden 3 días para un evento, el mismo día y un recordatorio diario mientras alguno siga vencido.
+      </p>
+      {notificationsMessage && (
+        <p
+          className={`profile-settings__message profile-settings__message--${notificationsMessage.type}`}
+        >
+          {notificationsMessage.text}
+        </p>
+      )}
     </section>
   );
 }

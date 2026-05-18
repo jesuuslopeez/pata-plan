@@ -80,6 +80,10 @@ export const changePasswordRequest = (currentPassword, newPassword) => {
   return api.put('/auth/password', { currentPassword, newPassword });
 };
 
+export const updateNotificationsRequest = (enabled) => {
+  return api.put('/auth/notifications', { enabled });
+};
+
 export const verifyEmailRequest = (token) => {
   return api.get(`/auth/verify-email?token=${encodeURIComponent(token)}`);
 };

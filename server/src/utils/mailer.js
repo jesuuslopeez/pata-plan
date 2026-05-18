@@ -107,4 +107,154 @@ const sendPasswordResetEmail = async ({ to, name, resetUrl }) => {
   return { messageId: info.messageId, previewUrl: preview || null };
 };
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail };
+const formatEsDate = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+const escapeHtml = (str) =>
+  String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const buildEventRow = (e, extraCol) => {
+  const animal = escapeHtml(e.animal?.name || '—');
+  const type = escapeHtml(e.eventType?.name || '—');
+  const date = formatEsDate(e.scheduledDate);
+  return `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E0D8;">${animal}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E0D8;">${type}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E0D8;">${date}</td>
+      ${extraCol ? `<td style="padding:8px 10px;border-bottom:1px solid #E2E0D8;">${extraCol(e)}</td>` : ''}
+    </tr>
+  `;
+};
+
+const buildEventTable = (events, headers, extraCol) => {
+  const headRow = headers
+    .map(
+      (h) =>
+        `<th style="text-align:left;padding:8px 10px;background:#F3F1EC;color:#1E1E1D;font-size:0.8rem;">${escapeHtml(h)}</th>`
+    )
+    .join('');
+  const rows = events.map((e) => buildEventRow(e, extraCol)).join('');
+  return `
+    <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:0.9rem;">
+      <thead><tr>${headRow}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+};
+
+const sendDigest = async ({ to, subject, html, text }) => {
+  const transporter = await getTransporter();
+  const from = process.env.MAIL_FROM || '"PataPlan" <no-reply@pataplan.local>';
+  const info = await transporter.sendMail({ from, to, subject, html, text });
+  const preview = nodemailer.getTestMessageUrl(info);
+  if (preview) {
+    // eslint-disable-next-line no-console
+    console.log(`[mailer] Preview URL: ${preview}`);
+  }
+  return { messageId: info.messageId, previewUrl: preview || null };
+};
+
+const sendUpcomingEventEmail = async ({ to, name, events }) => {
+  if (!events.length) return null;
+  const intro = `Tienes ${events.length} evento${events.length > 1 ? 's' : ''} programado${events.length > 1 ? 's' : ''} para dentro de 3 días.`;
+  const text =
+    `Hola ${name},\n\n${intro}\n\n` +
+    events
+      .map((e) => `- ${e.animal?.name}: ${e.eventType?.name} (${formatEsDate(e.scheduledDate)})`)
+      .join('\n') +
+    `\n\nPuedes consultarlos en tu calendario de PataPlan.`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#1E1E1D;padding:1rem;max-width:560px;">
+      <h2 style="color:#1A7A5C;margin-top:0;">Próximos eventos sanitarios</h2>
+      <p>Hola ${escapeHtml(name)}, ${intro}</p>
+      ${buildEventTable(events, ['Animal', 'Evento', 'Fecha'])}
+      <p style="font-size:0.85rem;color:#6B6A65;margin-top:1.25rem;">
+        Consulta el detalle en tu calendario de PataPlan.
+      </p>
+    </div>
+  `;
+  return sendDigest({
+    to,
+    subject: `PataPlan · ${events.length} evento${events.length > 1 ? 's' : ''} en 3 días`,
+    text,
+    html,
+  });
+};
+
+const sendDueTodayEmail = async ({ to, name, events }) => {
+  if (!events.length) return null;
+  const intro = `Hoy te toca atender ${events.length} evento${events.length > 1 ? 's' : ''} sanitario${events.length > 1 ? 's' : ''}.`;
+  const text =
+    `Hola ${name},\n\n${intro}\n\n` +
+    events
+      .map((e) => `- ${e.animal?.name}: ${e.eventType?.name}`)
+      .join('\n') +
+    `\n\nEntra en PataPlan para marcarlos como realizados cuando los hagas.`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#1E1E1D;padding:1rem;max-width:560px;">
+      <h2 style="color:#B07210;margin-top:0;">Hoy toca</h2>
+      <p>Hola ${escapeHtml(name)}, ${intro}</p>
+      ${buildEventTable(events, ['Animal', 'Evento', 'Fecha'])}
+      <p style="font-size:0.85rem;color:#6B6A65;margin-top:1.25rem;">
+        Cuando los hagas, márcalos como realizados en PataPlan para que el calendario quede al día.
+      </p>
+    </div>
+  `;
+  return sendDigest({
+    to,
+    subject: `PataPlan · Hoy toca (${events.length} evento${events.length > 1 ? 's' : ''})`,
+    text,
+    html,
+  });
+};
+
+const daysOverdue = (event, now) => {
+  const ms = now.getTime() - new Date(event.scheduledDate).getTime();
+  return Math.max(0, Math.floor(ms / 86400000));
+};
+
+const sendOverdueEventEmail = async ({ to, name, events }) => {
+  if (!events.length) return null;
+  const now = new Date();
+  const intro = `Tienes ${events.length} evento${events.length > 1 ? 's' : ''} sanitario${events.length > 1 ? ' vencidos' : ' vencido'} pendiente${events.length > 1 ? 's' : ''} de atender.`;
+  const text =
+    `Hola ${name},\n\n${intro}\n\n` +
+    events
+      .map(
+        (e) =>
+          `- ${e.animal?.name}: ${e.eventType?.name} (vencido el ${formatEsDate(e.scheduledDate)}, ${daysOverdue(e, now)} día${daysOverdue(e, now) === 1 ? '' : 's'} de retraso)`
+      )
+      .join('\n');
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#1E1E1D;padding:1rem;max-width:560px;">
+      <h2 style="color:#DC3545;margin-top:0;">Eventos vencidos</h2>
+      <p>Hola ${escapeHtml(name)}, ${intro}</p>
+      ${buildEventTable(events, ['Animal', 'Evento', 'Fecha programada', 'Retraso'], (e) => `${daysOverdue(e, now)} día${daysOverdue(e, now) === 1 ? '' : 's'}`)}
+      <p style="font-size:0.85rem;color:#6B6A65;margin-top:1.25rem;">
+        Mientras sigan vencidos recibirás un recordatorio diario. Márcalos como realizados o reprográmalos para dejar de recibirlo.
+      </p>
+    </div>
+  `;
+  return sendDigest({
+    to,
+    subject: `PataPlan · ${events.length} evento${events.length > 1 ? 's' : ''} vencido${events.length > 1 ? 's' : ''}`,
+    text,
+    html,
+  });
+};
+
+module.exports = {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendUpcomingEventEmail,
+  sendDueTodayEmail,
+  sendOverdueEventEmail,
+};

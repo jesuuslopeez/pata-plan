@@ -15,6 +15,7 @@ const USER_SELECT = {
   email: true,
   role: true,
   emailVerified: true,
+  emailNotificationsEnabled: true,
   createdAt: true,
 };
 
@@ -225,6 +226,18 @@ const updateMe = async (userId, { name, email }) => {
   return user;
 };
 
+const updateNotificationPreferences = async (userId, { enabled }) => {
+  if (typeof enabled !== 'boolean') {
+    throw new ApiError(400, 'El valor debe ser true o false');
+  }
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { emailNotificationsEnabled: enabled },
+    select: { ...USER_SELECT, updatedAt: true },
+  });
+  return user;
+};
+
 const changePassword = async (userId, { currentPassword, newPassword }) => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
@@ -252,5 +265,6 @@ module.exports = {
   resetPassword,
   getMe,
   updateMe,
+  updateNotificationPreferences,
   changePassword,
 };

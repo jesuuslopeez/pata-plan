@@ -72,6 +72,15 @@ const updateMe = async (req, res, next) => {
   }
 };
 
+const updateNotifications = async (req, res, next) => {
+  try {
+    const user = await authService.updateNotificationPreferences(req.user.id, req.body);
+    res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const changePassword = async (req, res, next) => {
   try {
     await authService.changePassword(req.user.id, req.body);
@@ -90,5 +99,6 @@ module.exports = {
   resetPassword,
   me,
   updateMe,
+  updateNotifications,
   changePassword,
 };
