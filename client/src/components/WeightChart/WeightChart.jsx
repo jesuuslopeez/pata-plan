@@ -6,7 +6,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Dot,
 } from 'recharts';
 import './WeightChart.scss';
 
@@ -25,12 +24,32 @@ function formatFullDate(iso) {
   });
 }
 
-function CustomDot(props) {
-  const { cx, cy, payload } = props;
-  if (payload.isAnomaly) {
-    return <circle cx={cx} cy={cy} r={6} fill="var(--dot-danger)" />;
+function renderDot(props) {
+  const { cx, cy, payload, index } = props;
+  if (cx == null || cy == null) return null;
+  if (payload?.isAnomaly) {
+    return (
+      <circle
+        key={`dot-anomaly-${index}`}
+        cx={cx}
+        cy={cy}
+        r={6}
+        fill="var(--dot-danger)"
+        stroke="var(--dot-danger)"
+        strokeWidth={2}
+      />
+    );
   }
-  return <circle cx={cx} cy={cy} r={4} fill="var(--dot-primary)" />;
+  return (
+    <circle
+      key={`dot-${index}`}
+      cx={cx}
+      cy={cy}
+      r={4}
+      fill="var(--dot-primary)"
+      stroke="var(--dot-primary)"
+    />
+  );
 }
 
 function CustomTooltip({ active, payload }) {
@@ -89,7 +108,7 @@ export function WeightChart({ weights }) {
             stroke="var(--line-primary)"
             strokeWidth={2}
             fill="url(#weightFill)"
-            dot={<CustomDot />}
+            dot={renderDot}
             activeDot={{ r: 6 }}
           />
         </AreaChart>

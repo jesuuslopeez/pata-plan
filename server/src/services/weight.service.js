@@ -62,7 +62,7 @@ const ANOMALY_THRESHOLD = 0.1;
 const ANOMALY_EVENT_TYPE_NAME = 'Anomalía de peso';
 
 const computeAnomaly = (newValue, recentValues) => {
-  if (recentValues.length < 3) {
+  if (recentValues.length < 2) {
     return { isAnomaly: false, mean: null, deviationPercent: null };
   }
   const mean = recentValues.reduce((a, b) => a + b, 0) / recentValues.length;
