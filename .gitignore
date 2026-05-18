@@ -50,3 +50,7 @@ CLAUDE.md
 
 # Uploaded documents (runtime data)
 server/uploads/documents/
+
+# Uploaded animal photos (runtime data)
+server/uploads/animals/*
+!server/uploads/animals/.gitkeep
