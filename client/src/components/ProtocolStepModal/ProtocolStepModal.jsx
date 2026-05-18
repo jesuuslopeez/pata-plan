@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import { createEventType } from '../../services/protocol.service';
 import { translateEventType } from '../../utils/eventTypeLabels';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './ProtocolStepModal.scss';
 
 const OTHER_OPTION = '__OTHER__';
@@ -14,30 +15,23 @@ const EMPTY_FORM = {
   notes: '',
 };
 
-export function ProtocolStepModal({ open, initial, eventTypes, onClose, onSubmit }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+function buildFormFromInitial(initial) {
+  if (!initial) return EMPTY_FORM;
+  return {
+    eventTypeId: String(initial.eventTypeId ?? initial.eventType?.id ?? ''),
+    customName: '',
+    dayOffset: initial.dayOffset ?? 0,
+    product: initial.product ?? '',
+    notes: initial.notes ?? '',
+  };
+}
+
+export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
+  const [form, setForm] = useState(() => buildFormFromInitial(initial));
   const [error, setError] = useState('');
+
+  useEscapeKey(onClose);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setForm(
-        initial
-          ? {
-              eventTypeId: String(initial.eventTypeId ?? initial.eventType?.id ?? ''),
-              customName: '',
-              dayOffset: initial.dayOffset ?? 0,
-              product: initial.product ?? '',
-              notes: initial.notes ?? '',
-            }
-          : EMPTY_FORM
-      );
-      setError('');
-      setSubmitting(false);
-    }
-  }, [open, initial]);
-
-  if (!open) return null;
 
   const isOther = form.eventTypeId === OTHER_OPTION;
 

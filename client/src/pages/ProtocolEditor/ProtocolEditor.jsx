@@ -321,16 +321,18 @@ export function ProtocolEditor() {
         )}
       </section>
 
-      <ProtocolStepModal
-        open={modalOpen}
-        initial={editingStep}
-        eventTypes={eventTypes}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingKey(null);
-        }}
-        onSubmit={handleAddStep}
-      />
+      {modalOpen && (
+        <ProtocolStepModal
+          key={editingKey || 'new'}
+          initial={editingStep}
+          eventTypes={eventTypes}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingKey(null);
+          }}
+          onSubmit={handleAddStep}
+        />
+      )}
 
       <ConfirmDialog
         open={!!deletingKey}
