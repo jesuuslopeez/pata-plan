@@ -111,6 +111,7 @@ export function Animals() {
         groups={editableGroups}
         onClose={() => setAddOpen(false)}
         onSaved={() => loadAnimals()}
+        onGroupCreated={(g) => setGroups((prev) => [...prev, g])}
       />
     </div>
   );
