@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearToken();
     setUser(null);
-    navigate('/login');
+    navigate('/');
   }, [navigate]);
 
   return (
