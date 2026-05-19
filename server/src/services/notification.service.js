@@ -44,9 +44,15 @@ const groupByOwner = (events) => {
   const byOwner = new Map();
   for (const e of events) {
     const owner = e.animal?.group?.user;
-    if (!owner) continue;
-    if (!owner.emailVerified) continue;
-    if (!owner.emailNotificationsEnabled) continue;
+    if (!owner) {
+      continue;
+    }
+    if (!owner.emailVerified) {
+      continue;
+    }
+    if (!owner.emailNotificationsEnabled) {
+      continue;
+    }
     const bucket = byOwner.get(owner.id) || { owner, events: [] };
     bucket.events.push(e);
     byOwner.set(owner.id, bucket);

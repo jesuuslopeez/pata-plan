@@ -11,10 +11,7 @@ const ANIMAL_INCLUDE = {
   vetVisit: { select: { id: true, reason: true } },
 };
 
-const {
-  getAccessibleGroupIds,
-  getEditableGroupIds,
-} = require('../utils/groupAccess');
+const { getAccessibleGroupIds, getEditableGroupIds } = require('../utils/groupAccess');
 
 const getUserAnimalIds = async (userId) => {
   const groupIds = await getAccessibleGroupIds(userId);
@@ -184,7 +181,9 @@ const getAll = async (userId, query = {}) => {
   const sort = query.sort === 'asc' ? 'asc' : 'desc';
 
   const limit = (() => {
-    if (query.limit === undefined) return DEFAULT_LIMIT;
+    if (query.limit === undefined) {
+      return DEFAULT_LIMIT;
+    }
     const n = parseInt(query.limit, 10);
     if (isNaN(n) || n <= 0) {
       throw new ApiError(400, 'El límite debe ser un número entero positivo');
@@ -193,7 +192,9 @@ const getAll = async (userId, query = {}) => {
   })();
 
   const offset = (() => {
-    if (query.offset === undefined) return 0;
+    if (query.offset === undefined) {
+      return 0;
+    }
     const n = parseInt(query.offset, 10);
     if (isNaN(n) || n < 0) {
       throw new ApiError(400, 'El offset debe ser un número entero no negativo');
@@ -268,12 +269,24 @@ const update = async (userId, expenseId, data) => {
   }
 
   const updateData = {};
-  if (data.animalId !== undefined) updateData.animalId = targetAnimalId;
-  if (validated.amount !== undefined) updateData.amount = validated.amount;
-  if (validated.category !== undefined) updateData.category = validated.category;
-  if (validated.description !== undefined) updateData.description = validated.description;
-  if (validated.expenseDate !== undefined) updateData.expenseDate = validated.expenseDate;
-  if (validated.vetVisitId !== undefined) updateData.vetVisitId = validated.vetVisitId;
+  if (data.animalId !== undefined) {
+    updateData.animalId = targetAnimalId;
+  }
+  if (validated.amount !== undefined) {
+    updateData.amount = validated.amount;
+  }
+  if (validated.category !== undefined) {
+    updateData.category = validated.category;
+  }
+  if (validated.description !== undefined) {
+    updateData.description = validated.description;
+  }
+  if (validated.expenseDate !== undefined) {
+    updateData.expenseDate = validated.expenseDate;
+  }
+  if (validated.vetVisitId !== undefined) {
+    updateData.vetVisitId = validated.vetVisitId;
+  }
 
   const expense = await prisma.expense.update({
     where: { id: expenseId },
@@ -289,7 +302,7 @@ const remove = async (userId, expenseId) => {
   await prisma.expense.delete({ where: { id: expenseId } });
 };
 
-const toNumber = (decimal) => (decimal == null ? 0 : Number(decimal));
+const toNumber = (decimal) => (decimal === null || decimal === undefined ? 0 : Number(decimal));
 
 const getStats = async (userId, query = {}) => {
   const groupIds = await getAccessibleGroupIds(userId);
@@ -306,7 +319,9 @@ const getStats = async (userId, query = {}) => {
 
   const now = new Date();
   const year = (() => {
-    if (query.year === undefined) return now.getFullYear();
+    if (query.year === undefined) {
+      return now.getFullYear();
+    }
     const n = parseInt(query.year, 10);
     if (isNaN(n)) {
       throw new ApiError(400, 'El año no es válido');
@@ -377,8 +392,7 @@ const getStats = async (userId, query = {}) => {
   const totalThisMonth = round2(toNumber(totalThisMonthAgg._sum.amount));
   const previousMonthTotal = round2(toNumber(previousMonthAgg._sum.amount));
 
-  const averagePerAnimal =
-    animalIds.length > 0 ? round2(totalAllTime / animalIds.length) : 0;
+  const averagePerAnimal = animalIds.length > 0 ? round2(totalAllTime / animalIds.length) : 0;
 
   const byCategory = VALID_CATEGORIES.map((cat) => {
     const row = byCategoryRaw.find((r) => r.category === cat);

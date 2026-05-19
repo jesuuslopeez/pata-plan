@@ -254,9 +254,7 @@ describe('GET /api/animals', () => {
     mockGroups(1, [CASA_GROUP, REFUGIO_GROUP]);
     mockAnimalsResponse([ROCKY, LUNA, SIMBA]);
 
-    const res = await request(app)
-      .get('/api/animals')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await request(app).get('/api/animals').set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.animals).toHaveLength(3);
@@ -315,9 +313,7 @@ describe('GET /api/animals', () => {
     mockGroups(2, [OTHER_GROUP]);
     mockAnimalsResponse([]);
 
-    const res = await request(app)
-      .get('/api/animals')
-      .set('Authorization', `Bearer ${otherToken}`);
+    const res = await request(app).get('/api/animals').set('Authorization', `Bearer ${otherToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.animals).toHaveLength(0);

@@ -44,9 +44,13 @@ const EXPENSE_CATEGORY_LABELS = {
 };
 
 const formatDate = (value) => {
-  if (!value) return '—';
+  if (!value) {
+    return '—';
+  }
   const d = value instanceof Date ? value : new Date(value);
-  if (isNaN(d.getTime())) return '—';
+  if (isNaN(d.getTime())) {
+    return '—';
+  }
   return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
@@ -60,13 +64,20 @@ const formatDateTime = (value) =>
   });
 
 const formatNumber = (value, digits = 2) => {
-  if (value === null || value === undefined) return '—';
+  if (value === null || value === undefined) {
+    return '—';
+  }
   const n = Number(value);
-  if (isNaN(n)) return '—';
-  return n.toLocaleString('es-ES', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  if (isNaN(n)) {
+    return '—';
+  }
+  return n.toLocaleString('es-ES', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 };
 
-const toNumber = (decimal) => (decimal == null ? 0 : Number(decimal));
+const toNumber = (decimal) => (decimal === null || decimal === undefined ? 0 : Number(decimal));
 
 const ensureSpace = (doc, neededHeight) => {
   const maxY = doc.page.height - doc.page.margins.bottom - FOOTER_RESERVED;
@@ -205,12 +216,7 @@ const drawTable = (doc, columns, rows) => {
 
   const drawHeaderRow = () => {
     const y = doc.y;
-    doc
-      .save()
-      .fillColor(COLORS.gray50)
-      .rect(offsetX, y, totalWidth, headerHeight)
-      .fill()
-      .restore();
+    doc.save().fillColor(COLORS.gray50).rect(offsetX, y, totalWidth, headerHeight).fill().restore();
 
     let cx = offsetX;
     columns.forEach((col) => {
@@ -250,12 +256,7 @@ const drawTable = (doc, columns, rows) => {
 
     const y = doc.y;
     if (idx % 2 === 0) {
-      doc
-        .save()
-        .fillColor('#FAFAF8')
-        .rect(offsetX, y, totalWidth, rowHeight)
-        .fill()
-        .restore();
+      doc.save().fillColor('#FAFAF8').rect(offsetX, y, totalWidth, rowHeight).fill().restore();
     }
 
     let cx = offsetX;
@@ -294,20 +295,37 @@ const drawTable = (doc, columns, rows) => {
 
 const statusCell = (status) => {
   let color = COLORS.gray600;
-  if (status === 'COMPLETED') color = COLORS.success;
-  else if (status === 'OVERDUE') color = COLORS.danger;
+  if (status === 'COMPLETED') {
+    color = COLORS.success;
+  } else if (status === 'OVERDUE') {
+    color = COLORS.danger;
+  }
   return { text: STATUS_LABELS[status] || status, color };
 };
 
 const buildAnimalRows = (animal) => {
   const rows = [['Nombre', animal.name]];
-  if (animal.species) rows.push(['Especie', SPECIES_LABELS[animal.species] || animal.species]);
-  if (animal.breed) rows.push(['Raza', animal.breed]);
-  if (animal.sex) rows.push(['Sexo', SEX_LABELS[animal.sex] || animal.sex]);
-  if (animal.dateOfBirth) rows.push(['Fecha de nacimiento', formatDate(animal.dateOfBirth)]);
-  if (animal.microchip) rows.push(['Microchip', animal.microchip]);
-  if (animal.group?.name) rows.push(['Grupo', animal.group.name]);
-  if (animal.notes) rows.push(['Notas', animal.notes]);
+  if (animal.species) {
+    rows.push(['Especie', SPECIES_LABELS[animal.species] || animal.species]);
+  }
+  if (animal.breed) {
+    rows.push(['Raza', animal.breed]);
+  }
+  if (animal.sex) {
+    rows.push(['Sexo', SEX_LABELS[animal.sex] || animal.sex]);
+  }
+  if (animal.dateOfBirth) {
+    rows.push(['Fecha de nacimiento', formatDate(animal.dateOfBirth)]);
+  }
+  if (animal.microchip) {
+    rows.push(['Microchip', animal.microchip]);
+  }
+  if (animal.group?.name) {
+    rows.push(['Grupo', animal.group.name]);
+  }
+  if (animal.notes) {
+    rows.push(['Notas', animal.notes]);
+  }
   return rows;
 };
 
@@ -322,7 +340,9 @@ const renderVaccines = (doc, events) => {
       statusCell(e.status),
     ]);
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Historial de vacunas');
   drawTable(
@@ -353,7 +373,9 @@ const renderDewormings = (doc, events) => {
       statusCell(e.status),
     ]);
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Historial de desparasitaciones');
   drawTable(
@@ -380,7 +402,9 @@ const renderTreatments = (doc, events) => {
       statusCell(e.status),
     ]);
 
-  if (rows.length === 0) return;
+  if (rows.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Tratamientos');
   drawTable(
@@ -398,7 +422,9 @@ const renderTreatments = (doc, events) => {
 };
 
 const renderVisits = (doc, visits) => {
-  if (!visits || visits.length === 0) return;
+  if (!visits || visits.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Visitas veterinarias');
 
@@ -451,16 +477,16 @@ const renderVisits = (doc, visits) => {
 };
 
 const renderWeights = (doc, weights) => {
-  if (!weights || weights.length === 0) return;
+  if (!weights || weights.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Evolución de peso');
 
   const rows = weights.map((w) => [
     formatDate(w.recordedAt),
     `${formatNumber(toNumber(w.valueKg))} kg`,
-    w.isAnomaly
-      ? { text: 'Anomalía detectada', color: COLORS.danger }
-      : '—',
+    w.isAnomaly ? { text: 'Anomalía detectada', color: COLORS.danger } : '—',
   ]);
 
   drawTable(
@@ -498,7 +524,9 @@ const renderWeights = (doc, weights) => {
 };
 
 const renderExpenses = (doc, expenses) => {
-  if (!expenses || expenses.length === 0) return;
+  if (!expenses || expenses.length === 0) {
+    return;
+  }
 
   sectionTitle(doc, 'Resumen de gastos');
 
@@ -506,7 +534,9 @@ const renderExpenses = (doc, expenses) => {
 
   const byCategory = expenses.reduce((acc, e) => {
     const cat = e.category;
-    if (!acc[cat]) acc[cat] = { total: 0, count: 0 };
+    if (!acc[cat]) {
+      acc[cat] = { total: 0, count: 0 };
+    }
     acc[cat].total += toNumber(e.amount);
     acc[cat].count += 1;
     return acc;

@@ -45,10 +45,7 @@ const uploadAnimalPhoto = multer({
 
 const documentUploader = multer({
   storage: buildStorage(DOCUMENTS_DIR),
-  fileFilter: buildFileFilter(
-    DOCUMENT_TYPES,
-    'Solo se aceptan imágenes (JPEG, PNG, WebP) y PDFs'
-  ),
+  fileFilter: buildFileFilter(DOCUMENT_TYPES, 'Solo se aceptan imágenes (JPEG, PNG, WebP) y PDFs'),
   limits: { fileSize: MAX_SIZE },
 });
 

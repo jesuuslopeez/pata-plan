@@ -34,10 +34,7 @@ const getAccessibleGroupIds = async (userId) => {
 };
 
 const getEditableGroupIds = async (userId) => {
-  const [owned, editor] = await Promise.all([
-    getOwnedGroupIds(userId),
-    getEditorGroupIds(userId),
-  ]);
+  const [owned, editor] = await Promise.all([getOwnedGroupIds(userId), getEditorGroupIds(userId)]);
   return [...new Set([...owned, ...editor])];
 };
 

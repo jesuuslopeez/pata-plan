@@ -163,7 +163,9 @@ const sendDigest = async ({ to, subject, html, text }) => {
 };
 
 const sendUpcomingEventEmail = async ({ to, name, events }) => {
-  if (!events.length) return null;
+  if (!events.length) {
+    return null;
+  }
   const intro = `Tienes ${events.length} evento${events.length > 1 ? 's' : ''} programado${events.length > 1 ? 's' : ''} para dentro de 3 días.`;
   const text =
     `Hola ${name},\n\n${intro}\n\n` +
@@ -190,13 +192,13 @@ const sendUpcomingEventEmail = async ({ to, name, events }) => {
 };
 
 const sendDueTodayEmail = async ({ to, name, events }) => {
-  if (!events.length) return null;
+  if (!events.length) {
+    return null;
+  }
   const intro = `Hoy te toca atender ${events.length} evento${events.length > 1 ? 's' : ''} sanitario${events.length > 1 ? 's' : ''}.`;
   const text =
     `Hola ${name},\n\n${intro}\n\n` +
-    events
-      .map((e) => `- ${e.animal?.name}: ${e.eventType?.name}`)
-      .join('\n') +
+    events.map((e) => `- ${e.animal?.name}: ${e.eventType?.name}`).join('\n') +
     `\n\nEntra en PataPlan para marcarlos como realizados cuando los hagas.`;
   const html = `
     <div style="font-family:Arial,sans-serif;color:#1E1E1D;padding:1rem;max-width:560px;">
@@ -222,7 +224,9 @@ const daysOverdue = (event, now) => {
 };
 
 const sendOverdueEventEmail = async ({ to, name, events }) => {
-  if (!events.length) return null;
+  if (!events.length) {
+    return null;
+  }
   const now = new Date();
   const intro = `Tienes ${events.length} evento${events.length > 1 ? 's' : ''} sanitario${events.length > 1 ? ' vencidos' : ' vencido'} pendiente${events.length > 1 ? 's' : ''} de atender.`;
   const text =

@@ -4,12 +4,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    restart: unless-stopped
 
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
-    command: npm start
     depends_on:
       db:
         condition: service_healthy
@@ -22,16 +22,37 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN}
       UPLOAD_MAX_SIZE_MB: ${UPLOAD_MAX_SIZE_MB:-10}
       UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      VERIFY_URL_BASE: ${VERIFY_URL_BASE}
+      RESET_URL_BASE: ${RESET_URL_BASE}
+      NOTIFICATIONS_ENABLED: ${NOTIFICATIONS_ENABLED:-true}
+      NOTIFICATIONS_CRON: ${NOTIFICATIONS_CRON:-0 9 * * *}
+      NOTIFICATIONS_TIMEZONE: ${NOTIFICATIONS_TIMEZONE:-Europe/Madrid}
+      NOTIFICATIONS_TRIGGER_TOKEN: ${NOTIFICATIONS_TRIGGER_TOKEN}
+    volumes:
+      - pataplan-uploads:/app/uploads
     networks:
       - pataplan-network
+    restart: unless-stopped
 
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
     depends_on:
       - server
     networks:
       - pataplan-network
+    restart: unless-stopped
+
+volumes:
+  pataplan-uploads:

@@ -1,7 +1,13 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
 
-const VALID_CATEGORIES = ['VACCINE', 'DEWORMING_INTERNAL', 'DEWORMING_EXTERNAL', 'TREATMENT', 'CHECKUP'];
+const VALID_CATEGORIES = [
+  'VACCINE',
+  'DEWORMING_INTERNAL',
+  'DEWORMING_EXTERNAL',
+  'TREATMENT',
+  'CHECKUP',
+];
 
 const getAll = async (req, res, next) => {
   try {

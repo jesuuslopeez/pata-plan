@@ -40,7 +40,9 @@ const mockPrisma = {
     create: jest.fn(),
   },
   $disconnect: jest.fn(),
-  $transaction: jest.fn(async (cb) => (typeof cb === 'function' ? cb(mockPrisma) : Promise.all(cb))),
+  $transaction: jest.fn(async (cb) =>
+    typeof cb === 'function' ? cb(mockPrisma) : Promise.all(cb)
+  ),
 };
 
 module.exports = mockPrisma;

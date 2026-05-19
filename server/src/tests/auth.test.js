@@ -181,18 +181,14 @@ describe('POST /api/auth/login', () => {
   });
 
   it('should return 400 if email is missing', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ password: 'password123' });
+    const res = await request(app).post('/api/auth/login').send({ password: 'password123' });
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/email/i);
   });
 
   it('should return 400 if password is missing', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'test@pataplan.com' });
+    const res = await request(app).post('/api/auth/login').send({ email: 'test@pataplan.com' });
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/password/i);
@@ -212,9 +208,7 @@ describe('GET /api/auth/me', () => {
     prisma.user.findUnique.mockResolvedValue(SAFE_USER);
     const token = getToken();
 
-    const res = await request(app)
-      .get('/api/auth/me')
-      .set('Authorization', `Bearer ${token}`);
+    const res = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     expect(res.body.user).toBeDefined();
@@ -240,11 +234,9 @@ describe('GET /api/auth/me', () => {
   });
 
   it('should return 401 with expired token', async () => {
-    const expiredToken = jwt.sign(
-      { userId: 1, role: 'ADMIN' },
-      process.env.JWT_SECRET,
-      { expiresIn: '0s' }
-    );
+    const expiredToken = jwt.sign({ userId: 1, role: 'ADMIN' }, process.env.JWT_SECRET, {
+      expiresIn: '0s',
+    });
 
     const res = await request(app)
       .get('/api/auth/me')

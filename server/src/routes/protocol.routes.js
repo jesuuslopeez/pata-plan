@@ -1,7 +1,14 @@
 const { Router } = require('express');
 const {
-  getAll, getById, create, update, remove,
-  addStep, updateStep, removeStep, reorderSteps,
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+  addStep,
+  updateStep,
+  removeStep,
+  reorderSteps,
 } = require('../controllers/protocol.controller');
 const { authorize } = require('../middlewares/roles');
 
