@@ -18,7 +18,8 @@ jobs:
           script: |
             set -e
             cd /var/www/pata-plan
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             if [ ! -f .env ]; then
               echo "ERROR: .env file not found. Deployment aborted."
               exit 1
