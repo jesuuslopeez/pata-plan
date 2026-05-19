@@ -398,7 +398,7 @@ const computeAnomaly = (newValue, recentValues) => {
 };
 ```
 
-Por debajo de tres registros previos no se evalúa: aún no hay suficiente historial para considerar nada anormal. A partir de tres, se calcula la media y la desviación porcentual del nuevo valor respecto a esa media. Si supera el 10% en valor absoluto (subida o bajada), se marca como anomalía.
+Por debajo de dos registros previos no se evalúa: aún no hay suficiente historial para considerar nada anormal. A partir de dos, se calcula la media y la desviación porcentual del nuevo valor respecto a esa media. Si supera el 10% en valor absoluto (subida o bajada), se marca como anomalía.
 
 ```javascript
 const recentRecords = await prisma.weightRecord.findMany({
