@@ -110,9 +110,7 @@ const getAlerts = async (userId, limit = 20) => {
     const severityFactor = calcSeverityFactor(event.eventType);
     const animalMultiplier = calcAnimalMultiplier(event.animal, now);
 
-    const score = parseFloat(
-      ((daysOverdueFactor + severityFactor) * animalMultiplier).toFixed(1)
-    );
+    const score = parseFloat(((daysOverdueFactor + severityFactor) * animalMultiplier).toFixed(1));
 
     const daysOverdue = diffDays(now, new Date(event.scheduledDate));
 

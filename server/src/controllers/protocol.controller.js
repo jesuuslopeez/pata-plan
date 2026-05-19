@@ -90,4 +90,14 @@ const reorderSteps = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, getById, create, update, remove, addStep, updateStep, removeStep, reorderSteps };
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+  addStep,
+  updateStep,
+  removeStep,
+  reorderSteps,
+};

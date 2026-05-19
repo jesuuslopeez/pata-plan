@@ -353,4 +353,14 @@ const reorderSteps = async (userId, protocolId, stepIds) => {
   return steps;
 };
 
-module.exports = { getAll, getById, create, update, remove, addStep, updateStep, removeStep, reorderSteps };
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  remove,
+  addStep,
+  updateStep,
+  removeStep,
+  reorderSteps,
+};

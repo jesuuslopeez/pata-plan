@@ -1,9 +1,6 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
-const {
-  getAccessibleGroupIds,
-  getEditableGroupIds,
-} = require('../utils/groupAccess');
+const { getAccessibleGroupIds, getEditableGroupIds } = require('../utils/groupAccess');
 
 const VISIT_INCLUDE = {
   documents: true,
@@ -213,13 +210,27 @@ const update = async (userId, visitId, data) => {
 
   const visit = await prisma.$transaction(async (tx) => {
     const updateData = {};
-    if (validated.visitDate !== undefined) updateData.visitDate = validated.visitDate;
-    if (validated.reason !== undefined) updateData.reason = validated.reason;
-    if (validated.diagnosis !== undefined) updateData.diagnosis = validated.diagnosis;
-    if (validated.treatment !== undefined) updateData.treatment = validated.treatment;
-    if (validated.vetName !== undefined) updateData.vetName = validated.vetName;
-    if (validated.observations !== undefined) updateData.observations = validated.observations;
-    if (validated.cost !== undefined) updateData.cost = validated.cost;
+    if (validated.visitDate !== undefined) {
+      updateData.visitDate = validated.visitDate;
+    }
+    if (validated.reason !== undefined) {
+      updateData.reason = validated.reason;
+    }
+    if (validated.diagnosis !== undefined) {
+      updateData.diagnosis = validated.diagnosis;
+    }
+    if (validated.treatment !== undefined) {
+      updateData.treatment = validated.treatment;
+    }
+    if (validated.vetName !== undefined) {
+      updateData.vetName = validated.vetName;
+    }
+    if (validated.observations !== undefined) {
+      updateData.observations = validated.observations;
+    }
+    if (validated.cost !== undefined) {
+      updateData.cost = validated.cost;
+    }
 
     if (Object.keys(updateData).length > 0) {
       await tx.vetVisit.update({

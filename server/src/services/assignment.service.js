@@ -1,9 +1,6 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
-const {
-  getAccessibleGroupIds,
-  getEditableGroupIds,
-} = require('../utils/groupAccess');
+const { getAccessibleGroupIds, getEditableGroupIds } = require('../utils/groupAccess');
 
 const verifyAnimalAccess = async (animalId, userId) => {
   const groupIds = await getAccessibleGroupIds(userId);

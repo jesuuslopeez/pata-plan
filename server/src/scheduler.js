@@ -14,7 +14,9 @@ const startScheduler = () => {
 
   const expression = process.env.NOTIFICATIONS_CRON || DEFAULT_CRON;
   if (!cron.validate(expression)) {
-    console.error(`[scheduler] invalid cron expression "${expression}", falling back to "${DEFAULT_CRON}"`);
+    console.error(
+      `[scheduler] invalid cron expression "${expression}", falling back to "${DEFAULT_CRON}"`
+    );
   }
   const tz = process.env.NOTIFICATIONS_TIMEZONE || 'Europe/Madrid';
 

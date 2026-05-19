@@ -12,5 +12,13 @@
     "no-console": "warn",
     "eqeqeq": "error",
     "curly": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/tests/**/*.js", "src/utils/__mocks__/**/*.js"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }

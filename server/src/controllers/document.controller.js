@@ -23,12 +23,7 @@ const create = async (req, res, next) => {
 const createMany = async (req, res, next) => {
   try {
     const animalId = parseInt(req.params.id, 10);
-    const documents = await documentService.createMany(
-      req.user.id,
-      animalId,
-      req.body,
-      req.files
-    );
+    const documents = await documentService.createMany(req.user.id, animalId, req.body, req.files);
     res.status(201).json({ documents });
   } catch (err) {
     next(err);

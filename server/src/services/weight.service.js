@@ -1,9 +1,6 @@
 const prisma = require('../utils/prisma');
 const { ApiError } = require('../utils/ApiError');
-const {
-  getAccessibleGroupIds,
-  getEditableGroupIds,
-} = require('../utils/groupAccess');
+const { getAccessibleGroupIds, getEditableGroupIds } = require('../utils/groupAccess');
 
 const verifyAnimalAccess = async (animalId, userId) => {
   const groupIds = await getAccessibleGroupIds(userId);
@@ -121,9 +118,7 @@ const create = async (userId, animalId, { valueKg, recordedAt }) => {
   const recentValues = recentRecords.map((r) => parseFloat(r.valueKg));
 
   const { isAnomaly, mean, deviationPercent } = computeAnomaly(value, recentValues);
-  const anomalyMessage = isAnomaly
-    ? buildAnomalyMessage(value, mean, deviationPercent)
-    : null;
+  const anomalyMessage = isAnomaly ? buildAnomalyMessage(value, mean, deviationPercent) : null;
 
   const weight = await prisma.$transaction(async (tx) => {
     const created = await tx.weightRecord.create({

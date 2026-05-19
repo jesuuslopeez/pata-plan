@@ -1,5 +1,9 @@
 const { Router } = require('express');
-const { assignProtocol, getAssignments, cancelAssignment } = require('../controllers/assignment.controller');
+const {
+  assignProtocol,
+  getAssignments,
+  cancelAssignment,
+} = require('../controllers/assignment.controller');
 const { authorize } = require('../middlewares/roles');
 
 const router = Router({ mergeParams: true });

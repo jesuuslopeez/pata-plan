@@ -107,7 +107,10 @@ const remove = async (userId, groupId) => {
   }
 
   if (group._count.animals > 0) {
-    throw new ApiError(400, 'No se puede eliminar un grupo con animales. Mueve o elimina los animales primero.');
+    throw new ApiError(
+      400,
+      'No se puede eliminar un grupo con animales. Mueve o elimina los animales primero.'
+    );
   }
 
   await prisma.group.delete({ where: { id: groupId } });
