@@ -176,21 +176,27 @@ export function Expenses() {
             ))}
           </select>
 
-          <input
-            type="date"
-            className="expenses__filter"
-            value={filters.dateFrom}
-            onChange={handleFilter('dateFrom')}
-            aria-label="Fecha desde"
-          />
+          <label className="expenses__filter-date">
+            <span className="expenses__filter-date-label">Desde</span>
+            <input
+              type="date"
+              className="expenses__filter expenses__filter--date"
+              value={filters.dateFrom}
+              onChange={handleFilter('dateFrom')}
+              aria-label="Fecha desde"
+            />
+          </label>
 
-          <input
-            type="date"
-            className="expenses__filter"
-            value={filters.dateTo}
-            onChange={handleFilter('dateTo')}
-            aria-label="Fecha hasta"
-          />
+          <label className="expenses__filter-date">
+            <span className="expenses__filter-date-label">Hasta</span>
+            <input
+              type="date"
+              className="expenses__filter expenses__filter--date"
+              value={filters.dateTo}
+              onChange={handleFilter('dateTo')}
+              aria-label="Fecha hasta"
+            />
+          </label>
         </div>
 
         {error && <p className="expenses__error">{error}</p>}
