@@ -145,7 +145,7 @@ ENTRADA: userId, limit
 ENTRADA: animalId, nuevo valor de peso
 
 1. Cargar los últimos N (p.ej. 10) WeightRecord del animal, orden DESC.
-2. SI hay menos de 3 registros previos: isAnomaly = false. Saltar al paso 5.
+2. SI hay menos de 2 registros previos: isAnomaly = false. Saltar al paso 5.
 3. Calcular media (m) y desviación típica (s) de los valores previos.
 4. zScore = |newValue - m| / s
    isAnomaly = (zScore >= 2)  // ~95% intervalo

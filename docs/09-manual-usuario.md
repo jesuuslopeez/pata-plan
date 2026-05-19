@@ -264,7 +264,7 @@ En la misma pestaña ves la **evolución del peso** en una gráfica, junto con d
 
 ### 9.11.3. Anomalías de peso
 
-PataPlan vigila los registros de peso por ti. Si tras tres o más medidas detecta una **variación importante** (más del 10% respecto a la media reciente del animal), genera automáticamente:
+PataPlan vigila los registros de peso por ti. Si tras dos o más medidas previas detecta una **variación importante** (más del 10% respecto a la media reciente del animal), genera automáticamente:
 
 - Una **marca de anomalía** en ese registro (se muestra en rojo en la gráfica).
 - Un **evento de revisión** pendiente en el calendario, para que lo evalúes.
