@@ -15,6 +15,7 @@ import { Protocols } from '../pages/Protocols/Protocols';
 import { ProtocolEditor } from '../pages/ProtocolEditor/ProtocolEditor';
 import { Expenses } from '../pages/Expenses/Expenses';
 import { Settings } from '../pages/Settings/Settings';
+import { NotFound } from '../pages/NotFound/NotFound';
 
 function ProtectedLayout() {
   return (
@@ -45,6 +46,7 @@ export function AppRouter() {
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

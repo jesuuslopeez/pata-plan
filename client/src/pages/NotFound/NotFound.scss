@@ -1,0 +1,122 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.not-found {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $primary-50 0%, $neutral-white 60%, $amber-50 100%);
+  @include flex-center;
+  padding: $spacing-8 $spacing-4;
+
+  &__content {
+    text-align: center;
+    max-width: 32rem;
+  }
+
+  &__code {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-3;
+    margin-bottom: $spacing-6;
+    line-height: 1;
+  }
+
+  &__digit {
+    font-size: 10rem;
+    font-weight: 800;
+    color: $primary-800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+
+    @include mobile {
+      font-size: 6rem;
+    }
+  }
+
+  &__paw {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 9rem;
+    height: 9rem;
+    background-color: $primary-600;
+    border-radius: 50%;
+    color: $neutral-white;
+    box-shadow: 0 1rem 2rem rgba($primary-900, 0.25);
+    animation: paw-bounce 2.4s ease-in-out infinite;
+
+    svg {
+      width: 5.5rem;
+      height: 5.5rem;
+      stroke-width: 1.75;
+    }
+
+    @include mobile {
+      width: 5.5rem;
+      height: 5.5rem;
+
+      svg {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xxl;
+    font-weight: 700;
+    color: $neutral-900;
+    margin-bottom: $spacing-3;
+
+    @include mobile {
+      font-size: $font-size-xl;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $neutral-600;
+    line-height: 1.5;
+    margin-bottom: $spacing-8;
+  }
+
+  &__button {
+    display: inline-block;
+    background-color: $primary-600;
+    color: $neutral-white;
+    padding: $spacing-3 $spacing-8;
+    border-radius: $radius-lg;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 0.2s,
+      transform 0.2s;
+
+    &:hover {
+      background-color: $primary-400;
+      transform: translateY(-2px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $primary-400;
+      outline-offset: 3px;
+    }
+  }
+}
+
+@keyframes paw-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-0.75rem) rotate(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .not-found__paw {
+    animation: none;
+  }
+}
