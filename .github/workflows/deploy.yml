@@ -31,5 +31,5 @@ jobs:
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
             docker image prune -f
             sleep 10
-            curl -fsS http://localhost:8080/ > /dev/null || (echo "Healthcheck failed"; exit 1)
+            curl -fsS http://localhost:8085/ > /dev/null || (echo "Healthcheck failed"; exit 1)
             echo "Deploy OK"
