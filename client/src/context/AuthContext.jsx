@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
       const res = await loginRequest(email, password, rememberMe);
       setToken(res.data.token, { persist: rememberMe });
       setUser(res.data.user);
-      navigate('/');
+      navigate('/dashboard');
     },
     [navigate]
   );
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
       if (res.data.token) {
         setToken(res.data.token);
         setUser(res.data.user);
-        navigate('/');
+        navigate('/dashboard');
       }
       return res.data;
     },
@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
     (userData, token) => {
       setToken(token);
       setUser(userData);
-      navigate('/');
+      navigate('/dashboard');
     },
     [navigate]
   );

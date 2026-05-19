@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { PawPrint, Upload, X } from 'lucide-react';
+import { PawPrint, Upload, X, FolderPlus, Sparkles } from 'lucide-react';
 import { createAnimal, updateAnimal } from '../../services/animal.service';
+import { createGroup } from '../../services/group.service';
 import { resolveAssetUrl } from '../../utils/assetUrl';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import './AddAnimalModal.scss';
@@ -30,6 +31,8 @@ const EMPTY_FORM = {
 
 const toDateInput = (iso) => (iso ? new Date(iso).toISOString().slice(0, 10) : '');
 
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
 const fromInitial = (initial) => ({
   name: initial.name ?? '',
   species: initial.species ?? '',
@@ -41,17 +44,22 @@ const fromInitial = (initial) => ({
   notes: initial.notes ?? '',
 });
 
-export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
+export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGroupCreated }) {
   const isEdit = !!initial;
   const [form, setForm] = useState(EMPTY_FORM);
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [removeExistingPhoto, setRemoveExistingPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [groupError, setGroupError] = useState(null);
 
   useEscapeKey(onClose, open);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+
+  const noGroups = !isEdit && (!groups || groups.length === 0);
 
   useEffect(() => {
     if (!open) return;
@@ -60,6 +68,8 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
     setPhotoPreview(initial?.photoUrl ? resolveAssetUrl(initial.photoUrl) : null);
     setRemoveExistingPhoto(false);
     setError(null);
+    setNewGroupName('');
+    setGroupError(null);
   }, [open, initial]);
 
   useEffect(() => {
@@ -94,11 +104,38 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const handleCreateGroup = async () => {
+    const trimmed = newGroupName.trim();
+    if (!trimmed) {
+      setGroupError('El nombre del grupo es obligatorio');
+      return;
+    }
+    setCreatingGroup(true);
+    setGroupError(null);
+    try {
+      const res = await createGroup(trimmed);
+      const created = res.data?.group;
+      setNewGroupName('');
+      if (created) {
+        setForm((prev) => ({ ...prev, groupId: String(created.id) }));
+        onGroupCreated?.(created);
+      }
+    } catch (err) {
+      setGroupError(err?.response?.data?.error || 'No se ha podido crear el grupo');
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
   const isValid = form.name.trim() && form.species && form.groupId;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return;
+    if (form.dateOfBirth && form.dateOfBirth > todayIso()) {
+      setError('La fecha de nacimiento no puede ser futura');
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -257,9 +294,10 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
               value={form.groupId}
               onChange={handleChange('groupId')}
               required
+              disabled={noGroups}
             >
               <option value="" disabled>
-                Selecciona un grupo
+                {noGroups ? 'Crea tu primer grupo abajo' : 'Selecciona un grupo'}
               </option>
               {groups?.map((g) => (
                 <option key={g.id} value={g.id}>
@@ -267,6 +305,54 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
                 </option>
               ))}
             </select>
+
+            {noGroups && (
+              <div className="add-animal-modal__group-hint" role="region" aria-label="Crear grupo">
+                <div className="add-animal-modal__group-hint-head">
+                  <span className="add-animal-modal__group-hint-icon" aria-hidden="true">
+                    <Sparkles size={18} />
+                  </span>
+                  <div>
+                    <p className="add-animal-modal__group-hint-title">
+                      Empieza creando un grupo
+                    </p>
+                    <p className="add-animal-modal__group-hint-body">
+                      Los grupos organizan a tus animales (ej. <em>Casa</em>, <em>Refugio</em>).
+                      Necesitas al menos uno para añadir animales.
+                    </p>
+                  </div>
+                </div>
+                <div className="add-animal-modal__group-hint-form">
+                  <input
+                    type="text"
+                    className="add-animal-modal__input"
+                    placeholder="Nombre del grupo (ej. Casa)"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleCreateGroup();
+                      }
+                    }}
+                    maxLength={50}
+                    disabled={creatingGroup}
+                  />
+                  <button
+                    type="button"
+                    className="add-animal-modal__btn add-animal-modal__btn--primary"
+                    onClick={handleCreateGroup}
+                    disabled={creatingGroup || !newGroupName.trim()}
+                  >
+                    <FolderPlus size={16} />
+                    <span>{creatingGroup ? 'Creando…' : 'Crear grupo'}</span>
+                  </button>
+                </div>
+                {groupError && (
+                  <p className="add-animal-modal__group-hint-error">{groupError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="add-animal-modal__row">
@@ -293,6 +379,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved }) {
                 className="add-animal-modal__input"
                 value={form.dateOfBirth}
                 onChange={handleChange('dateOfBirth')}
+                max={todayIso()}
               />
             </div>
           </div>

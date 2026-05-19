@@ -142,7 +142,14 @@ const create = async (userId, data, file) => {
     animalData.breed = data.breed.trim();
   }
   if (data.dateOfBirth) {
-    animalData.dateOfBirth = new Date(data.dateOfBirth);
+    const dob = new Date(data.dateOfBirth);
+    if (isNaN(dob.getTime())) {
+      throw new ApiError(400, 'La fecha de nacimiento no es válida');
+    }
+    if (dob.getTime() > Date.now()) {
+      throw new ApiError(400, 'La fecha de nacimiento no puede ser futura');
+    }
+    animalData.dateOfBirth = dob;
   }
   if (data.microchip) {
     animalData.microchip = data.microchip.trim();
@@ -190,7 +197,18 @@ const update = async (userId, animalId, data, file) => {
     updateData.breed = data.breed.trim() || null;
   }
   if (data.dateOfBirth !== undefined) {
-    updateData.dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+    if (data.dateOfBirth) {
+      const dob = new Date(data.dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        throw new ApiError(400, 'La fecha de nacimiento no es válida');
+      }
+      if (dob.getTime() > Date.now()) {
+        throw new ApiError(400, 'La fecha de nacimiento no puede ser futura');
+      }
+      updateData.dateOfBirth = dob;
+    } else {
+      updateData.dateOfBirth = null;
+    }
   }
   if (data.microchip !== undefined) {
     updateData.microchip = data.microchip.trim() || null;

@@ -15,7 +15,7 @@ import { NavItem } from './NavItem';
 import './Sidebar.scss';
 
 const NAV_ITEMS = [
-  { to: '/', icon: LayoutDashboard, label: 'Panel' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Panel' },
   { to: '/animals', icon: PawPrint, label: 'Animales' },
   { to: '/calendar', icon: Calendar, label: 'Calendario' },
   { to: '/protocols', icon: ClipboardList, label: 'Protocolos' },

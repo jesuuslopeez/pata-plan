@@ -15,12 +15,14 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 // Security headers
 app.use(helmet());
 
-// CORS
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  })
-);
+// CORS — allow any localhost origin in development for flexibility with Vite port fallbacks
+const corsOrigin = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
+  : (origin, cb) => {
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) return cb(null, true);
+      return cb(new Error('Not allowed by CORS'));
+    };
+app.use(cors({ origin: corsOrigin }));
 
 // Request logging
 app.use(morgan('dev'));

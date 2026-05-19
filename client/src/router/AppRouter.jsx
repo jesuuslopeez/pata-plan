@@ -1,7 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
 import { MainLayout } from '../layouts/MainLayout';
+import { Landing } from '../pages/Landing/Landing';
 import { Login } from '../pages/Login/Login';
 import { Register } from '../pages/Register/Register';
 import { VerifyEmail } from '../pages/VerifyEmail/VerifyEmail';
@@ -25,18 +27,32 @@ function ProtectedLayout() {
   );
 }
 
+function HomeGate() {
+  const { isAuthenticated, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-screen__spinner" />
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Landing />;
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<HomeGate />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route element={<ProtectedLayout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/animals" element={<Animals />} />
             <Route path="/animals/:id" element={<AnimalProfile />} />
             <Route path="/calendar" element={<Calendar />} />
