@@ -93,10 +93,13 @@
 
     @include mobile {
       width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
 
       .animal-profile__btn {
-        flex: 1;
         justify-content: center;
+        width: 100%;
       }
     }
   }
@@ -113,6 +116,10 @@
     cursor: pointer;
     border: 0.03125rem solid transparent;
     transition: background-color 0.2s, border-color 0.2s, opacity 0.2s;
+
+    svg {
+      flex-shrink: 0;
+    }
 
     &:disabled {
       opacity: 0.6;

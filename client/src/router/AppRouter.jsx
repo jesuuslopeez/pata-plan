@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
 import { useAuth } from '../hooks/useAuth';
 import { ProtectedRoute } from '../components/ProtectedRoute/ProtectedRoute';
@@ -27,6 +28,14 @@ function ProtectedLayout() {
   );
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function HomeGate() {
   const { isAuthenticated, loading } = useAuth();
   if (loading) {
@@ -44,6 +53,7 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<HomeGate />} />
           <Route path="/login" element={<Login />} />

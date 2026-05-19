@@ -115,11 +115,20 @@ export function Header({ onMenuClick }) {
       </div>
 
       <div className="header__actions">
-        <div className="header__badge">
+        <div
+          className="header__badge"
+          title={`${counts.overdue} vencidos · ${counts.pending} pendientes`}
+        >
           <AlertTriangle className="header__badge-icon" size={16} />
-          <span className="header__badge-overdue">{counts.overdue} vencidos</span>
+          <span className="header__badge-overdue">
+            {counts.overdue}
+            <span className="header__badge-label"> vencidos</span>
+          </span>
           <span className="header__badge-separator">|</span>
-          <span className="header__badge-pending">{counts.pending} pendientes</span>
+          <span className="header__badge-pending">
+            {counts.pending}
+            <span className="header__badge-label"> pendientes</span>
+          </span>
         </div>
         <div className="header__user-menu" ref={menuRef}>
           <button

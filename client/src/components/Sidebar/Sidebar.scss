@@ -3,7 +3,8 @@
 
 .sidebar {
   width: $sidebar-width;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   background-color: $primary-800;
   @include flex-column;
   flex-shrink: 0;
@@ -12,6 +13,7 @@
   left: 0;
   bottom: 0;
   z-index: 100;
+  overflow-y: auto;
 
   @include mobile {
     transform: translateX(-100%);
@@ -37,6 +39,10 @@
   &__header {
     @include flex-between;
     padding: $spacing-5 $spacing-4;
+
+    @include mobile {
+      padding: $spacing-4 $spacing-4;
+    }
   }
 
   &__brand {
@@ -75,6 +81,23 @@
     gap: 0.125rem;
     padding: 0 0.625rem;
     margin-bottom: $spacing-5;
+
+    @include mobile {
+      margin-bottom: $spacing-2;
+    }
+  }
+
+  &__nav {
+    @include mobile {
+      gap: 0;
+    }
+  }
+
+  &__item {
+    @include mobile {
+      height: 2.5rem;
+      padding: 0.5rem 0.75rem;
+    }
   }
 
   &__item {
