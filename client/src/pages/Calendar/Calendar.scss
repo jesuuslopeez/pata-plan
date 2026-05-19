@@ -12,7 +12,8 @@
   &__title {
     font-size: $font-size-xl;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
+    letter-spacing: -0.01em;
   }
 
   &__controls {
@@ -44,12 +45,15 @@
   }
 
   &__month-label {
+    font-family: $font-display;
     min-width: 9rem;
     text-align: center;
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
     text-transform: capitalize;
+    letter-spacing: -0.01em;
+    font-variation-settings: 'SOFT' 60;
   }
 
   &__today-btn {

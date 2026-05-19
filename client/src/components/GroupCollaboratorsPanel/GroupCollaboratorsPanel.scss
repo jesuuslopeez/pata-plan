@@ -1,4 +1,4 @@
-@use 'sass:color';
+﻿@use 'sass:color';
 
 $primary-600: #1a7a5c;
 $primary-400: #2a9d78;
@@ -13,9 +13,9 @@ $white: #fafaf8;
 
 .group-collaborators {
   background: $white;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   padding: 1.5rem;
-  border: 1px solid $gray-100;
+  border: 0.0625rem solid $gray-100;
 
   &__title {
     font-size: 1.125rem;
@@ -45,8 +45,8 @@ $white: #fafaf8;
   }
 
   &__row {
-    border: 1px solid $gray-100;
-    border-radius: 10px;
+    border: 0.0625rem solid $gray-100;
+    border-radius: 0.625rem;
     overflow: hidden;
   }
 
@@ -96,8 +96,8 @@ $white: #fafaf8;
   &__code-input {
     flex: 1;
     background: $gray-50;
-    border: 1px solid $gray-100;
-    border-radius: 8px;
+    border: 0.0625rem solid $gray-100;
+    border-radius: 0.5rem;
     padding: 0.5rem 0.75rem;
     font-family: 'Courier New', monospace;
     font-size: 0.95rem;
@@ -113,11 +113,11 @@ $white: #fafaf8;
 
   &__icon-btn {
     background: $white;
-    border: 1px solid $gray-100;
+    border: 0.0625rem solid $gray-100;
     color: $gray-600;
-    border-radius: 8px;
-    width: 32px;
-    height: 32px;
+    border-radius: 0.5rem;
+    width: 2rem;
+    height: 2rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -155,8 +155,8 @@ $white: #fafaf8;
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
-    border: 1px solid $gray-100;
-    border-radius: 8px;
+    border: 0.0625rem solid $gray-100;
+    border-radius: 0.5rem;
     background: $white;
   }
 
@@ -186,8 +186,8 @@ $white: #fafaf8;
 
   &__role {
     background: $white;
-    border: 1px solid $gray-100;
-    border-radius: 8px;
+    border: 0.0625rem solid $gray-100;
+    border-radius: 0.5rem;
     padding: 0.4rem 0.6rem;
     font-size: 0.85rem;
     color: $gray-900;

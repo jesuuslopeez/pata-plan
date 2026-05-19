@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .documents-grid {
@@ -83,15 +83,20 @@
 .document-card {
   position: relative;
   background-color: $neutral-white;
-  border: 0.03125rem solid $neutral-100;
+  border: 0.0625rem solid rgba($primary-900, 0.06);
   border-radius: $radius-lg;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
-    border-color: $neutral-300;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+    transform: translateY(-0.0625rem);
+    border-color: rgba($primary-800, 0.12);
+    box-shadow: 0 0.5rem 1rem -0.5rem rgba($primary-900, 0.18);
 
     .document-card__actions {
       opacity: 1;

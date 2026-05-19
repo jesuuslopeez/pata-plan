@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .register {
@@ -102,7 +102,7 @@
 
   &__input {
     padding: $spacing-3 $spacing-4;
-    border: 1px solid $neutral-100;
+    border: 0.0625rem solid $neutral-100;
     border-radius: $radius-md;
     font-size: $font-size-lg;
     font-weight: 400;

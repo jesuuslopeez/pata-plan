@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 
 .weight-chart {
   --line-primary: #{$primary-600};
@@ -15,8 +15,9 @@
 
   &__empty {
     background-color: $neutral-white;
-    border: 0.03125rem solid $neutral-100;
+    border: 0.0625rem solid rgba($primary-900, 0.06);
     border-radius: $radius-lg;
+    box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
     padding: 2.5rem 1rem;
     text-align: center;
     font-size: $font-size-sm;
