@@ -45,7 +45,8 @@ export const createAnimalEvent = (animalId, data) => api.post(`/animals/${animal
 
 export const getAnimalWeights = (id) => api.get(`/animals/${id}/weights`);
 
-export const createAnimalWeight = (animalId, data) => api.post(`/animals/${animalId}/weights`, data);
+export const createAnimalWeight = (animalId, data) =>
+  api.post(`/animals/${animalId}/weights`, data);
 
 export const updateWeight = (weightId, data) => api.put(`/weights/${weightId}`, data);
 

@@ -20,8 +20,6 @@ export const createEventType = (data) => api.post('/event-types', data);
 export const assignProtocolToAnimal = (animalId, payload) =>
   api.post(`/animals/${animalId}/assign-protocol`, payload);
 
-export const getAnimalAssignments = (animalId) =>
-  api.get(`/animals/${animalId}/assignments`);
+export const getAnimalAssignments = (animalId) => api.get(`/animals/${animalId}/assignments`);
 
-export const cancelAssignment = (assignmentId) =>
-  api.patch(`/assignments/${assignmentId}/cancel`);
+export const cancelAssignment = (assignmentId) => api.patch(`/assignments/${assignmentId}/cancel`);
