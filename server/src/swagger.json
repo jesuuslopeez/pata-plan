@@ -1,12 +1,40 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.0.3",
   "info": {
     "title": "PataPlan API",
-    "version": "0.1.0",
-    "description": "API for managing pet health, vaccination schedules, and veterinary records."
+    "version": "1.0.0",
+    "description": "REST API for managing pet health, vaccination schedules, veterinary records, expense tracking and shelter operations.\n\nAll endpoints are prefixed with `/api`. Authentication uses JWT bearer tokens (obtained via `POST /api/auth/login`).",
+    "contact": {
+      "name": "Jesús López Pérez",
+      "url": "https://github.com/jesuuslopeez/pata-plan"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
   },
   "servers": [
+    { "url": "https://pataplan.yiisus.com", "description": "Production" },
     { "url": "http://localhost:3000", "description": "Development" }
+  ],
+  "tags": [
+    { "name": "Health", "description": "Server health check" },
+    { "name": "Auth", "description": "Authentication, registration, email verification and password reset" },
+    { "name": "Groups", "description": "Animal grouping (e.g. Home, Shelter)" },
+    { "name": "Animals", "description": "Animal profiles" },
+    { "name": "Weights", "description": "Weight history and anomaly detection" },
+    { "name": "Health Events", "description": "Vaccines, dewormings, treatments, checkups" },
+    { "name": "Event Types", "description": "Catalog of clinical event types" },
+    { "name": "Protocols", "description": "Reusable health protocol templates" },
+    { "name": "Protocol Steps", "description": "Steps inside a protocol" },
+    { "name": "Assignments", "description": "Assignment of protocols to animals" },
+    { "name": "Visits", "description": "Veterinary visits" },
+    { "name": "Documents", "description": "Documents attached to animals" },
+    { "name": "Expenses", "description": "Expense tracking and statistics" },
+    { "name": "Dashboard", "description": "Aggregated dashboard data" },
+    { "name": "Reports", "description": "PDF report generation" },
+    { "name": "Collaborators", "description": "Group invitations and shared access" },
+    { "name": "Dev", "description": "Development and internal endpoints" }
   ],
   "components": {
     "securitySchemes": {
@@ -16,46 +44,105 @@
         "bearerFormat": "JWT"
       }
     },
+    "parameters": {
+      "IdParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Missing or invalid JWT token",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Forbidden": {
+        "description": "Authenticated user lacks the required role or group access",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "ValidationError": {
+        "description": "Request body or query parameters failed validation",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      },
+      "Conflict": {
+        "description": "Conflict with existing resource",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
     "schemas": {
       "Error": {
         "type": "object",
-        "properties": { "error": { "type": "string" } }
+        "properties": { "error": { "type": "string", "example": "Recurso no encontrado" } }
       },
       "User": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "email": { "type": "string" },
-          "role": { "type": "string", "enum": ["ADMIN", "COLLABORATOR"] },
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Jesús López" },
+          "email": { "type": "string", "format": "email", "example": "jesus@example.com" },
+          "role": { "type": "string", "enum": ["ADMIN", "COLLABORATOR"], "example": "ADMIN" },
+          "emailVerified": { "type": "boolean", "example": true },
+          "emailNotificationsEnabled": { "type": "boolean", "example": true },
           "createdAt": { "type": "string", "format": "date-time" }
         }
       },
-      "Animal": {
+      "AuthResponse": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] },
-          "breed": { "type": "string", "nullable": true },
-          "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
-          "dateOfBirth": { "type": "string", "format": "date", "nullable": true },
-          "microchip": { "type": "string", "nullable": true },
-          "photoUrl": { "type": "string", "nullable": true },
-          "notes": { "type": "string", "nullable": true },
-          "groupId": { "type": "integer" }
+          "user": { "$ref": "#/components/schemas/User" },
+          "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIs..." }
         }
       },
       "Group": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
+          "id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Casa" },
+          "ownerId": { "type": "integer", "example": 1 },
+          "role": { "type": "string", "enum": ["OWNER", "EDITOR", "VIEWER"], "example": "OWNER" },
+          "owner": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          },
           "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
           "_count": {
             "type": "object",
-            "properties": { "animals": { "type": "integer" } }
+            "properties": { "animals": { "type": "integer", "example": 6 } }
           }
+        }
+      },
+      "Animal": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 9 },
+          "name": { "type": "string", "example": "Jimbo" },
+          "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"], "example": "CAT" },
+          "breed": { "type": "string", "nullable": true, "example": "Europeo común" },
+          "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"], "example": "MALE" },
+          "dateOfBirth": { "type": "string", "format": "date", "nullable": true, "example": "2023-04-15" },
+          "microchip": { "type": "string", "nullable": true, "example": "941000023456789" },
+          "photoUrl": { "type": "string", "nullable": true, "example": "/uploads/animals/1779135168408-114544.jpg" },
+          "notes": { "type": "string", "nullable": true },
+          "groupId": { "type": "integer", "example": 1 },
+          "group": { "$ref": "#/components/schemas/Group" },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "overdueEvents": { "type": "integer", "example": 1 },
+              "pendingEvents": { "type": "integer", "example": 0 }
+            }
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
         }
       },
       "WeightRecord": {
@@ -63,9 +150,18 @@
         "properties": {
           "id": { "type": "integer" },
           "animalId": { "type": "integer" },
-          "valueKg": { "type": "number" },
+          "valueKg": { "type": "number", "format": "float", "example": 4.20 },
           "recordedAt": { "type": "string", "format": "date-time" },
-          "isAnomaly": { "type": "boolean" }
+          "isAnomaly": { "type": "boolean", "example": false },
+          "anomalyMessage": { "type": "string", "nullable": true, "example": "Peso registrado: 4.20 kg. Media histórica: 5.10 kg. Desviación: -17.6%" }
+        }
+      },
+      "EventType": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "example": "Vacuna trivalente" },
+          "category": { "type": "string", "enum": ["VACCINE", "DEWORMING_INTERNAL", "DEWORMING_EXTERNAL", "TREATMENT", "CHECKUP"], "example": "VACCINE" }
         }
       },
       "HealthEvent": {
@@ -74,25 +170,31 @@
           "id": { "type": "integer" },
           "animalId": { "type": "integer" },
           "eventTypeId": { "type": "integer" },
+          "eventType": { "$ref": "#/components/schemas/EventType" },
           "scheduledDate": { "type": "string", "format": "date-time" },
           "completedDate": { "type": "string", "format": "date-time", "nullable": true },
-          "product": { "type": "string", "nullable": true },
-          "vetName": { "type": "string", "nullable": true },
+          "product": { "type": "string", "nullable": true, "example": "Nobivac DHPPi" },
+          "vetName": { "type": "string", "nullable": true, "example": "Clínica Veterinaria San Antón" },
           "notes": { "type": "string", "nullable": true },
-          "frequencyDays": { "type": "integer", "nullable": true },
+          "frequencyDays": { "type": "integer", "nullable": true, "example": 365 },
           "nextDueDate": { "type": "string", "format": "date-time", "nullable": true },
-          "status": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] }
+          "status": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] },
+          "severityScore": { "type": "integer", "example": 5 }
         }
       },
       "Protocol": {
         "type": "object",
         "properties": {
           "id": { "type": "integer" },
-          "name": { "type": "string" },
+          "name": { "type": "string", "example": "Gato nuevo en refugio" },
           "description": { "type": "string", "nullable": true },
           "steps": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/ProtocolStep" }
+          },
+          "_count": {
+            "type": "object",
+            "properties": { "assignments": { "type": "integer" } }
           }
         }
       },
@@ -102,29 +204,127 @@
           "id": { "type": "integer" },
           "protocolId": { "type": "integer" },
           "eventTypeId": { "type": "integer" },
-          "dayOffset": { "type": "integer" },
+          "eventType": { "$ref": "#/components/schemas/EventType" },
+          "dayOffset": { "type": "integer", "example": 0, "description": "Days from protocol assignment startDate" },
           "product": { "type": "string", "nullable": true },
           "notes": { "type": "string", "nullable": true },
           "sortOrder": { "type": "integer" }
         }
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "protocolId": { "type": "integer" },
+          "protocol": { "$ref": "#/components/schemas/Protocol" },
+          "startDate": { "type": "string", "format": "date-time" },
+          "status": { "type": "string", "enum": ["ACTIVE", "CANCELLED", "COMPLETED"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "VetVisit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "visitDate": { "type": "string", "format": "date" },
+          "reason": { "type": "string", "example": "Revisión anual" },
+          "diagnosis": { "type": "string", "nullable": true },
+          "treatment": { "type": "string", "nullable": true },
+          "observations": { "type": "string", "nullable": true },
+          "vetName": { "type": "string", "nullable": true },
+          "cost": { "type": "number", "format": "float", "nullable": true, "example": 45.50 }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "vetVisitId": { "type": "integer", "nullable": true },
+          "filename": { "type": "string", "example": "cartilla-jimbo.pdf" },
+          "fileUrl": { "type": "string", "example": "/uploads/documents/1779-cartilla.pdf" },
+          "fileType": { "type": "string", "example": "application/pdf" },
+          "description": { "type": "string", "nullable": true },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Expense": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "animalId": { "type": "integer" },
+          "amount": { "type": "number", "format": "float", "example": 35.00 },
+          "category": { "type": "string", "enum": ["VACCINE", "DEWORMING", "SURGERY", "MEDICATION", "FOOD", "OTHER"] },
+          "description": { "type": "string", "nullable": true },
+          "expenseDate": { "type": "string", "format": "date" },
+          "vetVisitId": { "type": "integer", "nullable": true },
+          "animal": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "species": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Collaborator": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "userId": { "type": "integer" },
+          "groupId": { "type": "integer" },
+          "role": { "type": "string", "enum": ["EDITOR", "VIEWER"] },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          }
+        }
+      },
+      "InviteCode": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string", "example": "ABCD1234" },
+          "expiresAt": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "DashboardSummary": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "object",
+            "properties": {
+              "totalAnimals": { "type": "integer" },
+              "overdueEventsCount": { "type": "integer" },
+              "pendingEventsCount": { "type": "integer" },
+              "monthlySpend": { "type": "number" }
+            }
+          },
+          "topAlerts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/HealthEvent" }
+          },
+          "upcomingEvents": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/HealthEvent" }
+          }
+        }
       }
     }
   },
-  "tags": [
-    { "name": "Health", "description": "Server health check" },
-    { "name": "Auth", "description": "Authentication and user management" },
-    { "name": "Groups", "description": "Animal groups management" },
-    { "name": "Animals", "description": "Animal profiles management" },
-    { "name": "Weights", "description": "Weight history and anomaly detection" },
-    { "name": "Health Events", "description": "Vaccination, deworming, and health events" },
-    { "name": "Protocols", "description": "Health protocol templates" },
-    { "name": "Protocol Steps", "description": "Individual step management within protocols" }
-  ],
+  "security": [ { "bearerAuth": [] } ],
   "paths": {
     "/": {
       "get": {
         "tags": ["Health"],
         "summary": "Health check",
+        "security": [],
         "responses": {
           "200": {
             "description": "Server is running",
@@ -143,10 +343,12 @@
         }
       }
     },
+
     "/api/auth/register": {
       "post": {
         "tags": ["Auth"],
         "summary": "Register a new user",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -155,25 +357,39 @@
                 "type": "object",
                 "required": ["name", "email", "password"],
                 "properties": {
-                  "name": { "type": "string", "example": "Jesús López", "minLength": 2, "maxLength": 100 },
+                  "name": { "type": "string", "minLength": 2, "maxLength": 100, "example": "Jesús López" },
                   "email": { "type": "string", "format": "email", "example": "jesus@example.com" },
-                  "password": { "type": "string", "minLength": 8, "example": "securePassword123" }
+                  "password": { "type": "string", "minLength": 8, "example": "secret-12345" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "User registered successfully" },
-          "400": { "description": "Validation error" },
-          "409": { "description": "Email already registered" }
+          "201": {
+            "description": "User registered. Verification email sent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "requiresVerification": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "409": { "$ref": "#/components/responses/Conflict" }
         }
       }
     },
     "/api/auth/login": {
       "post": {
         "tags": ["Auth"],
-        "summary": "Login and receive JWT token",
+        "summary": "Login and obtain a JWT token",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -182,45 +398,244 @@
                 "type": "object",
                 "required": ["email", "password"],
                 "properties": {
-                  "email": { "type": "string", "format": "email", "example": "admin@pataplan.com" },
-                  "password": { "type": "string", "example": "admin123" }
+                  "email": { "type": "string", "format": "email", "example": "jesus@example.com" },
+                  "password": { "type": "string", "example": "secret-12345" },
+                  "rememberMe": { "type": "boolean", "example": false }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Login successful, returns user and token" },
-          "400": { "description": "Validation error" },
-          "401": { "description": "Invalid credentials" }
+          "200": {
+            "description": "Login successful",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": {
+            "description": "Email not verified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Email no verificado" },
+                    "requiresVerification": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/verify-email": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Verify email with the token sent by mail",
+        "security": [],
+        "parameters": [
+          { "name": "token", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email verified; returns user and JWT for auto-login",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } }
+          },
+          "400": { "description": "Invalid or expired token" }
+        }
+      }
+    },
+    "/api/auth/resend-verification": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Resend verification email",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": { "email": { "type": "string", "format": "email" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Verification email sent (returns 200 even if email doesn't exist, to avoid leaking)" },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Request a password reset email",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": { "email": { "type": "string", "format": "email" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Reset email sent if account exists" }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Reset password using the token from email",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["token", "password"],
+                "properties": {
+                  "token": { "type": "string" },
+                  "password": { "type": "string", "minLength": 8 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password updated" },
+          "400": { "description": "Invalid or expired token" }
         }
       }
     },
     "/api/auth/me": {
       "get": {
         "tags": ["Auth"],
-        "summary": "Get authenticated user data",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "Get the currently authenticated user",
         "responses": {
-          "200": { "description": "Current user data" },
-          "401": { "description": "Not authenticated" }
+          "200": {
+            "description": "Current user info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "user": { "$ref": "#/components/schemas/User" } }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Update the authenticated user's profile (name, email)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 2, "maxLength": 100 },
+                  "email": { "type": "string", "format": "email" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": { "$ref": "#/components/responses/Conflict" }
         }
       }
     },
+    "/api/auth/notifications": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Toggle email notifications for the authenticated user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["enabled"],
+                "properties": { "enabled": { "type": "boolean", "example": true } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Preference updated" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/auth/password": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Change the password of the authenticated user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["currentPassword", "newPassword"],
+                "properties": {
+                  "currentPassword": { "type": "string" },
+                  "newPassword": { "type": "string", "minLength": 8 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password changed" },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+
     "/api/groups": {
       "get": {
         "tags": ["Groups"],
-        "summary": "List groups of the authenticated user",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "List groups owned by or shared with the user",
         "responses": {
-          "200": { "description": "List of groups with animal count" },
-          "401": { "description": "Not authenticated" }
+          "200": {
+            "description": "List of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "groups": { "type": "array", "items": { "$ref": "#/components/schemas/Group" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       },
       "post": {
         "tags": ["Groups"],
         "summary": "Create a new group",
-        "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -228,26 +643,26 @@
               "schema": {
                 "type": "object",
                 "required": ["name"],
-                "properties": {
-                  "name": { "type": "string", "example": "Casa", "maxLength": 100 }
-                }
+                "properties": { "name": { "type": "string", "minLength": 1, "maxLength": 100, "example": "Refugio" } }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Group created" },
-          "400": { "description": "Validation error" },
-          "409": { "description": "Group name already exists" }
+          "201": {
+            "description": "Group created",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "group": { "$ref": "#/components/schemas/Group" } } } } }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       }
     },
     "/api/groups/{id}": {
       "put": {
         "tags": ["Groups"],
-        "summary": "Update a group",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Rename a group",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "requestBody": {
           "required": true,
           "content": {
@@ -255,49 +670,50 @@
               "schema": {
                 "type": "object",
                 "required": ["name"],
-                "properties": {
-                  "name": { "type": "string", "example": "Refugio" }
-                }
+                "properties": { "name": { "type": "string" } }
               }
             }
           }
         },
         "responses": {
           "200": { "description": "Group updated" },
-          "404": { "description": "Group not found" },
-          "409": { "description": "Group name already exists" }
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       },
       "delete": {
         "tags": ["Groups"],
-        "summary": "Delete a group (must have no animals)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Delete a group (must be empty of animals)",
+        "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
         "responses": {
           "204": { "description": "Group deleted" },
-          "400": { "description": "Group has animals" },
-          "404": { "description": "Group not found" }
+          "400": { "description": "Group still contains animals" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
     },
+
     "/api/animals": {
       "get": {
         "tags": ["Animals"],
-        "summary": "List animals with optional filters",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "List animals accessible to the user",
         "parameters": [
-          { "name": "groupId", "in": "query", "schema": { "type": "integer" }, "description": "Filter by group" },
-          { "name": "species", "in": "query", "schema": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] } },
-          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search by name" }
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Filter by name" },
+          { "name": "groupId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "species", "in": "query", "schema": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] } }
         ],
         "responses": {
-          "200": { "description": "List of animals with pending/overdue event counts" }
+          "200": {
+            "description": "List of animals",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "animals": { "type": "array", "items": { "$ref": "#/components/schemas/Animal" } } } } } }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       },
       "post": {
         "tags": ["Animals"],
-        "summary": "Create a new animal (supports photo upload)",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "Create a new animal (multipart for optional photo)",
         "requestBody": {
           "required": true,
           "content": {
@@ -306,13 +722,13 @@
                 "type": "object",
                 "required": ["name", "species", "sex", "groupId"],
                 "properties": {
-                  "name": { "type": "string", "example": "Rocky" },
+                  "name": { "type": "string" },
                   "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] },
-                  "breed": { "type": "string" },
                   "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+                  "groupId": { "type": "integer" },
+                  "breed": { "type": "string" },
                   "dateOfBirth": { "type": "string", "format": "date" },
                   "microchip": { "type": "string" },
-                  "groupId": { "type": "integer" },
                   "notes": { "type": "string" },
                   "photo": { "type": "string", "format": "binary" }
                 }
@@ -321,99 +737,187 @@
           }
         },
         "responses": {
-          "201": { "description": "Animal created" },
-          "400": { "description": "Validation error or invalid group" }
+          "201": { "description": "Animal created", "content": { "application/json": { "schema": { "type": "object", "properties": { "animal": { "$ref": "#/components/schemas/Animal" } } } } } },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
         }
       }
     },
     "/api/animals/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "get": {
         "tags": ["Animals"],
-        "summary": "Get animal detail with latest weight and event counts",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Get an animal by id (with detailed health info)",
         "responses": {
-          "200": { "description": "Animal detail" },
-          "404": { "description": "Animal not found" }
+          "200": { "description": "Animal", "content": { "application/json": { "schema": { "type": "object", "properties": { "animal": { "$ref": "#/components/schemas/Animal" } } } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       },
       "put": {
         "tags": ["Animals"],
-        "summary": "Update an animal",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "200": { "description": "Animal updated" },
-          "404": { "description": "Animal not found" }
-        }
-      },
-      "delete": {
-        "tags": ["Animals"],
-        "summary": "Delete an animal (cascade: events, weights, documents, expenses)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "204": { "description": "Animal deleted" },
-          "404": { "description": "Animal not found" }
-        }
-      }
-    },
-    "/api/animals/{id}/weights": {
-      "get": {
-        "tags": ["Weights"],
-        "summary": "Get weight history with trend data",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "200": { "description": "Weight records and trend (current, previous, change, average, min, max)" }
-        }
-      },
-      "post": {
-        "tags": ["Weights"],
-        "summary": "Add weight record (auto anomaly detection)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Update an animal (multipart for optional photo)",
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["valueKg", "recordedAt"],
                 "properties": {
-                  "valueKg": { "type": "number", "example": 29.5 },
-                  "recordedAt": { "type": "string", "format": "date", "example": "2026-04-10" }
+                  "name": { "type": "string" },
+                  "species": { "type": "string", "enum": ["DOG", "CAT", "OTHER"] },
+                  "sex": { "type": "string", "enum": ["MALE", "FEMALE", "UNKNOWN"] },
+                  "groupId": { "type": "integer" },
+                  "breed": { "type": "string" },
+                  "dateOfBirth": { "type": "string", "format": "date" },
+                  "microchip": { "type": "string" },
+                  "notes": { "type": "string" },
+                  "photo": { "type": "string", "format": "binary" },
+                  "removePhoto": { "type": "string", "example": "true" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Weight recorded, includes anomalyDetected flag" }
+          "200": { "description": "Animal updated" },
+          "400": { "$ref": "#/components/responses/ValidationError" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Animals"],
+        "summary": "Delete an animal",
+        "responses": {
+          "204": { "description": "Deleted" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
     },
+
+    "/api/animals/{id}/weights": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Weights"],
+        "summary": "List weight records of an animal with trend stats",
+        "responses": {
+          "200": {
+            "description": "Weight history + trend",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "weights": { "type": "array", "items": { "$ref": "#/components/schemas/WeightRecord" } },
+                    "trend": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "current": { "type": "number" },
+                        "previous": { "type": "number", "nullable": true },
+                        "mean": { "type": "number" },
+                        "minWeight": { "type": "number" },
+                        "maxWeight": { "type": "number" },
+                        "totalRecords": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Weights"],
+        "summary": "Add a weight record (may detect anomaly)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["valueKg"],
+                "properties": {
+                  "valueKg": { "type": "number", "example": 4.20 },
+                  "recordedAt": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Weight created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "weight": { "$ref": "#/components/schemas/WeightRecord" },
+                    "anomalyDetected": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/ValidationError" }
+        }
+      }
+    },
+    "/api/weights/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "put": {
+        "tags": ["Weights"],
+        "summary": "Update a weight record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "valueKg": { "type": "number" },
+                  "recordedAt": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Weight updated" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Weights"],
+        "summary": "Delete a weight record",
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+
     "/api/animals/{id}/events": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "get": {
         "tags": ["Health Events"],
         "summary": "List health events for an animal",
-        "security": [{ "bearerAuth": [] }],
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
-          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] } },
-          { "name": "eventTypeId", "in": "query", "schema": { "type": "integer" } },
-          { "name": "from", "in": "query", "schema": { "type": "string", "format": "date" } },
-          { "name": "to", "in": "query", "schema": { "type": "string", "format": "date" } }
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] } }
         ],
         "responses": {
-          "200": { "description": "List of health events with event type" }
+          "200": {
+            "description": "Events list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "events": { "type": "array", "items": { "$ref": "#/components/schemas/HealthEvent" } } } } } }
+          }
         }
       },
       "post": {
         "tags": ["Health Events"],
-        "summary": "Create health event (auto-calculates status and nextDueDate)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Create a health event for an animal",
         "requestBody": {
           "required": true,
           "content": {
@@ -424,80 +928,138 @@
                 "properties": {
                   "eventTypeId": { "type": "integer" },
                   "scheduledDate": { "type": "string", "format": "date" },
-                  "completedDate": { "type": "string", "format": "date" },
+                  "completedDate": { "type": "string", "format": "date", "nullable": true },
                   "product": { "type": "string" },
                   "vetName": { "type": "string" },
                   "notes": { "type": "string" },
-                  "frequencyDays": { "type": "integer" }
+                  "frequencyDays": { "type": "integer", "nullable": true }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Event created" }
+          "201": { "description": "Event created", "content": { "application/json": { "schema": { "type": "object", "properties": { "event": { "$ref": "#/components/schemas/HealthEvent" } } } } } },
+          "400": { "$ref": "#/components/responses/ValidationError" }
         }
       }
     },
     "/api/events/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "put": {
         "tags": ["Health Events"],
         "summary": "Update a health event",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "200": { "description": "Event updated" },
-          "404": { "description": "Event not found" }
-        }
-      },
-      "delete": {
-        "tags": ["Health Events"],
-        "summary": "Delete a health event",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": {
-          "204": { "description": "Event deleted" },
-          "404": { "description": "Event not found" }
-        }
-      }
-    },
-    "/api/events/{id}/complete": {
-      "patch": {
-        "tags": ["Health Events"],
-        "summary": "Mark event as completed (auto-generates next if has frequency)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "completedDate": { "type": "string", "format": "date" }
+                  "scheduledDate": { "type": "string", "format": "date" },
+                  "completedDate": { "type": "string", "format": "date", "nullable": true },
+                  "product": { "type": "string" },
+                  "vetName": { "type": "string" },
+                  "notes": { "type": "string" },
+                  "frequencyDays": { "type": "integer", "nullable": true },
+                  "status": { "type": "string", "enum": ["PENDING", "COMPLETED", "OVERDUE", "SKIPPED"] }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Event completed, returns completed event and next event if generated" },
-          "400": { "description": "Event already completed" }
+          "200": { "description": "Event updated" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Health Events"],
+        "summary": "Delete a health event",
+        "responses": {
+          "204": { "description": "Deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
     },
+    "/api/events/{id}/complete": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "patch": {
+        "tags": ["Health Events"],
+        "summary": "Mark an event as completed (triggers cascade recalculation if part of a protocol)",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "completedDate": { "type": "string", "format": "date" },
+                  "product": { "type": "string" },
+                  "vetName": { "type": "string" },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Event completed and next-due recalculated" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+
+    "/api/event-types": {
+      "get": {
+        "tags": ["Event Types"],
+        "summary": "List event types",
+        "responses": {
+          "200": {
+            "description": "Event types list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "eventTypes": { "type": "array", "items": { "$ref": "#/components/schemas/EventType" } } } } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Event Types"],
+        "summary": "Create a custom event type (admin only)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "category"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "category": { "type": "string", "enum": ["VACCINE", "DEWORMING_INTERNAL", "DEWORMING_EXTERNAL", "TREATMENT", "CHECKUP"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Event type created" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+
     "/api/protocols": {
       "get": {
         "tags": ["Protocols"],
-        "summary": "List protocols of the authenticated user",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "List protocols available to the user",
         "responses": {
-          "200": { "description": "List of protocols with steps and active assignment count" }
+          "200": {
+            "description": "Protocols",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "protocols": { "type": "array", "items": { "$ref": "#/components/schemas/Protocol" } } } } } }
+          }
         }
       },
       "post": {
         "tags": ["Protocols"],
-        "summary": "Create a health protocol with optional steps",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "Create a protocol",
         "requestBody": {
           "required": true,
           "content": {
@@ -506,70 +1068,65 @@
                 "type": "object",
                 "required": ["name"],
                 "properties": {
-                  "name": { "type": "string", "example": "New shelter cat" },
-                  "description": { "type": "string", "example": "Standard protocol for new cats" },
-                  "steps": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": ["eventTypeId", "dayOffset"],
-                      "properties": {
-                        "eventTypeId": { "type": "integer" },
-                        "dayOffset": { "type": "integer" },
-                        "product": { "type": "string" },
-                        "notes": { "type": "string" }
-                      }
-                    }
-                  }
+                  "name": { "type": "string", "example": "Gato nuevo en refugio" },
+                  "description": { "type": "string" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Protocol created with steps" }
+          "201": { "description": "Protocol created" },
+          "400": { "$ref": "#/components/responses/ValidationError" }
         }
       }
     },
     "/api/protocols/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "get": {
         "tags": ["Protocols"],
-        "summary": "Get protocol detail with steps and assignments",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Get a protocol with its steps",
         "responses": {
-          "200": { "description": "Protocol with steps and assignments" },
-          "404": { "description": "Protocol not found" }
+          "200": { "description": "Protocol", "content": { "application/json": { "schema": { "type": "object", "properties": { "protocol": { "$ref": "#/components/schemas/Protocol" } } } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       },
       "put": {
         "tags": ["Protocols"],
-        "summary": "Update protocol (replaces steps if provided)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Update a protocol",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": { "description": "Protocol updated" },
-          "404": { "description": "Protocol not found" }
+          "200": { "description": "Updated" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       },
       "delete": {
         "tags": ["Protocols"],
-        "summary": "Delete protocol (blocks if has active assignments)",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "summary": "Delete a protocol",
         "responses": {
-          "204": { "description": "Protocol deleted" },
-          "400": { "description": "Has active assignments" },
-          "404": { "description": "Protocol not found" }
+          "204": { "description": "Deleted" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
     },
     "/api/protocols/{id}/steps": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "post": {
         "tags": ["Protocol Steps"],
         "summary": "Add a step to a protocol",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -588,16 +1145,15 @@
           }
         },
         "responses": {
-          "201": { "description": "Step added" }
+          "201": { "description": "Step created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ProtocolStep" } } } }
         }
       }
     },
     "/api/protocols/{id}/steps/reorder": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
       "put": {
         "tags": ["Protocol Steps"],
         "summary": "Reorder protocol steps",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "required": true,
           "content": {
@@ -606,42 +1162,544 @@
                 "type": "object",
                 "required": ["stepIds"],
                 "properties": {
-                  "stepIds": { "type": "array", "items": { "type": "integer" }, "example": [3, 1, 5, 2] }
+                  "stepIds": { "type": "array", "items": { "type": "integer" }, "example": [3, 1, 2] }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Steps reordered" }
+          "200": { "description": "Order updated" }
         }
       }
     },
     "/api/protocols/{protocolId}/steps/{stepId}": {
+      "parameters": [
+        { "name": "protocolId", "in": "path", "required": true, "schema": { "type": "integer" } },
+        { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
+      ],
       "put": {
         "tags": ["Protocol Steps"],
         "summary": "Update a protocol step",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          { "name": "protocolId", "in": "path", "required": true, "schema": { "type": "integer" } },
-          { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "eventTypeId": { "type": "integer" },
+                  "dayOffset": { "type": "integer" },
+                  "product": { "type": "string" },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": { "description": "Step updated" },
-          "404": { "description": "Protocol or step not found" }
+          "200": { "description": "Updated" }
         }
       },
       "delete": {
         "tags": ["Protocol Steps"],
-        "summary": "Delete a step (auto-recompacts sortOrder)",
-        "security": [{ "bearerAuth": [] }],
+        "summary": "Delete a protocol step",
+        "responses": {
+          "204": { "description": "Deleted" }
+        }
+      }
+    },
+
+    "/api/animals/{id}/assign-protocol": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "post": {
+        "tags": ["Assignments"],
+        "summary": "Assign a protocol to an animal, generating its events",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["protocolId", "startDate"],
+                "properties": {
+                  "protocolId": { "type": "integer" },
+                  "startDate": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Assignment created and events generated", "content": { "application/json": { "schema": { "type": "object", "properties": { "assignment": { "$ref": "#/components/schemas/Assignment" } } } } } }
+        }
+      }
+    },
+    "/api/animals/{id}/assignments": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Assignments"],
+        "summary": "List protocol assignments for an animal",
+        "responses": {
+          "200": {
+            "description": "Assignments list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "assignments": { "type": "array", "items": { "$ref": "#/components/schemas/Assignment" } } } } } }
+          }
+        }
+      }
+    },
+    "/api/assignments/{id}/cancel": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "patch": {
+        "tags": ["Assignments"],
+        "summary": "Cancel an active assignment",
+        "responses": {
+          "200": { "description": "Assignment cancelled" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+
+    "/api/animals/{id}/visits": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Visits"],
+        "summary": "List vet visits for an animal",
+        "responses": {
+          "200": {
+            "description": "Visits list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "visits": { "type": "array", "items": { "$ref": "#/components/schemas/VetVisit" } } } } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Visits"],
+        "summary": "Add a vet visit to an animal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["visitDate", "reason"],
+                "properties": {
+                  "visitDate": { "type": "string", "format": "date" },
+                  "reason": { "type": "string" },
+                  "diagnosis": { "type": "string" },
+                  "treatment": { "type": "string" },
+                  "observations": { "type": "string" },
+                  "vetName": { "type": "string" },
+                  "cost": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Visit created" }
+        }
+      }
+    },
+    "/api/visits/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Visits"],
+        "summary": "Get a vet visit by id",
+        "responses": {
+          "200": { "description": "Visit", "content": { "application/json": { "schema": { "type": "object", "properties": { "visit": { "$ref": "#/components/schemas/VetVisit" } } } } } },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["Visits"],
+        "summary": "Update a vet visit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VetVisit" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Visits"],
+        "summary": "Delete a vet visit",
+        "responses": {
+          "204": { "description": "Deleted" }
+        }
+      }
+    },
+
+    "/api/animals/{id}/documents": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Documents"],
+        "summary": "List documents of an animal",
         "parameters": [
-          { "name": "protocolId", "in": "path", "required": true, "schema": { "type": "integer" } },
-          { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
+          { "name": "vetVisitId", "in": "query", "schema": { "type": "integer" } }
         ],
         "responses": {
-          "204": { "description": "Step deleted" },
-          "404": { "description": "Protocol or step not found" }
+          "200": {
+            "description": "Documents",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "documents": { "type": "array", "items": { "$ref": "#/components/schemas/Document" } } } } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Documents"],
+        "summary": "Upload one or more documents to an animal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": { "type": "array", "items": { "type": "string", "format": "binary" } },
+                  "description": { "type": "string" },
+                  "vetVisitId": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Documents uploaded" },
+          "400": { "description": "No files or invalid type/size" }
+        }
+      }
+    },
+    "/api/documents/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "patch": {
+        "tags": ["Documents"],
+        "summary": "Update document metadata (filename, description)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string", "maxLength": 255 },
+                  "description": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      },
+      "delete": {
+        "tags": ["Documents"],
+        "summary": "Delete a document (also removes file from disk)",
+        "responses": {
+          "204": { "description": "Deleted" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        }
+      }
+    },
+
+    "/api/expenses": {
+      "get": {
+        "tags": ["Expenses"],
+        "summary": "List expenses with filters and pagination",
+        "parameters": [
+          { "name": "animalId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "category", "in": "query", "schema": { "type": "string", "enum": ["VACCINE", "DEWORMING", "SURGERY", "MEDICATION", "FOOD", "OTHER"] } },
+          { "name": "dateFrom", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "dateTo", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged expenses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expenses": { "type": "array", "items": { "$ref": "#/components/schemas/Expense" } },
+                    "total": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Expenses"],
+        "summary": "Create an expense",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["animalId", "amount", "category", "expenseDate"],
+                "properties": {
+                  "animalId": { "type": "integer" },
+                  "amount": { "type": "number" },
+                  "category": { "type": "string", "enum": ["VACCINE", "DEWORMING", "SURGERY", "MEDICATION", "FOOD", "OTHER"] },
+                  "description": { "type": "string", "maxLength": 300 },
+                  "expenseDate": { "type": "string", "format": "date" },
+                  "vetVisitId": { "type": "integer", "nullable": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Expense created" }
+        }
+      }
+    },
+    "/api/expenses/stats": {
+      "get": {
+        "tags": ["Expenses"],
+        "summary": "Aggregate stats (totals, breakdown by category, monthly evolution)",
+        "parameters": [
+          { "name": "year", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalAllTime": { "type": "number" },
+                    "totalThisMonth": { "type": "number" },
+                    "totalLastMonth": { "type": "number" },
+                    "totalThisYear": { "type": "number" },
+                    "byCategory": { "type": "array", "items": { "type": "object", "properties": { "category": { "type": "string" }, "total": { "type": "number" } } } },
+                    "byMonth": { "type": "array", "items": { "type": "object", "properties": { "month": { "type": "string", "example": "2026-03" }, "total": { "type": "number" } } } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/expenses/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "put": {
+        "tags": ["Expenses"],
+        "summary": "Update an expense",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Expense" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Expenses"],
+        "summary": "Delete an expense",
+        "responses": {
+          "204": { "description": "Deleted" }
+        }
+      }
+    },
+
+    "/api/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Get aggregated dashboard data (summary + top alerts + upcoming events)",
+        "responses": {
+          "200": {
+            "description": "Dashboard payload",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DashboardSummary" } } }
+          }
+        }
+      }
+    },
+    "/api/dashboard/alerts": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Get the prioritized list of alerts",
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Alerts list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "alerts": { "type": "array", "items": { "$ref": "#/components/schemas/HealthEvent" } } } } } }
+          }
+        }
+      }
+    },
+    "/api/dashboard/upcoming": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Get upcoming events (next 7 days)",
+        "responses": {
+          "200": {
+            "description": "Upcoming events",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "events": { "type": "array", "items": { "$ref": "#/components/schemas/HealthEvent" } } } } } }
+          }
+        }
+      }
+    },
+
+    "/api/animals/{id}/report": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "get": {
+        "tags": ["Reports"],
+        "summary": "Download a PDF health report for an animal",
+        "responses": {
+          "200": {
+            "description": "PDF stream",
+            "content": {
+              "application/pdf": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+
+    "/api/me/memberships": {
+      "get": {
+        "tags": ["Collaborators"],
+        "summary": "List groups the current user has access to as a collaborator",
+        "responses": {
+          "200": {
+            "description": "Memberships list",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "memberships": { "type": "array", "items": { "$ref": "#/components/schemas/Collaborator" } } } } } }
+          }
+        }
+      }
+    },
+    "/api/me/memberships/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/IdParam" }],
+      "delete": {
+        "tags": ["Collaborators"],
+        "summary": "Leave a group (remove own membership)",
+        "responses": {
+          "204": { "description": "Membership removed" }
+        }
+      }
+    },
+    "/api/join": {
+      "post": {
+        "tags": ["Collaborators"],
+        "summary": "Join a group using an invite code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code"],
+                "properties": { "code": { "type": "string", "example": "ABCD1234" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Joined", "content": { "application/json": { "schema": { "type": "object", "properties": { "group": { "$ref": "#/components/schemas/Group" } } } } } },
+          "400": { "description": "Invalid or expired code" }
+        }
+      }
+    },
+    "/api/groups/{groupId}/invite-code": {
+      "parameters": [{ "name": "groupId", "in": "path", "required": true, "schema": { "type": "integer" } }],
+      "get": {
+        "tags": ["Collaborators"],
+        "summary": "Get the active invite code for a group (owner only)",
+        "responses": {
+          "200": { "description": "Invite code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/InviteCode" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Collaborators"],
+        "summary": "Regenerate the invite code for a group",
+        "responses": {
+          "200": { "description": "New code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/InviteCode" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Collaborators"],
+        "summary": "Revoke the current invite code",
+        "responses": {
+          "204": { "description": "Code revoked" }
+        }
+      }
+    },
+    "/api/groups/{groupId}/collaborators": {
+      "parameters": [{ "name": "groupId", "in": "path", "required": true, "schema": { "type": "integer" } }],
+      "get": {
+        "tags": ["Collaborators"],
+        "summary": "List collaborators in a group",
+        "responses": {
+          "200": { "description": "Collaborators", "content": { "application/json": { "schema": { "type": "object", "properties": { "collaborators": { "type": "array", "items": { "$ref": "#/components/schemas/Collaborator" } } } } } } }
+        }
+      }
+    },
+    "/api/groups/{groupId}/collaborators/{id}": {
+      "parameters": [
+        { "name": "groupId", "in": "path", "required": true, "schema": { "type": "integer" } },
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Collaborator id" }
+      ],
+      "patch": {
+        "tags": ["Collaborators"],
+        "summary": "Change a collaborator's role",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role"],
+                "properties": { "role": { "type": "string", "enum": ["EDITOR", "VIEWER"] } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Role updated" }
+        }
+      },
+      "delete": {
+        "tags": ["Collaborators"],
+        "summary": "Remove a collaborator from a group",
+        "responses": {
+          "204": { "description": "Removed" }
+        }
+      }
+    },
+
+    "/api/dev/run-notifications": {
+      "post": {
+        "tags": ["Dev"],
+        "summary": "Manually trigger the daily notifications job (requires trigger token header)",
+        "security": [],
+        "parameters": [
+          { "name": "x-trigger-token", "in": "header", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Job executed" },
+          "401": { "description": "Missing or invalid token" }
         }
       }
     }
