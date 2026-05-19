@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .animals {
@@ -18,7 +18,8 @@
   &__title {
     font-size: $font-size-xl;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
+    letter-spacing: -0.01em;
   }
 
   &__add-button {
@@ -81,13 +82,17 @@
     align-items: center;
     gap: $spacing-4;
     padding: $spacing-12 $spacing-4;
-    background-color: $neutral-white;
-    border: 0.03125rem solid $neutral-100;
+    background:
+      radial-gradient(ellipse at top, rgba($primary-100, 0.25), transparent 60%),
+      $neutral-white;
+    border: 0.0625rem solid rgba($primary-900, 0.06);
     border-radius: $radius-lg;
+    box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
   }
 
   &__empty-icon {
-    color: $neutral-300;
+    color: $primary-200;
+    opacity: 0.7;
   }
 
   &__empty-text {

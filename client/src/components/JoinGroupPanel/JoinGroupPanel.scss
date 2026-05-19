@@ -1,4 +1,4 @@
-$primary-600: #1a7a5c;
+﻿$primary-600: #1a7a5c;
 $primary-400: #2a9d78;
 $gray-50: #f3f1ec;
 $gray-100: #e2e0d8;
@@ -9,9 +9,9 @@ $white: #fafaf8;
 
 .join-group {
   background: $white;
-  border-radius: 12px;
+  border-radius: 0.75rem;
   padding: 1.5rem;
-  border: 1px solid $gray-100;
+  border: 0.0625rem solid $gray-100;
 
   &__title {
     font-size: 1.125rem;
@@ -41,8 +41,8 @@ $white: #fafaf8;
   &__input {
     flex: 1;
     background: $gray-50;
-    border: 1px solid $gray-100;
-    border-radius: 8px;
+    border: 0.0625rem solid $gray-100;
+    border-radius: 0.5rem;
     padding: 0.55rem 2.25rem 0.55rem 0.75rem;
     font-size: 0.95rem;
     font-family: 'Courier New', monospace;
@@ -67,9 +67,9 @@ $white: #fafaf8;
     background: transparent;
     border: none;
     color: $gray-600;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -85,7 +85,7 @@ $white: #fafaf8;
     background: $primary-600;
     color: $white;
     border: none;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     padding: 0 1rem;
     display: inline-flex;
     align-items: center;
@@ -104,7 +104,7 @@ $white: #fafaf8;
   }
 
   &__memberships {
-    border-top: 1px solid $gray-100;
+    border-top: 0.0625rem solid $gray-100;
     padding-top: 1rem;
   }
 
@@ -136,7 +136,7 @@ $white: #fafaf8;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
     background: $gray-50;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     font-size: 0.9rem;
   }
 
@@ -157,7 +157,7 @@ $white: #fafaf8;
     background: $white;
     padding: 0.2rem 0.5rem;
     border-radius: 999px;
-    border: 1px solid $gray-100;
+    border: 0.0625rem solid $gray-100;
   }
 
   &__membership-actions {
@@ -168,11 +168,11 @@ $white: #fafaf8;
 
   &__leave {
     background: $white;
-    border: 1px solid $gray-100;
+    border: 0.0625rem solid $gray-100;
     color: $gray-600;
-    border-radius: 6px;
-    width: 28px;
-    height: 28px;
+    border-radius: 0.375rem;
+    width: 1.75rem;
+    height: 1.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;

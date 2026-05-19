@@ -1,4 +1,4 @@
-*,
+﻿*,
 *::before,
 *::after {
   box-sizing: border-box;
@@ -34,37 +34,37 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid #1a7a5c;
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: 0.125rem solid #1a7a5c;
+  outline-offset: 0.125rem;
+  border-radius: 0.125rem;
 }
 
 .skip-link {
   position: absolute;
-  top: -40px;
+  top: -2.5rem;
   left: 0.5rem;
   z-index: 1000;
   padding: 0.5rem 0.75rem;
   background-color: #1a7a5c;
   color: #fafaf8;
   font-weight: 600;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   transition: top 0.15s ease;
 
   &:focus,
   &:focus-visible {
     top: 0.5rem;
-    outline: 2px solid #fafaf8;
-    outline-offset: 2px;
+    outline: 0.125rem solid #fafaf8;
+    outline-offset: 0.125rem;
   }
 }
 
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: 0.0625rem;
+  height: 0.0625rem;
   padding: 0;
-  margin: -1px;
+  margin: -0.0625rem;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;

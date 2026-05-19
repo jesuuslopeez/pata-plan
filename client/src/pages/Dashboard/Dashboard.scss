@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .dashboard {
@@ -13,18 +13,36 @@
   &__section-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem;
+    padding-bottom: 0.25rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      width: 0.25rem;
+      height: 1.125rem;
+      background: $danger;
+      border-radius: 0.125rem;
+      flex-shrink: 0;
+    }
   }
 
   &__section-icon {
     color: $danger;
     flex-shrink: 0;
+    padding: 0.3rem;
+    background: rgba($danger, 0.1);
+    border-radius: $radius-sm;
+    width: 1.125rem;
+    height: 1.125rem;
+    box-sizing: content-box;
   }
 
   &__section-title {
     font-size: 0.9375rem;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
+    letter-spacing: -0.005em;
   }
 
   &__loading {
@@ -37,13 +55,17 @@
   &__empty {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1.125rem;
-    background-color: $neutral-white;
-    border: 0.03125rem solid $neutral-100;
+    gap: 0.625rem;
+    padding: 1.125rem 1.25rem;
+    background:
+      linear-gradient(135deg, rgba($success, 0.08) 0%, transparent 100%),
+      $neutral-white;
+    border: 0.0625rem solid rgba($success, 0.2);
     border-radius: $radius-lg;
     font-size: $font-size-sm;
-    color: $neutral-800;
+    font-weight: 600;
+    color: $primary-900;
+    box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
   }
 
   &__empty-icon {

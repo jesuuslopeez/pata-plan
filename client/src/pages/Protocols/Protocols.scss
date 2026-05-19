@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .protocols {
@@ -19,7 +19,8 @@
   &__title {
     font-size: $font-size-xl;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
+    letter-spacing: -0.01em;
     margin-bottom: 0.25rem;
   }
 
@@ -82,13 +83,17 @@
     align-items: center;
     gap: $spacing-4;
     padding: $spacing-12 $spacing-4;
-    background-color: $neutral-white;
-    border: 0.0625rem solid $neutral-100;
+    background:
+      radial-gradient(ellipse at top, rgba($primary-100, 0.25), transparent 60%),
+      $neutral-white;
+    border: 0.0625rem solid rgba($primary-900, 0.06);
     border-radius: $radius-lg;
+    box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
   }
 
   &__empty-icon {
-    color: $neutral-300;
+    color: $primary-200;
+    opacity: 0.7;
   }
 
   &__empty-text {
@@ -101,9 +106,38 @@
   @include flex-column;
   gap: 0.75rem;
   background-color: $neutral-white;
-  border: 0.0625rem solid $neutral-100;
+  border: 0.0625rem solid rgba($primary-900, 0.06);
   border-radius: $radius-lg;
   padding: 1.25rem;
+  box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1.25rem;
+    width: 2rem;
+    height: 0.1875rem;
+    background: $primary-600;
+    border-radius: 0 0 0.1875rem 0.1875rem;
+    transition: width 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-0.125rem);
+    box-shadow:
+      0 0.875rem 1.75rem -1rem rgba($primary-900, 0.2),
+      0 0.25rem 0.625rem -0.25rem rgba($primary-900, 0.06);
+
+    &::before {
+      width: 3.5rem;
+    }
+  }
 
   &__head {
     @include flex-between;
@@ -113,7 +147,8 @@
   &__name {
     font-size: $font-size-lg;
     font-weight: 700;
-    color: $neutral-900;
+    color: $primary-900;
+    letter-spacing: -0.005em;
   }
 
   &__desc {

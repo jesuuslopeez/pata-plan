@@ -55,6 +55,12 @@ export function AnimalCard({ animal }) {
             aria-hidden="true"
           />
         )}
+        <PawPrint
+          className="animal-card__paw-watermark"
+          size={88}
+          strokeWidth={1.2}
+          aria-hidden="true"
+        />
         {animal.photoUrl ? (
           <img
             className="animal-card__image"

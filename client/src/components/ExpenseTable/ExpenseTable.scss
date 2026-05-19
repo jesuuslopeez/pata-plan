@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .expense-table {
@@ -118,12 +118,13 @@
 
   &__item {
     background-color: $neutral-white;
-    border: 0.0625rem solid $neutral-100;
+    border: 0.0625rem solid rgba($primary-900, 0.06);
     border-radius: $radius-md;
-    padding: 0.75rem;
+    padding: 0.875rem 1rem;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    box-shadow: 0 0.0625rem 0.125rem rgba($primary-900, 0.04);
   }
 
   &__head {

@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+﻿@use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
 
 .add-animal-modal {
@@ -223,7 +223,7 @@
       rgba($primary-50, 0.85) 0%,
       rgba($primary-100, 0.45) 100%
     );
-    border: 1px dashed $primary-400;
+    border: 0.0625rem dashed $primary-400;
     border-radius: $radius-lg;
     display: flex;
     flex-direction: column;
@@ -299,7 +299,7 @@
 @keyframes hint-in {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-0.25rem);
   }
   to {
     opacity: 1;
