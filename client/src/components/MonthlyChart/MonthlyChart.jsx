@@ -44,7 +44,7 @@ export function MonthlyChart({ data }) {
 
   return (
     <div className="monthly-chart">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={240}>
         <BarChart data={chartData} margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
           <CartesianGrid stroke="var(--monthly-chart-grid)" strokeDasharray="3 3" vertical={false} />
           <XAxis

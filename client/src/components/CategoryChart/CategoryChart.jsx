@@ -62,7 +62,7 @@ export function CategoryChart({ data }) {
 
   return (
     <div className="category-chart">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={240}>
         <PieChart>
           <Pie
             data={chartData}
