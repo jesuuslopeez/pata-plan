@@ -9,6 +9,7 @@ import {
   TrendingUp,
   ArrowRight,
 } from 'lucide-react';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Landing.scss';
 
 const FEATURES = [
@@ -45,6 +46,7 @@ const FEATURES = [
 ];
 
 export function Landing() {
+  usePageTitle();
   return (
     <div className="landing">
       <div className="landing__grain" aria-hidden="true" />
@@ -52,9 +54,9 @@ export function Landing() {
 
       <header className="landing__topbar">
         <Link to="/" className="landing__brand-link" aria-label="PataPlan">
-          <img src="/pataplan-wordmark.png" alt="PataPlan" className="landing__brand-logo" />
+          <img src="/pataplan-wordmark.png" alt="PataPlan logo" className="landing__brand-logo" />
         </Link>
-        <nav className="landing__topnav">
+        <nav className="landing__topnav" aria-label="Acciones de cuenta">
           <Link to="/login" className="landing__topnav-link">
             Iniciar sesión
           </Link>
@@ -101,7 +103,7 @@ export function Landing() {
               <span className="landing__card-date">14 mar</span>
             </div>
             <div className="landing__card-body">
-              <div className="landing__card-icon">
+              <div className="landing__card-icon" aria-hidden="true">
                 <PawPrint size={28} />
               </div>
               <div>
@@ -117,7 +119,7 @@ export function Landing() {
               </div>
             </div>
             <div className="landing__card-foot">
-              <span className="landing__card-dot landing__card-dot--ok" />
+              <span className="landing__card-dot landing__card-dot--ok" aria-hidden="true" />
               <span>Programado automáticamente por protocolo</span>
             </div>
           </aside>

@@ -96,7 +96,7 @@ export function GroupSettings() {
       <h2 className="group-settings__title">Grupos</h2>
 
       {loading ? (
-        <p className="group-settings__loading">Cargando…</p>
+        <p className="group-settings__loading" role="status" aria-live="polite">Cargando…</p>
       ) : groups.length === 0 ? (
         <p className="group-settings__empty">Aún no tienes grupos. Crea el primero abajo.</p>
       ) : (
@@ -134,7 +134,7 @@ export function GroupSettings() {
                     onClick={() => startEdit(group)}
                     aria-label="Editar grupo"
                   >
-                    <Edit size={14} />
+                    <Edit size={14} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
@@ -142,7 +142,7 @@ export function GroupSettings() {
                     onClick={() => handleDelete(group)}
                     aria-label="Eliminar grupo"
                   >
-                    <Trash size={14} />
+                    <Trash size={14} aria-hidden="true" />
                   </button>
                 </div>
               </li>
@@ -165,12 +165,12 @@ export function GroupSettings() {
           className="group-settings__add-btn"
           disabled={creating || !newName.trim()}
         >
-          <Plus size={14} />
+          <Plus size={14} aria-hidden="true" />
           <span>Añadir</span>
         </button>
       </form>
 
-      {error && <p className="group-settings__error">{error}</p>}
+      {error && <p className="group-settings__error" role="alert">{error}</p>}
 
       <ConfirmDialog
         open={!!deletingGroup}

@@ -1,4 +1,5 @@
 import { useAuth } from '../../hooks/useAuth';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import { ProfileSettings } from '../../components/ProfileSettings/ProfileSettings';
 import { GroupSettings } from '../../components/GroupSettings/GroupSettings';
 import { GroupCollaboratorsPanel } from '../../components/GroupCollaboratorsPanel/GroupCollaboratorsPanel';
@@ -6,6 +7,7 @@ import { JoinGroupPanel } from '../../components/JoinGroupPanel/JoinGroupPanel';
 import './Settings.scss';
 
 export function Settings() {
+  usePageTitle('Ajustes');
   const { user } = useAuth();
   const isAdmin = user?.role === 'ADMIN';
 

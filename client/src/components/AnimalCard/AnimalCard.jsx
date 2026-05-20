@@ -45,6 +45,7 @@ export function AnimalCard({ animal }) {
       }}
       role="button"
       tabIndex={0}
+      aria-label={`Ver perfil de ${animal.name}`}
     >
       <div className="animal-card__photo">
         {animal.photoUrl && (
@@ -65,10 +66,10 @@ export function AnimalCard({ animal }) {
           <img
             className="animal-card__image"
             src={resolveAssetUrl(animal.photoUrl)}
-            alt={animal.name}
+            alt={`Foto de ${animal.name}`}
           />
         ) : (
-          <PawPrint className="animal-card__placeholder" size={48} />
+          <PawPrint className="animal-card__placeholder" size={48} aria-hidden="true" />
         )}
       </div>
 

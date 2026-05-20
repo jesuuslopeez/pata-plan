@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X, Ban, ClipboardList } from 'lucide-react';
 import {
   cancelAssignment,
@@ -9,6 +9,7 @@ import {
 import { Badge } from '../Badge/Badge';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AssignProtocolModal.scss';
 
 const STATUS_VARIANT = {
@@ -33,6 +34,8 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [cancelingAssignment, setCancelingAssignment] = useState(null);
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open && !cancelingAssignment);
   const [alertDialog, setAlertDialog] = useState(null);
@@ -99,11 +102,11 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
   };
 
   return (
-    <div className="assign-modal" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="assign-modal__panel" onClick={(e) => e.stopPropagation()}>
+    <div className="assign-modal" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={onClose}>
+      <div className="assign-modal__panel" ref={containerRef} onClick={(e) => e.stopPropagation()}>
         <header className="assign-modal__head">
           <div>
-            <h2 className="assign-modal__title">Asignar protocolo</h2>
+            <h2 id={titleId} className="assign-modal__title">Asignar protocolo</h2>
             <p className="assign-modal__subtitle">a {animalName}</p>
           </div>
           <button
@@ -112,7 +115,7 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </header>
 
@@ -155,7 +158,7 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
             />
           </div>
 
-          {error && <p className="assign-modal__error">{error}</p>}
+          {error && <p className="assign-modal__error" role="alert">{error}</p>}
 
           <button type="submit" className="assign-modal__submit" disabled={submitting}>
             {submitting ? 'Asignando…' : 'Asignar protocolo'}
@@ -165,10 +168,10 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
         <section className="assign-modal__list">
           <h3 className="assign-modal__list-title">Asignaciones existentes</h3>
           {loading ? (
-            <p className="assign-modal__list-empty">Cargando…</p>
+            <p className="assign-modal__list-empty" role="status" aria-live="polite">Cargando…</p>
           ) : assignments.length === 0 ? (
             <p className="assign-modal__list-empty">
-              <ClipboardList size={16} />
+              <ClipboardList size={16} aria-hidden="true" />
               <span>Sin asignaciones registradas</span>
             </p>
           ) : (
@@ -201,7 +204,7 @@ export function AssignProtocolModal({ open, animalId, animalName, onClose, onCha
                       onClick={() => setCancelingAssignment(a)}
                       aria-label="Cancelar asignación"
                     >
-                      <Ban size={14} />
+                      <Ban size={14} aria-hidden="true" />
                       <span>Cancelar</span>
                     </button>
                   )}

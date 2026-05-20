@@ -1,8 +1,10 @@
+import { useId } from 'react';
 import { X, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '../Badge/Badge';
 import { translateEventType } from '../../utils/eventTypeLabels';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './EventDetailModal.scss';
 
 const STATUS_CONFIG = {
@@ -32,6 +34,8 @@ function formatDate(iso) {
 export function EventDetailModal({ event, onClose, onComplete }) {
   const navigate = useNavigate();
   useEscapeKey(onClose, Boolean(event));
+  const titleId = useId();
+  const containerRef = useFocusTrap(Boolean(event));
   if (!event) return null;
 
   const status = STATUS_CONFIG[event.status] || STATUS_CONFIG.PENDING;
@@ -42,12 +46,12 @@ export function EventDetailModal({ event, onClose, onComplete }) {
       className="event-detail-modal"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="event-detail-title"
+      aria-labelledby={titleId}
       onClick={onClose}
     >
-      <div className="event-detail-modal__content" onClick={(e) => e.stopPropagation()}>
+      <div className="event-detail-modal__content" ref={containerRef} onClick={(e) => e.stopPropagation()}>
         <header className="event-detail-modal__header">
-          <h2 id="event-detail-title" className="event-detail-modal__title">
+          <h2 id={titleId} className="event-detail-modal__title">
             {translateEventType(event.eventType?.name)}
           </h2>
           <button
@@ -56,7 +60,7 @@ export function EventDetailModal({ event, onClose, onComplete }) {
             type="button"
             aria-label="Cerrar"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </header>
 
@@ -124,7 +128,7 @@ export function EventDetailModal({ event, onClose, onComplete }) {
               onClick={() => onComplete?.(event.id)}
               type="button"
             >
-              <CheckCircle size={16} />
+              <CheckCircle size={16} aria-hidden="true" />
               <span>Marcar como completado</span>
             </button>
           </footer>

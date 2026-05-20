@@ -25,16 +25,17 @@ export function HealthEventsTable({ events, onComplete }) {
   }
 
   return (
-    <div className="health-events-table">
+    <ul className="health-events-table" aria-label="Listado de eventos sanitarios">
       {events.map((event) => {
         const status = STATUS_CONFIG[event.status] || STATUS_CONFIG.PENDING;
         const canComplete = event.status === 'PENDING' || event.status === 'OVERDUE';
+        const eventLabel = translateEventType(event.eventType?.name);
 
         return (
-          <div key={event.id} className="health-events-table__row">
+          <li key={event.id} className="health-events-table__row">
             <span className="health-events-table__date">{formatDate(event.scheduledDate)}</span>
             <div className="health-events-table__info">
-              <span className="health-events-table__type">{translateEventType(event.eventType?.name)}</span>
+              <span className="health-events-table__type">{eventLabel}</span>
               {event.product && (
                 <span className="health-events-table__product">{event.product}</span>
               )}
@@ -50,14 +51,14 @@ export function HealthEventsTable({ events, onComplete }) {
                 className="health-events-table__complete"
                 onClick={() => onComplete?.(event.id)}
                 type="button"
-                title="Marcar como completado"
+                aria-label={`Completar evento ${eventLabel} del ${formatDate(event.scheduledDate)}`}
               >
-                <CheckCircle size={18} />
+                <CheckCircle size={18} aria-hidden="true" />
               </button>
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }

@@ -93,7 +93,7 @@ export function JoinGroupPanel() {
             aria-label="Pegar del portapapeles"
             title="Pegar del portapapeles"
           >
-            <Clipboard size={14} />
+            <Clipboard size={14} aria-hidden="true" />
           </button>
         </div>
         <button
@@ -101,7 +101,7 @@ export function JoinGroupPanel() {
           className="join-group__btn"
           disabled={submitting || !code.trim()}
         >
-          <LogIn size={14} />
+          <LogIn size={14} aria-hidden="true" />
           <span>{submitting ? 'Uniéndome…' : 'Unirme'}</span>
         </button>
       </form>
@@ -109,7 +109,7 @@ export function JoinGroupPanel() {
       <div className="join-group__memberships">
         <h3 className="join-group__memberships-title">Grupos en los que colaboras</h3>
         {loading ? (
-          <p className="join-group__memberships-empty">Cargando…</p>
+          <p className="join-group__memberships-empty" role="status" aria-live="polite">Cargando…</p>
         ) : memberships.length === 0 ? (
           <p className="join-group__memberships-empty">
             Todavía no colaboras en ningún grupo.
@@ -136,7 +136,7 @@ export function JoinGroupPanel() {
                     aria-label="Salir del grupo"
                     title="Salir del grupo"
                   >
-                    <LogOut size={14} />
+                    <LogOut size={14} aria-hidden="true" />
                   </button>
                 </div>
               </li>

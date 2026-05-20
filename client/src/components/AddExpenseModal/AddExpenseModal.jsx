@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import {
   createExpense,
   updateExpense,
 } from '../../services/expense.service';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AddExpenseModal.scss';
 
 const CATEGORY_OPTIONS = [
@@ -46,6 +47,8 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
   const [form, setForm] = useState(buildEmptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open);
 
@@ -116,11 +119,11 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
   };
 
   return (
-    <div className="add-expense-modal" role="dialog" aria-modal="true">
-      <div className="add-expense-modal__overlay" onClick={onClose} />
-      <div className="add-expense-modal__content">
+    <div className="add-expense-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="add-expense-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="add-expense-modal__content" ref={containerRef}>
         <header className="add-expense-modal__header">
-          <h2 className="add-expense-modal__title">
+          <h2 id={titleId} className="add-expense-modal__title">
             {isEdit ? 'Editar gasto' : 'Añadir gasto'}
           </h2>
           <button
@@ -129,7 +132,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
@@ -137,7 +140,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
           <div className="add-expense-modal__row">
             <div className="add-expense-modal__field">
               <label className="add-expense-modal__label" htmlFor="expense-group">
-                Grupo *
+                Grupo <span aria-hidden="true">*</span>
               </label>
               <select
                 id="expense-group"
@@ -145,6 +148,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
                 value={form.groupId}
                 onChange={handleGroupChange}
                 required
+                aria-required="true"
               >
                 <option value="">Selecciona un grupo</option>
                 {groups.map((g) => (
@@ -157,7 +161,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
 
             <div className="add-expense-modal__field">
               <label className="add-expense-modal__label" htmlFor="expense-animal">
-                Animal *
+                Animal <span aria-hidden="true">*</span>
               </label>
               <select
                 id="expense-animal"
@@ -166,6 +170,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
                 onChange={handleChange('animalId')}
                 disabled={!form.groupId}
                 required
+                aria-required="true"
               >
                 <option value="">
                   {form.groupId ? 'Selecciona un animal' : 'Elige antes un grupo'}
@@ -182,7 +187,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
           <div className="add-expense-modal__row">
             <div className="add-expense-modal__field">
               <label className="add-expense-modal__label" htmlFor="expense-amount">
-                Importe (EUR) *
+                Importe (EUR) <span aria-hidden="true">*</span>
               </label>
               <input
                 id="expense-amount"
@@ -193,12 +198,13 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
                 value={form.amount}
                 onChange={handleChange('amount')}
                 required
+                aria-required="true"
               />
             </div>
 
             <div className="add-expense-modal__field">
               <label className="add-expense-modal__label" htmlFor="expense-date">
-                Fecha *
+                Fecha <span aria-hidden="true">*</span>
               </label>
               <input
                 id="expense-date"
@@ -208,13 +214,14 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
                 onChange={handleChange('expenseDate')}
                 max={todayIso()}
                 required
+                aria-required="true"
               />
             </div>
           </div>
 
           <div className="add-expense-modal__field">
             <label className="add-expense-modal__label" htmlFor="expense-category">
-              Categoría *
+              Categoría <span aria-hidden="true">*</span>
             </label>
             <select
               id="expense-category"
@@ -222,6 +229,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
               value={form.category}
               onChange={handleChange('category')}
               required
+              aria-required="true"
             >
               {CATEGORY_OPTIONS.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -246,7 +254,7 @@ export function AddExpenseModal({ open, animals, initial, onClose, onSaved }) {
             />
           </div>
 
-          {error && <p className="add-expense-modal__error">{error}</p>}
+          {error && <p className="add-expense-modal__error" role="alert">{error}</p>}
 
           <footer className="add-expense-modal__footer">
             <button

@@ -38,19 +38,19 @@ export function VetVisitsList({ visits, canManage = false, onEdit, onDelete }) {
                       type="button"
                       className="vet-visits-list__icon-btn"
                       onClick={() => onEdit?.(visit)}
-                      aria-label="Editar visita"
+                      aria-label="Editar"
                       title="Editar"
                     >
-                      <Pencil size={14} />
+                      <Pencil size={14} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
                       className="vet-visits-list__icon-btn vet-visits-list__icon-btn--danger"
                       onClick={() => onDelete?.(visit)}
-                      aria-label="Eliminar visita"
+                      aria-label="Eliminar"
                       title="Eliminar"
                     >
-                      <Trash size={14} />
+                      <Trash size={14} aria-hidden="true" />
                     </button>
                   </div>
                 )}

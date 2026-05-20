@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { createEventType } from '../../services/protocol.service';
 import { translateEventType } from '../../utils/eventTypeLabels';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './ProtocolStepModal.scss';
 
 const OTHER_OPTION = '__OTHER__';
@@ -29,6 +30,8 @@ function buildFormFromInitial(initial) {
 export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
   const [form, setForm] = useState(() => buildFormFromInitial(initial));
   const [error, setError] = useState('');
+  const titleId = useId();
+  const containerRef = useFocusTrap(true);
 
   useEscapeKey(onClose);
   const [submitting, setSubmitting] = useState(false);
@@ -90,21 +93,22 @@ export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
   };
 
   return (
-    <div className="step-modal" role="dialog" aria-modal="true" onClick={onClose}>
+    <div className="step-modal" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={onClose}>
       <form
         className="step-modal__panel"
+        ref={containerRef}
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
       >
         <header className="step-modal__head">
-          <h2 className="step-modal__title">{initial ? 'Editar paso' : 'Añadir paso'}</h2>
+          <h2 id={titleId} className="step-modal__title">{initial ? 'Editar paso' : 'Añadir paso'}</h2>
           <button
             type="button"
             className="step-modal__close"
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </header>
 
@@ -118,6 +122,7 @@ export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
             value={form.eventTypeId}
             onChange={handleChange('eventTypeId')}
             required
+            aria-required="true"
           >
             <option value="">Selecciona…</option>
             {eventTypes.map((et) => (
@@ -142,6 +147,7 @@ export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
               onChange={handleChange('customName')}
               placeholder="p. ej. Revisión post-operatoria"
               required
+              aria-required="true"
             />
           </div>
         )}
@@ -158,6 +164,7 @@ export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
             value={form.dayOffset}
             onChange={handleChange('dayOffset')}
             required
+            aria-required="true"
           />
         </div>
 
@@ -188,7 +195,7 @@ export function ProtocolStepModal({ initial, eventTypes, onClose, onSubmit }) {
           />
         </div>
 
-        {error && <p className="step-modal__error">{error}</p>}
+        {error && <p className="step-modal__error" role="alert">{error}</p>}
 
         <footer className="step-modal__actions">
           <button

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { createAnimalVisit, updateVisit } from '../../services/animal.service';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AddVisitModal.scss';
 
 const EMPTY_FORM = {
@@ -33,6 +34,8 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open);
 
@@ -79,11 +82,11 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
   };
 
   return (
-    <div className="add-visit-modal" role="dialog" aria-modal="true">
-      <div className="add-visit-modal__overlay" onClick={onClose} />
-      <div className="add-visit-modal__content">
+    <div className="add-visit-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="add-visit-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="add-visit-modal__content" ref={containerRef}>
         <header className="add-visit-modal__header">
-          <h2 className="add-visit-modal__title">
+          <h2 id={titleId} className="add-visit-modal__title">
             {isEdit ? 'Editar visita veterinaria' : 'Añadir visita veterinaria'}
           </h2>
           <button
@@ -92,7 +95,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
@@ -100,7 +103,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
           <div className="add-visit-modal__row">
             <div className="add-visit-modal__field">
               <label className="add-visit-modal__label" htmlFor="visit-date">
-                Fecha de la visita *
+                Fecha de la visita <span aria-hidden="true">*</span>
               </label>
               <input
                 id="visit-date"
@@ -110,6 +113,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
                 onChange={handleChange('visitDate')}
                 max={todayIso()}
                 required
+                aria-required="true"
               />
             </div>
 
@@ -132,7 +136,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
 
           <div className="add-visit-modal__field">
             <label className="add-visit-modal__label" htmlFor="visit-reason">
-              Motivo *
+              Motivo <span aria-hidden="true">*</span>
             </label>
             <input
               id="visit-reason"
@@ -143,6 +147,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
               onChange={handleChange('reason')}
               placeholder="Ej: Revisión anual"
               required
+              aria-required="true"
             />
           </div>
 
@@ -199,7 +204,7 @@ export function AddVisitModal({ open, animalId, initial, onClose, onSaved }) {
             />
           </div>
 
-          {error && <p className="add-visit-modal__error">{error}</p>}
+          {error && <p className="add-visit-modal__error" role="alert">{error}</p>}
 
           <footer className="add-visit-modal__footer">
             <button

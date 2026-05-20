@@ -140,7 +140,10 @@ export function ProfileSettings() {
           </button>
         </div>
         {profileMessage && (
-          <p className={`profile-settings__message profile-settings__message--${profileMessage.type}`}>
+          <p
+            className={`profile-settings__message profile-settings__message--${profileMessage.type}`}
+            role={profileMessage.type === 'error' ? 'alert' : 'status'}
+          >
             {profileMessage.text}
           </p>
         )}
@@ -187,7 +190,10 @@ export function ProfileSettings() {
           </button>
         </div>
         {passwordMessage && (
-          <p className={`profile-settings__message profile-settings__message--${passwordMessage.type}`}>
+          <p
+            className={`profile-settings__message profile-settings__message--${passwordMessage.type}`}
+            role={passwordMessage.type === 'error' ? 'alert' : 'status'}
+          >
             {passwordMessage.text}
           </p>
         )}
@@ -212,6 +218,7 @@ export function ProfileSettings() {
       {notificationsMessage && (
         <p
           className={`profile-settings__message profile-settings__message--${notificationsMessage.type}`}
+          role={notificationsMessage.type === 'error' ? 'alert' : 'status'}
         >
           {notificationsMessage.text}
         </p>

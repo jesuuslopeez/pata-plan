@@ -76,6 +76,14 @@
     padding: 0 0.625rem;
   }
 
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    @include flex-column;
+    gap: 0.125rem;
+  }
+
   &__footer {
     @include flex-column;
     gap: 0.125rem;

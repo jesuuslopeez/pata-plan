@@ -149,7 +149,7 @@ export function GroupCollaboratorsPanel() {
       </p>
 
       {loading ? (
-        <p className="group-collaborators__loading">Cargando…</p>
+        <p className="group-collaborators__loading" role="status" aria-live="polite">Cargando…</p>
       ) : groups.length === 0 ? (
         <p className="group-collaborators__empty">
           Crea un grupo primero para poder gestionar colaboradores.
@@ -167,7 +167,7 @@ export function GroupCollaboratorsPanel() {
                   className="group-collaborators__toggle"
                   onClick={() => toggle(group.id)}
                 >
-                  {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                  {isOpen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
                   <span className="group-collaborators__name">{group.name}</span>
                 </button>
 
@@ -193,7 +193,7 @@ export function GroupCollaboratorsPanel() {
                             aria-label="Copiar código"
                             title="Copiar código"
                           >
-                            <Copy size={14} />
+                            <Copy size={14} aria-hidden="true" />
                           </button>
                         )}
                         <button
@@ -203,7 +203,7 @@ export function GroupCollaboratorsPanel() {
                           aria-label="Regenerar código"
                           title={code ? 'Regenerar código' : 'Generar código'}
                         >
-                          <RefreshCw size={14} />
+                          <RefreshCw size={14} aria-hidden="true" />
                         </button>
                         {code && (
                           <button
@@ -213,7 +213,7 @@ export function GroupCollaboratorsPanel() {
                             aria-label="Revocar código"
                             title="Revocar código"
                           >
-                            <Ban size={14} />
+                            <Ban size={14} aria-hidden="true" />
                           </button>
                         )}
                       </div>
@@ -265,7 +265,7 @@ export function GroupCollaboratorsPanel() {
                                   }
                                   aria-label="Eliminar colaborador"
                                 >
-                                  <Trash size={14} />
+                                  <Trash size={14} aria-hidden="true" />
                                 </button>
                               </div>
                             </li>

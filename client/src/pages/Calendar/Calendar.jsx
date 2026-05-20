@@ -6,6 +6,7 @@ import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
 import { CalendarGrid } from '../../components/CalendarGrid/CalendarGrid';
 import { EventDetailModal } from '../../components/EventDetailModal/EventDetailModal';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Calendar.scss';
 
 const MONTH_LABELS = [
@@ -23,6 +24,7 @@ const TYPE_OPTIONS = [
 ];
 
 export function Calendar() {
+  usePageTitle('Calendario');
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -157,9 +159,9 @@ export function Calendar() {
             type="button"
             aria-label="Mes anterior"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={18} aria-hidden="true" />
           </button>
-          <span className="calendar-page__month-label">
+          <span className="calendar-page__month-label" aria-live="polite">
             {MONTH_LABELS[month]} {year}
           </span>
           <button
@@ -168,7 +170,7 @@ export function Calendar() {
             type="button"
             aria-label="Mes siguiente"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={18} aria-hidden="true" />
           </button>
           <button className="calendar-page__today-btn" onClick={handleToday} type="button">
             Hoy
@@ -176,13 +178,28 @@ export function Calendar() {
         </div>
 
         <div className="calendar-page__filters">
-          <SelectFilter value={animalId} onChange={setAnimalId} options={animalOptions} />
-          <SelectFilter value={groupId} onChange={setGroupId} options={groupOptions} />
-          <SelectFilter value={typeFilter} onChange={setTypeFilter} options={TYPE_OPTIONS} />
+          <SelectFilter
+            value={animalId}
+            onChange={setAnimalId}
+            options={animalOptions}
+            aria-label="Filtrar por animal"
+          />
+          <SelectFilter
+            value={groupId}
+            onChange={setGroupId}
+            options={groupOptions}
+            aria-label="Filtrar por grupo"
+          />
+          <SelectFilter
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={TYPE_OPTIONS}
+            aria-label="Filtrar por tipo de evento"
+          />
         </div>
       </div>
 
-      <div className="calendar-page__legend">
+      <div className="calendar-page__legend" role="list" aria-label="Leyenda del calendario">
         <LegendItem className="calendar-page__legend-item--vaccine" label="Vacuna" />
         <LegendItem className="calendar-page__legend-item--deworming" label="Desparasitación" />
         <LegendItem className="calendar-page__legend-item--treatment" label="Tratamiento" />
@@ -190,7 +207,7 @@ export function Calendar() {
       </div>
 
       {loading ? (
-        <div className="calendar-page__loading">Cargando calendario...</div>
+        <div className="calendar-page__loading" role="status" aria-live="polite">Cargando calendario...</div>
       ) : (
         <CalendarGrid
           year={year}
@@ -222,8 +239,8 @@ export function Calendar() {
 
 function LegendItem({ className, label }) {
   return (
-    <div className="calendar-page__legend-item">
-      <span className={`calendar-page__legend-dot ${className}`} />
+    <div className="calendar-page__legend-item" role="listitem">
+      <span className={`calendar-page__legend-dot ${className}`} aria-hidden="true" />
       <span>{label}</span>
     </div>
   );

@@ -29,8 +29,8 @@ export function WeightHistoryList({ weights, canManage = false, onEdit, onDelete
                 {Number(w.valueKg).toFixed(2)} kg
               </span>
               {w.isAnomaly && (
-                <span className="weight-history-list__anomaly">
-                  <AlertTriangle size={12} />
+                <span className="weight-history-list__anomaly" role="status">
+                  <AlertTriangle size={12} aria-hidden="true" />
                   <span>Anómalo</span>
                 </span>
               )}
@@ -42,19 +42,19 @@ export function WeightHistoryList({ weights, canManage = false, onEdit, onDelete
                   type="button"
                   className="weight-history-list__icon-btn"
                   onClick={() => onEdit?.(w)}
-                  aria-label="Editar registro"
+                  aria-label="Editar"
                   title="Editar"
                 >
-                  <Pencil size={14} />
+                  <Pencil size={14} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   className="weight-history-list__icon-btn weight-history-list__icon-btn--danger"
                   onClick={() => onDelete?.(w)}
-                  aria-label="Eliminar registro"
+                  aria-label="Eliminar"
                   title="Eliminar"
                 >
-                  <Trash size={14} />
+                  <Trash size={14} aria-hidden="true" />
                 </button>
               </div>
             )}

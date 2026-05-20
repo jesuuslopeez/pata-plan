@@ -1,4 +1,6 @@
-﻿*,
+﻿@use 'variables' as *;
+
+*,
 *::before,
 *::after {
   box-sizing: border-box;
@@ -34,7 +36,7 @@ select {
 }
 
 :focus-visible {
-  outline: 0.125rem solid #1a7a5c;
+  outline: 0.125rem solid $primary-600;
   outline-offset: 0.125rem;
   border-radius: 0.125rem;
 }
@@ -42,19 +44,19 @@ select {
 .skip-link {
   position: absolute;
   top: -2.5rem;
-  left: 0.5rem;
+  left: $spacing-2;
   z-index: 1000;
-  padding: 0.5rem 0.75rem;
-  background-color: #1a7a5c;
-  color: #fafaf8;
+  padding: $spacing-2 $spacing-3;
+  background-color: $primary-600;
+  color: $neutral-white;
   font-weight: 600;
-  border-radius: 0.25rem;
+  border-radius: $radius-sm;
   transition: top 0.15s ease;
 
   &:focus,
   &:focus-visible {
-    top: 0.5rem;
-    outline: 0.125rem solid #fafaf8;
+    top: $spacing-2;
+    outline: 0.125rem solid $neutral-white;
     outline-offset: 0.125rem;
   }
 }

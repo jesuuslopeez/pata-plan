@@ -18,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { ChevronLeft, GripVertical, Pencil, Plus, Trash } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import {
   createProtocol,
   getEventTypes,
@@ -49,6 +50,7 @@ let localStepCounter = 0;
 const nextLocalKey = () => `local-${++localStepCounter}-${Date.now()}`;
 
 export function ProtocolEditor() {
+  usePageTitle('Editor de protocolo');
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
@@ -187,7 +189,7 @@ export function ProtocolEditor() {
     : null;
 
   if (loading) {
-    return <div className="protocol-editor__loading">Cargando…</div>;
+    return <div className="protocol-editor__loading" role="status" aria-live="polite">Cargando…</div>;
   }
 
   const readOnly = !isAdmin;
@@ -199,7 +201,7 @@ export function ProtocolEditor() {
         className="protocol-editor__back"
         onClick={() => navigate('/protocols')}
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={16} aria-hidden="true" />
         <span>Volver a protocolos</span>
       </button>
 
@@ -252,7 +254,7 @@ export function ProtocolEditor() {
           />
         </div>
 
-        {error && <p className="protocol-editor__error">{error}</p>}
+        {error && <p className="protocol-editor__error" role="alert">{error}</p>}
       </form>
 
       <section className="protocol-editor__timeline">
@@ -267,7 +269,7 @@ export function ProtocolEditor() {
                 setModalOpen(true);
               }}
             >
-              <Plus size={16} />
+              <Plus size={16} aria-hidden="true" />
               <span>Añadir paso</span>
             </button>
           )}
@@ -375,7 +377,7 @@ function SortableStep({ step, index, readOnly, onEdit, onRemove }) {
           {...attributes}
           {...listeners}
         >
-          <GripVertical size={16} />
+          <GripVertical size={16} aria-hidden="true" />
         </button>
       )}
 
@@ -403,7 +405,7 @@ function SortableStep({ step, index, readOnly, onEdit, onRemove }) {
             onClick={onEdit}
             aria-label="Editar paso"
           >
-            <Pencil size={14} />
+            <Pencil size={14} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -411,7 +413,7 @@ function SortableStep({ step, index, readOnly, onEdit, onRemove }) {
             onClick={onRemove}
             aria-label="Eliminar paso"
           >
-            <Trash size={14} />
+            <Trash size={14} aria-hidden="true" />
           </button>
         </div>
       )}

@@ -11,9 +11,9 @@ export function SpendSummary({ amount, changePercent }) {
   const arrow = isDecrease ? '↓' : '↑';
 
   return (
-    <section className="spend-summary">
-      <p className="spend-summary__label">Gasto este mes</p>
-      <div className="spend-summary__amount-row">
+    <section className="spend-summary" aria-label="Gasto del mes">
+      <p className="spend-summary__label" id="spend-summary-label">Gasto este mes</p>
+      <div className="spend-summary__amount-row" aria-labelledby="spend-summary-label">
         <span className="spend-summary__amount">{formatAmount(amount)}</span>
         <span className="spend-summary__currency">EUR</span>
       </div>
@@ -23,7 +23,8 @@ export function SpendSummary({ amount, changePercent }) {
             isDecrease ? 'spend-summary__change--down' : 'spend-summary__change--up'
           }`}
         >
-          {arrow} {Math.abs(changePercent).toFixed(0)}% vs mes anterior
+          <span aria-hidden="true">{arrow} </span>
+          {Math.abs(changePercent).toFixed(0)}% vs mes anterior
         </p>
       )}
     </section>

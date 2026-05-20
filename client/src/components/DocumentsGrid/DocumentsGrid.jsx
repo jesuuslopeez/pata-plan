@@ -80,7 +80,7 @@ export function DocumentsGrid({ animalId }) {
           className="documents-grid__upload-btn"
           onClick={() => setUploadOpen(true)}
         >
-          <Upload size={16} />
+          <Upload size={16} aria-hidden="true" />
           <span>Subir documento</span>
         </button>
       </header>
@@ -93,7 +93,7 @@ export function DocumentsGrid({ animalId }) {
         </div>
       ) : documents.length === 0 ? (
         <div className="documents-grid__empty">
-          <FileText className="documents-grid__empty-icon" size={48} />
+          <FileText className="documents-grid__empty-icon" size={48} aria-hidden="true" />
           <p className="documents-grid__empty-text">Sin documentos</p>
           <button
             type="button"
@@ -131,7 +131,7 @@ export function DocumentsGrid({ animalId }) {
                   aria-label="Renombrar documento"
                   title="Renombrar"
                 >
-                  <Pencil size={14} />
+                  <Pencil size={14} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -143,7 +143,7 @@ export function DocumentsGrid({ animalId }) {
                   aria-label="Eliminar documento"
                   title="Eliminar"
                 >
-                  <Trash size={14} />
+                  <Trash size={14} aria-hidden="true" />
                 </button>
               </div>
 
@@ -157,7 +157,7 @@ export function DocumentsGrid({ animalId }) {
                   />
                 ) : (
                   <div className="document-card__pdf">
-                    <FileText size={40} className="document-card__pdf-icon" />
+                    <FileText size={40} className="document-card__pdf-icon" aria-hidden="true" />
                     <span className="document-card__pdf-label">PDF</span>
                   </div>
                 )}

@@ -36,9 +36,9 @@ function formatDate(dateString) {
 
 export function UpcomingEvents({ events }) {
   return (
-    <section className="upcoming-events">
+    <section className="upcoming-events" aria-label="Próximos eventos">
       <div className="upcoming-events__header">
-        <Calendar className="upcoming-events__icon" size={16} />
+        <Calendar className="upcoming-events__icon" size={16} aria-hidden="true" />
         <h3 className="upcoming-events__title">Próximos días</h3>
       </div>
 
@@ -52,7 +52,10 @@ export function UpcomingEvents({ events }) {
               <span className="upcoming-events__label">
                 {event.animal?.name} - {translateEventType(event.eventType?.name)}
               </span>
-              <span className={`upcoming-events__badge ${CATEGORY_CLASS[event.eventType?.category] || ''}`}>
+              <span
+                className={`upcoming-events__badge ${CATEGORY_CLASS[event.eventType?.category] || ''}`}
+                role="status"
+              >
                 {CATEGORY_LABEL[event.eventType?.category] || event.eventType?.category}
               </span>
             </li>

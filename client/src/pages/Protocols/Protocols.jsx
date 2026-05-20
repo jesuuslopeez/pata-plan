@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { getProtocols, deleteProtocol } from '../../services/protocol.service';
 import { Badge } from '../../components/Badge/Badge';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import { translateEventType } from '../../utils/eventTypeLabels';
 import './Protocols.scss';
 
@@ -25,6 +26,7 @@ const CATEGORY_VARIANT = {
 };
 
 export function Protocols() {
+  usePageTitle('Protocolos');
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -72,21 +74,21 @@ export function Protocols() {
             type="button"
             onClick={() => navigate('/protocols/new')}
           >
-            <Plus size={18} />
+            <Plus size={18} aria-hidden="true" />
             <span>Crear protocolo</span>
           </button>
         )}
       </header>
 
       {loading ? (
-        <div className="protocols__grid">
+        <div className="protocols__grid" aria-live="polite" aria-label="Cargando protocolos">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="protocols__skeleton" />
+            <div key={i} className="protocols__skeleton" aria-hidden="true" />
           ))}
         </div>
       ) : protocols.length === 0 ? (
-        <div className="protocols__empty">
-          <ClipboardList size={48} className="protocols__empty-icon" />
+        <div className="protocols__empty" role="status">
+          <ClipboardList size={48} className="protocols__empty-icon" aria-hidden="true" />
           <p className="protocols__empty-text">Aún no hay protocolos definidos</p>
           {isAdmin && (
             <button
@@ -94,7 +96,7 @@ export function Protocols() {
               type="button"
               onClick={() => navigate('/protocols/new')}
             >
-              <Plus size={18} />
+              <Plus size={18} aria-hidden="true" />
               <span>Crear el primero</span>
             </button>
           )}
@@ -143,8 +145,9 @@ export function Protocols() {
                   className="protocol-card__btn protocol-card__btn--secondary"
                   type="button"
                   onClick={() => navigate(`/protocols/${protocol.id}/edit`)}
+                  aria-label={isAdmin ? `Editar protocolo ${protocol.name}` : `Ver detalle de ${protocol.name}`}
                 >
-                  <Pencil size={14} />
+                  <Pencil size={14} aria-hidden="true" />
                   <span>{isAdmin ? 'Editar' : 'Ver detalle'}</span>
                 </button>
                 {isAdmin && (
@@ -152,8 +155,9 @@ export function Protocols() {
                     className="protocol-card__btn protocol-card__btn--danger"
                     type="button"
                     onClick={() => setDeletingProtocol(protocol)}
+                    aria-label={`Eliminar protocolo ${protocol.name}`}
                   >
-                    <Trash size={14} />
+                    <Trash size={14} aria-hidden="true" />
                     <span>Eliminar</span>
                   </button>
                 )}

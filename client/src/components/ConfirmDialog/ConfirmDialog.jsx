@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './ConfirmDialog.scss';
 
 export function ConfirmDialog({
@@ -15,6 +16,9 @@ export function ConfirmDialog({
   onClose,
 }) {
   const [busy, setBusy] = useState(false);
+  const titleId = useId();
+  const messageId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEffect(() => {
     if (!open) setBusy(false);
@@ -39,22 +43,28 @@ export function ConfirmDialog({
   };
 
   return (
-    <div className="confirm-dialog" role="dialog" aria-modal="true">
-      <div className="confirm-dialog__overlay" onClick={onClose} />
-      <div className="confirm-dialog__content">
+    <div
+      className="confirm-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={message ? messageId : undefined}
+    >
+      <div className="confirm-dialog__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="confirm-dialog__content" ref={containerRef}>
         <header className="confirm-dialog__header">
-          <h2 className="confirm-dialog__title">{title}</h2>
+          <h2 className="confirm-dialog__title" id={titleId}>{title}</h2>
           <button
             type="button"
             className="confirm-dialog__close"
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
-        {message && <p className="confirm-dialog__message">{message}</p>}
+        {message && <p className="confirm-dialog__message" id={messageId}>{message}</p>}
 
         <footer className="confirm-dialog__footer">
           {!hideCancel && (

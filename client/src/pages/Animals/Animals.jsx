@@ -7,6 +7,7 @@ import { AnimalCard } from '../../components/AnimalCard/AnimalCard';
 import { SearchInput } from '../../components/SearchInput/SearchInput';
 import { SelectFilter } from '../../components/SelectFilter/SelectFilter';
 import { AddAnimalModal } from '../../components/AddAnimalModal/AddAnimalModal';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Animals.scss';
 
 const SPECIES_OPTIONS = [
@@ -17,6 +18,7 @@ const SPECIES_OPTIONS = [
 ];
 
 export function Animals() {
+  usePageTitle('Animales');
   const { isAdmin } = useAuth();
   const [animals, setAnimals] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -56,7 +58,7 @@ export function Animals() {
   const editableGroups = groups.filter((g) => !g.role || g.role === 'OWNER' || g.role === 'EDITOR');
 
   return (
-    <div className="animals">
+    <div className="animals" aria-busy={loading}>
       <header className="animals__header">
         <h1 className="animals__title">Animales</h1>
         {isAdmin && (
@@ -65,27 +67,41 @@ export function Animals() {
             type="button"
             onClick={() => setAddOpen(true)}
           >
-            <Plus size={18} />
+            <Plus size={18} aria-hidden="true" />
             <span>Añadir animal</span>
           </button>
         )}
       </header>
 
-      <div className="animals__filters">
-        <SearchInput placeholder="Buscar por nombre..." onSearch={setSearch} />
-        <SelectFilter value={groupId} onChange={setGroupId} options={groupOptions} />
-        <SelectFilter value={species} onChange={setSpecies} options={SPECIES_OPTIONS} />
+      <div className="animals__filters" role="search">
+        <SearchInput
+          placeholder="Buscar por nombre..."
+          onSearch={setSearch}
+          aria-label="Buscar animales por nombre"
+        />
+        <SelectFilter
+          value={groupId}
+          onChange={setGroupId}
+          options={groupOptions}
+          aria-label="Filtrar por grupo"
+        />
+        <SelectFilter
+          value={species}
+          onChange={setSpecies}
+          options={SPECIES_OPTIONS}
+          aria-label="Filtrar por especie"
+        />
       </div>
 
       {loading ? (
-        <div className="animals__grid">
+        <div className="animals__grid" aria-live="polite" aria-label="Cargando animales">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animals__skeleton" />
+            <div key={i} className="animals__skeleton" aria-hidden="true" />
           ))}
         </div>
       ) : animals.length === 0 ? (
-        <div className="animals__empty">
-          <PawPrint className="animals__empty-icon" size={48} />
+        <div className="animals__empty" role="status">
+          <PawPrint className="animals__empty-icon" size={48} aria-hidden="true" />
           <p className="animals__empty-text">No se encontraron animales</p>
           {isAdmin && (
             <button
@@ -93,13 +109,13 @@ export function Animals() {
               type="button"
               onClick={() => setAddOpen(true)}
             >
-              <Plus size={18} />
+              <Plus size={18} aria-hidden="true" />
               <span>Añadir animal</span>
             </button>
           )}
         </div>
       ) : (
-        <div className="animals__grid">
+        <div className="animals__grid" aria-live="polite">
           {animals.map((animal) => (
             <AnimalCard key={animal.id} animal={animal} />
           ))}

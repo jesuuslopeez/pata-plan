@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { PawPrint, Upload, X, FolderPlus, Sparkles } from 'lucide-react';
 import { createAnimal, updateAnimal } from '../../services/animal.service';
 import { createGroup } from '../../services/group.service';
 import { resolveAssetUrl } from '../../utils/assetUrl';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AddAnimalModal.scss';
 
 const SPECIES_OPTIONS = [
@@ -58,6 +59,9 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
   useEscapeKey(onClose, open);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
+  const titleId = useId();
+  const errorId = useId();
+  const containerRef = useFocusTrap(open);
 
   const noGroups = !isEdit && (!groups || groups.length === 0);
 
@@ -167,11 +171,11 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
   };
 
   return (
-    <div className="add-animal-modal" role="dialog" aria-modal="true">
-      <div className="add-animal-modal__overlay" onClick={onClose} />
-      <div className="add-animal-modal__content">
+    <div className="add-animal-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="add-animal-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="add-animal-modal__content" ref={containerRef}>
         <header className="add-animal-modal__header">
-          <h2 className="add-animal-modal__title">
+          <h2 className="add-animal-modal__title" id={titleId}>
             {isEdit ? 'Editar animal' : 'Añadir animal'}
           </h2>
           <button
@@ -180,21 +184,21 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
         <form className="add-animal-modal__form" onSubmit={handleSubmit}>
           <div className="add-animal-modal__photo">
-            <div className="add-animal-modal__photo-preview">
+            <div className="add-animal-modal__photo-preview" aria-hidden={!photoPreview}>
               {photoPreview ? (
                 <img
                   src={photoPreview}
-                  alt="Vista previa"
+                  alt={isEdit && form.name ? `Foto de ${form.name}` : 'Vista previa de la foto'}
                   className="add-animal-modal__photo-img"
                 />
               ) : (
-                <PawPrint size={32} className="add-animal-modal__photo-placeholder" />
+                <PawPrint size={32} className="add-animal-modal__photo-placeholder" aria-hidden="true" />
               )}
             </div>
             <div className="add-animal-modal__photo-actions">
@@ -211,7 +215,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
                 className="add-animal-modal__btn add-animal-modal__btn--secondary"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload size={14} />
+                <Upload size={14} aria-hidden="true" />
                 <span>{photoPreview ? 'Cambiar foto' : 'Subir foto'}</span>
               </button>
               {photoPreview && (
@@ -228,7 +232,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
 
           <div className="add-animal-modal__field">
             <label className="add-animal-modal__label" htmlFor="animal-name">
-              Nombre *
+              Nombre <span aria-hidden="true">*</span>
             </label>
             <input
               id="animal-name"
@@ -237,6 +241,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
               value={form.name}
               onChange={handleChange('name')}
               required
+              aria-required="true"
               autoFocus
             />
           </div>
@@ -244,7 +249,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
           <div className="add-animal-modal__row">
             <div className="add-animal-modal__field">
               <label className="add-animal-modal__label" htmlFor="animal-species">
-                Especie *
+                Especie <span aria-hidden="true">*</span>
               </label>
               <select
                 id="animal-species"
@@ -252,6 +257,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
                 value={form.species}
                 onChange={handleChange('species')}
                 required
+                aria-required="true"
               >
                 <option value="" disabled>
                   Selecciona una especie
@@ -266,7 +272,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
 
             <div className="add-animal-modal__field">
               <label className="add-animal-modal__label" htmlFor="animal-sex">
-                Sexo *
+                Sexo <span aria-hidden="true">*</span>
               </label>
               <select
                 id="animal-sex"
@@ -274,6 +280,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
                 value={form.sex}
                 onChange={handleChange('sex')}
                 required
+                aria-required="true"
               >
                 {SEX_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -286,7 +293,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
 
           <div className="add-animal-modal__field">
             <label className="add-animal-modal__label" htmlFor="animal-group">
-              Grupo *
+              Grupo <span aria-hidden="true">*</span>
             </label>
             <select
               id="animal-group"
@@ -294,6 +301,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
               value={form.groupId}
               onChange={handleChange('groupId')}
               required
+              aria-required="true"
               disabled={noGroups}
             >
               <option value="" disabled>
@@ -344,12 +352,12 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
                     onClick={handleCreateGroup}
                     disabled={creatingGroup || !newGroupName.trim()}
                   >
-                    <FolderPlus size={16} />
+                    <FolderPlus size={16} aria-hidden="true" />
                     <span>{creatingGroup ? 'Creando…' : 'Crear grupo'}</span>
                   </button>
                 </div>
                 {groupError && (
-                  <p className="add-animal-modal__group-hint-error">{groupError}</p>
+                  <p className="add-animal-modal__group-hint-error" role="alert">{groupError}</p>
                 )}
               </div>
             )}
@@ -410,7 +418,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
             />
           </div>
 
-          {error && <p className="add-animal-modal__error">{error}</p>}
+          {error && <p className="add-animal-modal__error" id={errorId} role="alert">{error}</p>}
 
           <footer className="add-animal-modal__footer">
             <button

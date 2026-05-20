@@ -29,16 +29,20 @@ export function AnimalAlertCard({ animal, group, alerts }) {
   const groupName = group?.name || '';
 
   return (
-    <div className="animal-alert-card">
-      <div className={`animal-alert-card__bar ${barClass}`} />
+    <article
+      className="animal-alert-card"
+      role={hasOverdue ? 'alert' : 'status'}
+      aria-label={`Alertas de ${animal.name}`}
+    >
+      <div className={`animal-alert-card__bar ${barClass}`} aria-hidden="true" />
       <div className="animal-alert-card__content">
         <div className="animal-alert-card__header">
-          <div className="animal-alert-card__avatar">
+          <div className="animal-alert-card__avatar" aria-hidden="true">
             {animal.photoUrl ? (
               <img
                 className="animal-alert-card__avatar-img"
                 src={resolveAssetUrl(animal.photoUrl)}
-                alt={animal.name}
+                alt={`Foto de ${animal.name}`}
               />
             ) : (
               initial
@@ -59,13 +63,13 @@ export function AnimalAlertCard({ animal, group, alerts }) {
                 key={alert.id}
                 className={`animal-alert-card__event ${isOverdue ? 'animal-alert-card__event--overdue' : 'animal-alert-card__event--pending'}`}
               >
-                <span className="animal-alert-card__dot" />
+                <span className="animal-alert-card__dot" aria-hidden="true" />
                 <span>{formatEventText(alert)}</span>
               </li>
             );
           })}
         </ul>
       </div>
-    </div>
+    </article>
   );
 }

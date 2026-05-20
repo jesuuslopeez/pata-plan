@@ -2,12 +2,12 @@
 @use '../../styles/mixins' as *;
 
 .expense-table {
-  display: grid;
-  grid-template-columns: 6.25rem 1fr 9rem 2fr 8rem;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
 
   &__head {
-    display: contents;
-
     .expense-table__th {
       background-color: $neutral-50;
       color: $neutral-600;
@@ -16,6 +16,7 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
       padding: 0.625rem 0.75rem;
+      text-align: left;
 
       &:first-child {
         border-top-left-radius: $radius-md;
@@ -38,17 +39,15 @@
   }
 
   &__row {
-    display: contents;
+    transition: background-color 0.15s;
 
-    > span {
+    > td {
       padding: 0.75rem;
       border-bottom: 0.0625rem solid $neutral-50;
-      display: flex;
-      align-items: center;
-      transition: background-color 0.15s;
+      vertical-align: middle;
     }
 
-    &:hover > span {
+    &:hover > td {
       background-color: $neutral-50;
     }
   }
@@ -57,12 +56,17 @@
     color: $neutral-900;
     font-size: 0.8125rem;
     white-space: nowrap;
+    width: 6.25rem;
   }
 
   &__animal {
     color: $neutral-800;
     font-size: 0.8125rem;
     font-weight: 600;
+  }
+
+  &__cat {
+    width: 9rem;
   }
 
   &__desc {
@@ -72,16 +76,15 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
-    display: block;
   }
 
   &__amount {
-    justify-content: flex-end;
     color: $neutral-900;
     font-size: 0.8125rem;
     font-weight: 700;
     text-align: right;
     white-space: nowrap;
+    width: 8rem;
   }
 
   &__amount-suffix {
