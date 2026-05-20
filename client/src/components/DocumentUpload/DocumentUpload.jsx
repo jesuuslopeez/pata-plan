@@ -124,7 +124,7 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </header>
 
@@ -162,7 +162,7 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
                   className="document-upload__file-thumb"
                 />
               ) : (
-                <FileText size={32} className="document-upload__file-icon" />
+                <FileText size={32} className="document-upload__file-icon" aria-hidden="true" />
               )}
               <div className="document-upload__file-info">
                 <p className="document-upload__file-name" title={file.name}>
@@ -175,7 +175,7 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
             </div>
           ) : (
             <>
-              <Upload size={40} className="document-upload__drop-icon" />
+              <Upload size={40} className="document-upload__drop-icon" aria-hidden="true" />
               <p className="document-upload__drop-title">
                 Arrastra un archivo aquí o haz clic para seleccionar
               </p>
@@ -201,7 +201,7 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
           />
         </div>
 
-        {error && <p className="document-upload__error">{error}</p>}
+        {error && <p className="document-upload__error" role="alert">{error}</p>}
 
         <footer className="document-upload__actions">
           <button

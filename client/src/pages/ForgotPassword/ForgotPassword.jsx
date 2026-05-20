@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { forgotPasswordRequest } from '../../services/auth.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './ForgotPassword.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ForgotPassword() {
+  usePageTitle('Recuperar contraseña');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +35,7 @@ export function ForgotPassword() {
     <div className="forgot-password">
       <div className="forgot-password__left">
         <div className="forgot-password__brand">
-          <img className="forgot-password__logo" src="/pataplan.png" alt="PataPlan" />
+          <img className="forgot-password__logo" src="/pataplan.png" alt="PataPlan logo" />
           <p className="forgot-password__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
@@ -41,7 +43,7 @@ export function ForgotPassword() {
         <div className="forgot-password__form-wrap">
           {sent ? (
             <>
-              <div className="forgot-password__header">
+              <div className="forgot-password__header" role="status">
                 <h2 className="forgot-password__title">Revisa tu correo</h2>
                 <p className="forgot-password__subtitle">
                   Si la dirección está registrada, te hemos enviado un enlace para
@@ -61,7 +63,7 @@ export function ForgotPassword() {
                 </p>
               </div>
 
-              {error && <div className="forgot-password__alert">{error}</div>}
+              {error && <div className="forgot-password__alert" role="alert">{error}</div>}
 
               <div className="forgot-password__field">
                 <label className="forgot-password__label" htmlFor="email">
@@ -74,6 +76,8 @@ export function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="tu@correo.com"
+                  aria-required="true"
+                  aria-invalid={error ? 'true' : 'false'}
                 />
               </div>
 

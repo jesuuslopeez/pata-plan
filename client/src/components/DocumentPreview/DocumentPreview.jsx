@@ -29,7 +29,7 @@ export function DocumentPreview({ open, document, onClose }) {
         onClick={onClose}
         aria-label="Cerrar"
       >
-        <X size={24} />
+        <X size={24} aria-hidden="true" />
       </button>
 
       <figure className="document-preview__figure" onClick={(e) => e.stopPropagation()}>

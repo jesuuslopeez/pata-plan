@@ -21,6 +21,7 @@ import {
   downloadAnimalReport,
 } from '../../services/animal.service';
 import { useAuth } from '../../hooks/useAuth';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import { Badge } from '../../components/Badge/Badge';
 import { Tabs } from '../../components/Tabs/Tabs';
 import { HealthEventsTable } from '../../components/HealthEventsTable/HealthEventsTable';
@@ -90,6 +91,8 @@ export function AnimalProfile() {
   const [visits, setVisits] = useState([]);
   const [weights, setWeights] = useState([]);
   const [trend, setTrend] = useState(null);
+
+  usePageTitle(animal ? animal.name : 'Animal');
 
   const reloadEvents = () =>
     getAnimalEvents(id).then((r) => setEvents(r.data?.events || [])).catch(() => {});
@@ -178,17 +181,21 @@ export function AnimalProfile() {
   };
 
   if (loading) {
-    return <div className="animal-profile__loading">Cargando...</div>;
+    return (
+      <div className="animal-profile__loading" role="status" aria-live="polite">
+        Cargando...
+      </div>
+    );
   }
 
   if (!animal) {
     return (
       <div className="animal-profile">
         <button className="animal-profile__back" onClick={() => navigate('/animals')} type="button">
-          <ChevronLeft size={16} />
+          <ChevronLeft size={16} aria-hidden="true" />
           <span>Volver a animales</span>
         </button>
-        <p className="animal-profile__loading">Animal no encontrado</p>
+        <p className="animal-profile__loading" role="alert">Animal no encontrado</p>
       </div>
     );
   }
@@ -203,16 +210,20 @@ export function AnimalProfile() {
         onClick={() => navigate('/animals')}
         type="button"
       >
-        <ChevronLeft size={16} />
+        <ChevronLeft size={16} aria-hidden="true" />
         <span>Volver a animales</span>
       </button>
 
       <header className="animal-profile__header">
         <div className="animal-profile__photo">
           {animal.photoUrl ? (
-            <img src={resolveAssetUrl(animal.photoUrl)} alt={animal.name} className="animal-profile__photo-img" />
+            <img
+              src={resolveAssetUrl(animal.photoUrl)}
+              alt={`Foto de ${animal.name}`}
+              className="animal-profile__photo-img"
+            />
           ) : (
-            <PawPrint className="animal-profile__photo-placeholder" size={40} />
+            <PawPrint className="animal-profile__photo-placeholder" size={40} aria-hidden="true" />
           )}
         </div>
 
@@ -234,7 +245,7 @@ export function AnimalProfile() {
             onClick={handleDownloadReport}
             disabled={downloadingReport}
           >
-            <FileDown size={16} />
+            <FileDown size={16} aria-hidden="true" />
             <span>{downloadingReport ? 'Generando…' : 'Descargar informe'}</span>
           </button>
           {isAdmin && (
@@ -243,7 +254,7 @@ export function AnimalProfile() {
               type="button"
               onClick={() => setAssignOpen(true)}
             >
-              <ClipboardList size={16} />
+              <ClipboardList size={16} aria-hidden="true" />
               <span>Asignar protocolo</span>
             </button>
           )}
@@ -252,8 +263,9 @@ export function AnimalProfile() {
               className="animal-profile__btn animal-profile__btn--secondary"
               type="button"
               onClick={() => setEditAnimalOpen(true)}
+              aria-label={`Editar ${animal.name}`}
             >
-              <Edit size={16} />
+              <Edit size={16} aria-hidden="true" />
               <span>Editar</span>
             </button>
           )}
@@ -262,8 +274,9 @@ export function AnimalProfile() {
               className="animal-profile__btn animal-profile__btn--danger"
               onClick={() => setDeletingAnimal(true)}
               type="button"
+              aria-label={`Eliminar ${animal.name}`}
             >
-              <Trash size={16} />
+              <Trash size={16} aria-hidden="true" />
               <span>Eliminar</span>
             </button>
           )}
@@ -426,11 +439,20 @@ export function AnimalProfile() {
         </div>
       </div>
 
-      <Tabs tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      <Tabs
+        tabs={TABS}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        ariaLabel="Secciones del perfil"
+      />
 
       <div className="animal-profile__tab-content">
         {activeTab === 'health' && (
-          <section>
+          <section
+            role="tabpanel"
+            id="tabpanel-health"
+            aria-labelledby="tab-health"
+          >
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Eventos sanitarios</h2>
               <button
@@ -438,7 +460,7 @@ export function AnimalProfile() {
                 type="button"
                 onClick={() => setAddEventOpen(true)}
               >
-                <Plus size={16} />
+                <Plus size={16} aria-hidden="true" />
                 <span>Añadir evento</span>
               </button>
             </div>
@@ -451,7 +473,11 @@ export function AnimalProfile() {
         )}
 
         {activeTab === 'visits' && (
-          <section>
+          <section
+            role="tabpanel"
+            id="tabpanel-visits"
+            aria-labelledby="tab-visits"
+          >
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Visitas veterinarias</h2>
               {isAdmin && (
@@ -463,7 +489,7 @@ export function AnimalProfile() {
                     setAddVisitOpen(true);
                   }}
                 >
-                  <Plus size={16} />
+                  <Plus size={16} aria-hidden="true" />
                   <span>Añadir visita</span>
                 </button>
               )}
@@ -482,13 +508,22 @@ export function AnimalProfile() {
         )}
 
         {activeTab === 'documents' && (
-          <section>
+          <section
+            role="tabpanel"
+            id="tabpanel-documents"
+            aria-labelledby="tab-documents"
+          >
             <DocumentsGrid animalId={parseInt(id, 10)} />
           </section>
         )}
 
         {activeTab === 'weight' && (
-          <section className="animal-profile__weight">
+          <section
+            className="animal-profile__weight"
+            role="tabpanel"
+            id="tabpanel-weight"
+            aria-labelledby="tab-weight"
+          >
             <div className="animal-profile__section-header">
               <h2 className="animal-profile__section-title">Evolución de peso</h2>
               {isAdmin && (
@@ -497,7 +532,7 @@ export function AnimalProfile() {
                   type="button"
                   onClick={() => setAddWeightOpen(true)}
                 >
-                  <Plus size={16} />
+                  <Plus size={16} aria-hidden="true" />
                   <span>Registrar peso</span>
                 </button>
               )}

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { resendVerificationRequest } from '../../services/auth.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Login.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Login() {
+  usePageTitle('Iniciar sesión');
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -70,21 +72,21 @@ export function Login() {
 
   return (
     <div className="login">
-      <div className="login__left">
+      <div className="login__left" aria-hidden="true">
         <div className="login__brand">
-          <img className="login__logo" src="/pataplan.png" alt="PataPlan" />
+          <img className="login__logo" src="/pataplan.png" alt="PataPlan logo" />
           <p className="login__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
       <div className="login__right">
-        <form className="login__form" onSubmit={handleSubmit} noValidate>
+        <form className="login__form" onSubmit={handleSubmit} noValidate aria-labelledby="login-title">
           <div className="login__header">
-            <h2 className="login__title">Iniciar sesión</h2>
+            <h2 className="login__title" id="login-title">Iniciar sesión</h2>
             <p className="login__subtitle">Introduce tus credenciales para acceder</p>
           </div>
 
           {apiError && (
-            <div className="login__alert">
+            <div className="login__alert" role="alert">
               <span>{apiError}</span>
               {unverifiedEmail && (
                 <button
@@ -106,7 +108,9 @@ export function Login() {
           )}
 
           <div className="login__field">
-            <label className="login__label" htmlFor="email">Correo electrónico</label>
+            <label className="login__label" htmlFor="email">
+              Correo electrónico <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`login__input ${errors.email ? 'login__input--error' : ''}`}
               id="email"
@@ -114,12 +118,22 @@ export function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@correo.com"
+              aria-required="true"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'login-email-error' : undefined}
+              autoComplete="email"
             />
-            {errors.email && <span className="login__error">{errors.email}</span>}
+            {errors.email && (
+              <span className="login__error" id="login-email-error" role="alert">
+                {errors.email}
+              </span>
+            )}
           </div>
 
           <div className="login__field">
-            <label className="login__label" htmlFor="password">Contraseña</label>
+            <label className="login__label" htmlFor="password">
+              Contraseña <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`login__input ${errors.password ? 'login__input--error' : ''}`}
               id="password"
@@ -127,13 +141,22 @@ export function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              aria-required="true"
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'login-password-error' : undefined}
+              autoComplete="current-password"
             />
-            {errors.password && <span className="login__error">{errors.password}</span>}
+            {errors.password && (
+              <span className="login__error" id="login-password-error" role="alert">
+                {errors.password}
+              </span>
+            )}
           </div>
 
           <div className="login__options">
-            <label className="login__remember">
+            <label className="login__remember" htmlFor="remember-me">
               <input
+                id="remember-me"
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}

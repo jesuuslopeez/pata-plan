@@ -6,7 +6,7 @@ export function GroupSummary({ groups }) {
   const total = groups?.reduce((sum, g) => sum + (g._count?.animals || 0), 0) || 0;
 
   return (
-    <section className="group-summary">
+    <section className="group-summary" aria-label="Resumen de grupos">
       <p className="group-summary__label">Por grupo</p>
 
       {(!groups || groups.length === 0) ? (
@@ -15,7 +15,7 @@ export function GroupSummary({ groups }) {
         <ul className="group-summary__list">
           {groups.map((group, idx) => {
             const count = group._count?.animals || 0;
-            const percent = total > 0 ? (count / total) * 100 : 0;
+            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
             const colorClass = BAR_COLORS[idx % BAR_COLORS.length];
             return (
               <li key={group.id} className="group-summary__item">
@@ -30,7 +30,14 @@ export function GroupSummary({ groups }) {
                     {count} {count === 1 ? 'animal' : 'animales'}
                   </span>
                 </div>
-                <div className="group-summary__bar">
+                <div
+                  className="group-summary__bar"
+                  role="progressbar"
+                  aria-valuenow={percent}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label={`Animales en ${group.name}`}
+                >
                   <div
                     className={`group-summary__fill ${colorClass}`}
                     style={{ width: `${percent}%` }}

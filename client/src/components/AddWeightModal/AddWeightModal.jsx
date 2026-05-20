@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { createAnimalWeight, updateWeight } from '../../services/animal.service';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AddWeightModal.scss';
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
@@ -18,6 +19,8 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
   const [form, setForm] = useState({ valueKg: '', recordedAt: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open);
 
@@ -57,11 +60,11 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
   };
 
   return (
-    <div className="add-weight-modal" role="dialog" aria-modal="true">
-      <div className="add-weight-modal__overlay" onClick={onClose} />
-      <div className="add-weight-modal__content">
+    <div className="add-weight-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="add-weight-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="add-weight-modal__content" ref={containerRef}>
         <header className="add-weight-modal__header">
-          <h2 className="add-weight-modal__title">
+          <h2 id={titleId} className="add-weight-modal__title">
             {isEdit ? 'Editar peso' : 'Registrar peso'}
           </h2>
           <button
@@ -70,7 +73,7 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
@@ -78,7 +81,7 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
           <div className="add-weight-modal__row">
             <div className="add-weight-modal__field">
               <label className="add-weight-modal__label" htmlFor="weight-value">
-                Peso (kg) *
+                Peso (kg) <span aria-hidden="true">*</span>
               </label>
               <input
                 id="weight-value"
@@ -91,13 +94,14 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
                 onChange={handleChange('valueKg')}
                 placeholder="Ej: 4.2"
                 required
+                aria-required="true"
                 autoFocus
               />
             </div>
 
             <div className="add-weight-modal__field">
               <label className="add-weight-modal__label" htmlFor="weight-date">
-                Fecha *
+                Fecha <span aria-hidden="true">*</span>
               </label>
               <input
                 id="weight-date"
@@ -107,11 +111,12 @@ export function AddWeightModal({ open, animalId, initial, onClose, onSaved }) {
                 onChange={handleChange('recordedAt')}
                 max={todayIso()}
                 required
+                aria-required="true"
               />
             </div>
           </div>
 
-          {error && <p className="add-weight-modal__error">{error}</p>}
+          {error && <p className="add-weight-modal__error" role="alert">{error}</p>}
 
           <footer className="add-weight-modal__footer">
             <button

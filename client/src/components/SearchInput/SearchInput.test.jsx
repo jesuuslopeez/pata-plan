@@ -21,7 +21,7 @@ describe('SearchInput', () => {
     render(<SearchInput onSearch={onSearch} debounceMs={300} />);
 
     onSearch.mockClear();
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'gato' } });
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'gato' } });
 
     act(() => {
       vi.advanceTimersByTime(200);
@@ -39,7 +39,7 @@ describe('SearchInput', () => {
     render(<SearchInput onSearch={onSearch} debounceMs={300} />);
     onSearch.mockClear();
 
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole('searchbox');
     fireEvent.change(input, { target: { value: 'g' } });
     fireEvent.change(input, { target: { value: 'ga' } });
     fireEvent.change(input, { target: { value: 'gat' } });

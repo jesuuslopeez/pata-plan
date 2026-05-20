@@ -41,44 +41,39 @@ export function ExpenseTable({ expenses }) {
 
   return (
     <>
-      <div className="expense-table" role="table">
-        <div className="expense-table__head" role="row">
-          <span className="expense-table__th" role="columnheader">Fecha</span>
-          <span className="expense-table__th" role="columnheader">Animal</span>
-          <span className="expense-table__th" role="columnheader">Categoría</span>
-          <span className="expense-table__th" role="columnheader">Descripción</span>
-          <span
-            className="expense-table__th expense-table__th--right"
-            role="columnheader"
-          >
-            Importe
-          </span>
-        </div>
+      <table className="expense-table" aria-label="Listado de gastos">
+        <thead className="expense-table__head">
+          <tr>
+            <th className="expense-table__th" scope="col">Fecha</th>
+            <th className="expense-table__th" scope="col">Animal</th>
+            <th className="expense-table__th" scope="col">Categoría</th>
+            <th className="expense-table__th" scope="col">Descripción</th>
+            <th className="expense-table__th expense-table__th--right" scope="col">
+              Importe
+            </th>
+          </tr>
+        </thead>
 
-        {expenses.map((expense) => (
-          <div className="expense-table__row" role="row" key={expense.id}>
-            <span className="expense-table__date" role="cell">
-              {formatDate(expense.expenseDate)}
-            </span>
-            <span className="expense-table__animal" role="cell">
-              {expense.animal?.name || '—'}
-            </span>
-            <span className="expense-table__cat" role="cell">
-              <Badge
-                text={CATEGORY_LABEL[expense.category] || expense.category}
-                variant={CATEGORY_VARIANT[expense.category] || 'neutral'}
-              />
-            </span>
-            <span className="expense-table__desc" role="cell">
-              {expense.description || '—'}
-            </span>
-            <span className="expense-table__amount" role="cell">
-              <span className="expense-table__amount-value">{formatAmount(expense.amount)}</span>
-              <span className="expense-table__amount-suffix"> EUR</span>
-            </span>
-          </div>
-        ))}
-      </div>
+        <tbody>
+          {expenses.map((expense) => (
+            <tr className="expense-table__row" key={expense.id}>
+              <td className="expense-table__date">{formatDate(expense.expenseDate)}</td>
+              <td className="expense-table__animal">{expense.animal?.name || '—'}</td>
+              <td className="expense-table__cat">
+                <Badge
+                  text={CATEGORY_LABEL[expense.category] || expense.category}
+                  variant={CATEGORY_VARIANT[expense.category] || 'neutral'}
+                />
+              </td>
+              <td className="expense-table__desc">{expense.description || '—'}</td>
+              <td className="expense-table__amount">
+                <span className="expense-table__amount-value">{formatAmount(expense.amount)}</span>
+                <span className="expense-table__amount-suffix"> EUR</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <ul className="expense-cards" aria-hidden="true">
         {expenses.map((expense) => (

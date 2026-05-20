@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { resendVerificationRequest } from '../../services/auth.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Register.scss';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Register() {
+  usePageTitle('Crear cuenta');
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -77,14 +79,14 @@ export function Register() {
   if (registeredEmail) {
     return (
       <div className="register">
-        <div className="register__left">
+        <div className="register__left" aria-hidden="true">
           <div className="register__brand">
-            <img className="register__logo" src="/pataplan.png" alt="PataPlan" />
+            <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" />
             <p className="register__tagline">La salud de tus animales, bajo control</p>
           </div>
         </div>
         <div className="register__right">
-          <div className="register__form">
+          <div className="register__form" role="status">
             <div className="register__header">
               <h2 className="register__title">Revisa tu correo</h2>
               <p className="register__subtitle">
@@ -107,10 +109,10 @@ export function Register() {
             </button>
 
             {resendStatus === 'ok' && (
-              <p className="register__hint">Correo reenviado.</p>
+              <p className="register__hint" role="status">Correo reenviado.</p>
             )}
             {resendStatus === 'error' && (
-              <p className="register__error">No se ha podido reenviar. Inténtalo más tarde.</p>
+              <p className="register__error" role="alert">No se ha podido reenviar. Inténtalo más tarde.</p>
             )}
 
             <p className="register__link">
@@ -124,23 +126,25 @@ export function Register() {
 
   return (
     <div className="register">
-      <div className="register__left">
+      <div className="register__left" aria-hidden="true">
         <div className="register__brand">
-          <img className="register__logo" src="/pataplan.png" alt="PataPlan" />
+          <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" />
           <p className="register__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
       <div className="register__right">
-        <form className="register__form" onSubmit={handleSubmit} noValidate>
+        <form className="register__form" onSubmit={handleSubmit} noValidate aria-labelledby="register-title">
           <div className="register__header">
-            <h2 className="register__title">Crear cuenta</h2>
+            <h2 className="register__title" id="register-title">Crear cuenta</h2>
             <p className="register__subtitle">Completa tus datos para empezar</p>
           </div>
 
-          {apiError && <div className="register__alert">{apiError}</div>}
+          {apiError && <div className="register__alert" role="alert">{apiError}</div>}
 
           <div className="register__field">
-            <label className="register__label" htmlFor="name">Nombre completo</label>
+            <label className="register__label" htmlFor="name">
+              Nombre completo <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`register__input ${errors.name ? 'register__input--error' : ''}`}
               id="name"
@@ -148,12 +152,22 @@ export function Register() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tu nombre completo"
+              aria-required="true"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'register-name-error' : undefined}
+              autoComplete="name"
             />
-            {errors.name && <span className="register__error">{errors.name}</span>}
+            {errors.name && (
+              <span className="register__error" id="register-name-error" role="alert">
+                {errors.name}
+              </span>
+            )}
           </div>
 
           <div className="register__field">
-            <label className="register__label" htmlFor="email">Correo electrónico</label>
+            <label className="register__label" htmlFor="email">
+              Correo electrónico <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`register__input ${errors.email ? 'register__input--error' : ''}`}
               id="email"
@@ -161,12 +175,22 @@ export function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@correo.com"
+              aria-required="true"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'register-email-error' : undefined}
+              autoComplete="email"
             />
-            {errors.email && <span className="register__error">{errors.email}</span>}
+            {errors.email && (
+              <span className="register__error" id="register-email-error" role="alert">
+                {errors.email}
+              </span>
+            )}
           </div>
 
           <div className="register__field">
-            <label className="register__label" htmlFor="password">Contraseña</label>
+            <label className="register__label" htmlFor="password">
+              Contraseña <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`register__input ${errors.password ? 'register__input--error' : ''}`}
               id="password"
@@ -174,12 +198,22 @@ export function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              aria-required="true"
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? 'register-password-error' : undefined}
+              autoComplete="new-password"
             />
-            {errors.password && <span className="register__error">{errors.password}</span>}
+            {errors.password && (
+              <span className="register__error" id="register-password-error" role="alert">
+                {errors.password}
+              </span>
+            )}
           </div>
 
           <div className="register__field">
-            <label className="register__label" htmlFor="confirmPassword">Confirmar contraseña</label>
+            <label className="register__label" htmlFor="confirmPassword">
+              Confirmar contraseña <span aria-hidden="true">*</span>
+            </label>
             <input
               className={`register__input ${errors.confirmPassword ? 'register__input--error' : ''}`}
               id="confirmPassword"
@@ -187,8 +221,16 @@ export function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
+              aria-required="true"
+              aria-invalid={!!errors.confirmPassword}
+              aria-describedby={errors.confirmPassword ? 'register-confirm-error' : undefined}
+              autoComplete="new-password"
             />
-            {errors.confirmPassword && <span className="register__error">{errors.confirmPassword}</span>}
+            {errors.confirmPassword && (
+              <span className="register__error" id="register-confirm-error" role="alert">
+                {errors.confirmPassword}
+              </span>
+            )}
           </div>
 
           <button className="register__button" type="submit" disabled={submitting}>

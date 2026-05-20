@@ -99,14 +99,14 @@ export function Header({ onMenuClick }) {
   };
 
   return (
-    <header className="header">
+    <header className="header" role="banner">
       <button
         className="header__menu"
         onClick={onMenuClick}
         type="button"
-        aria-label="Abrir menú de navegación"
+        aria-label="Abrir menú"
       >
-        <Menu size={20} />
+        <Menu size={20} aria-hidden="true" />
       </button>
 
       <div className="header__greeting">
@@ -117,14 +117,16 @@ export function Header({ onMenuClick }) {
       <div className="header__actions">
         <div
           className="header__badge"
+          role="status"
+          aria-label={`${counts.overdue} vencidos y ${counts.pending} pendientes`}
           title={`${counts.overdue} vencidos · ${counts.pending} pendientes`}
         >
-          <AlertTriangle className="header__badge-icon" size={16} />
+          <AlertTriangle className="header__badge-icon" size={16} aria-hidden="true" />
           <span className="header__badge-overdue">
             {counts.overdue}
             <span className="header__badge-label"> vencidos</span>
           </span>
-          <span className="header__badge-separator">|</span>
+          <span className="header__badge-separator" aria-hidden="true">|</span>
           <span className="header__badge-pending">
             {counts.pending}
             <span className="header__badge-label"> pendientes</span>
@@ -139,7 +141,7 @@ export function Header({ onMenuClick }) {
             aria-expanded={menuOpen}
             aria-label="Abrir menú de usuario"
           >
-            {getInitials(user?.name)}
+            <span aria-hidden="true">{getInitials(user?.name)}</span>
           </button>
 
           {menuOpen && (
@@ -154,7 +156,7 @@ export function Header({ onMenuClick }) {
                 onClick={handleAccount}
                 role="menuitem"
               >
-                <UserCircle size={16} />
+                <UserCircle size={16} aria-hidden="true" />
                 <span>Mi cuenta</span>
               </button>
               <button
@@ -163,7 +165,7 @@ export function Header({ onMenuClick }) {
                 onClick={handleLogout}
                 role="menuitem"
               >
-                <LogOut size={16} />
+                <LogOut size={16} aria-hidden="true" />
                 <span>Cerrar sesión</span>
               </button>
             </div>

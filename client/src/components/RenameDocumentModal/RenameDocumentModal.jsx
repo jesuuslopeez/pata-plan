@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './RenameDocumentModal.scss';
 
 export function RenameDocumentModal({ open, initialName = '', onClose, onSubmit }) {
   const [name, setName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open);
 
@@ -39,18 +42,18 @@ export function RenameDocumentModal({ open, initialName = '', onClose, onSubmit 
   };
 
   return (
-    <div className="rename-document-modal" role="dialog" aria-modal="true">
-      <div className="rename-document-modal__overlay" onClick={onClose} />
-      <div className="rename-document-modal__content">
+    <div className="rename-document-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="rename-document-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="rename-document-modal__content" ref={containerRef}>
         <header className="rename-document-modal__header">
-          <h2 className="rename-document-modal__title">Renombrar documento</h2>
+          <h2 id={titleId} className="rename-document-modal__title">Renombrar documento</h2>
           <button
             type="button"
             className="rename-document-modal__close"
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
@@ -68,10 +71,11 @@ export function RenameDocumentModal({ open, initialName = '', onClose, onSubmit 
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              aria-required="true"
             />
           </div>
 
-          {error && <p className="rename-document-modal__error">{error}</p>}
+          {error && <p className="rename-document-modal__error" role="alert">{error}</p>}
 
           <footer className="rename-document-modal__footer">
             <button

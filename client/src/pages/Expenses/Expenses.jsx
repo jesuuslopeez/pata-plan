@@ -6,6 +6,7 @@ import { ExpenseTable } from '../../components/ExpenseTable/ExpenseTable';
 import { MonthlyChart } from '../../components/MonthlyChart/MonthlyChart';
 import { CategoryChart } from '../../components/CategoryChart/CategoryChart';
 import { AddExpenseModal } from '../../components/AddExpenseModal/AddExpenseModal';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './Expenses.scss';
 
 const PAGE_SIZE = 20;
@@ -32,6 +33,7 @@ const formatPercent = (value) => {
 };
 
 export function Expenses() {
+  usePageTitle('Gastos');
   const [stats, setStats] = useState(null);
   const [animals, setAnimals] = useState([]);
   const [expenses, setExpenses] = useState([]);
@@ -101,12 +103,12 @@ export function Expenses() {
           onClick={() => setAddOpen(true)}
           disabled={animals.length === 0}
         >
-          <Plus size={16} />
+          <Plus size={16} aria-hidden="true" />
           <span>Añadir gasto</span>
         </button>
       </header>
 
-      <section className="expenses__metrics">
+      <section className="expenses__metrics" aria-label="Resumen de gastos">
         <article className="metric-card">
           <span className="metric-card__label">Gasto total</span>
           <p className="metric-card__value">
@@ -135,7 +137,7 @@ export function Expenses() {
         </article>
       </section>
 
-      <section className="expenses__charts">
+      <section className="expenses__charts" aria-label="Gráficos de gastos">
         <article className="expenses__chart-card expenses__chart-card--wide">
           <h2 className="expenses__chart-title">Gasto mensual</h2>
           <MonthlyChart data={stats?.byMonth || []} />
@@ -199,10 +201,10 @@ export function Expenses() {
           </label>
         </div>
 
-        {error && <p className="expenses__error">{error}</p>}
+        {error && <p className="expenses__error" role="alert">{error}</p>}
 
         {loading ? (
-          <p className="expenses__loading">Cargando…</p>
+          <p className="expenses__loading" role="status" aria-live="polite">Cargando…</p>
         ) : (
           <ExpenseTable expenses={expenses} />
         )}
@@ -219,18 +221,19 @@ export function Expenses() {
 
         {total > 0 && (
           <footer className="expenses__pagination">
-            <span className="expenses__pagination-info">
+            <span className="expenses__pagination-info" aria-live="polite">
               Mostrando {expenses.length === 0 ? 0 : page * PAGE_SIZE + 1}–
               {page * PAGE_SIZE + expenses.length} de {total}
             </span>
-            <div className="expenses__pagination-actions">
+            <nav className="expenses__pagination-actions" aria-label="Paginación de gastos">
               <button
                 type="button"
                 className="expenses__pager"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
+                aria-label="Página anterior"
               >
-                <ChevronLeft size={14} />
+                <ChevronLeft size={14} aria-hidden="true" />
                 <span>Anterior</span>
               </button>
               <button
@@ -238,11 +241,12 @@ export function Expenses() {
                 className="expenses__pager"
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
+                aria-label="Página siguiente"
               >
                 <span>Siguiente</span>
-                <ChevronRight size={14} />
+                <ChevronRight size={14} aria-hidden="true" />
               </button>
-            </div>
+            </nav>
           </footer>
         )}
       </section>

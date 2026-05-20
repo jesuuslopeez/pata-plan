@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { resetPasswordRequest } from '../../services/auth.service';
+import { usePageTitle } from '../../hooks/usePageTitle';
 import './ResetPassword.scss';
 
 export function ResetPassword() {
+  usePageTitle('Nueva contraseña');
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token') || '';
@@ -44,7 +46,7 @@ export function ResetPassword() {
     <div className="reset-password">
       <div className="reset-password__left">
         <div className="reset-password__brand">
-          <img className="reset-password__logo" src="/pataplan.png" alt="PataPlan" />
+          <img className="reset-password__logo" src="/pataplan.png" alt="PataPlan logo" />
           <p className="reset-password__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
@@ -67,7 +69,7 @@ export function ResetPassword() {
             </>
           ) : done ? (
             <>
-              <div className="reset-password__header">
+              <div className="reset-password__header" role="status">
                 <h2 className="reset-password__title">¡Contraseña actualizada!</h2>
                 <p className="reset-password__subtitle">
                   Te redirigimos al inicio de sesión…
@@ -83,7 +85,7 @@ export function ResetPassword() {
                 </p>
               </div>
 
-              {error && <div className="reset-password__alert">{error}</div>}
+              {error && <div className="reset-password__alert" role="alert">{error}</div>}
 
               <div className="reset-password__field">
                 <label className="reset-password__label" htmlFor="password">
@@ -96,6 +98,8 @@ export function ResetPassword() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  aria-required="true"
+                  aria-invalid={error ? 'true' : 'false'}
                 />
               </div>
 
@@ -110,6 +114,8 @@ export function ResetPassword() {
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="••••••••"
+                  aria-required="true"
+                  aria-invalid={error ? 'true' : 'false'}
                 />
               </div>
 

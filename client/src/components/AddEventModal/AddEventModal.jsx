@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { createAnimalEvent } from '../../services/animal.service';
 import { getEventTypes, createEventType } from '../../services/protocol.service';
 import { translateEventType } from '../../utils/eventTypeLabels';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './AddEventModal.scss';
 
 const OTHER_OPTION = '__OTHER__';
@@ -24,6 +25,8 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
   const [eventTypes, setEventTypes] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const titleId = useId();
+  const containerRef = useFocusTrap(open);
 
   useEscapeKey(onClose, open);
 
@@ -81,25 +84,25 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
   };
 
   return (
-    <div className="add-event-modal" role="dialog" aria-modal="true">
-      <div className="add-event-modal__overlay" onClick={onClose} />
-      <div className="add-event-modal__content">
+    <div className="add-event-modal" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="add-event-modal__overlay" onClick={onClose} aria-hidden="true" />
+      <div className="add-event-modal__content" ref={containerRef}>
         <header className="add-event-modal__header">
-          <h2 className="add-event-modal__title">Añadir evento sanitario</h2>
+          <h2 className="add-event-modal__title" id={titleId}>Añadir evento sanitario</h2>
           <button
             type="button"
             className="add-event-modal__close"
             onClick={onClose}
             aria-label="Cerrar"
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </header>
 
         <form className="add-event-modal__form" onSubmit={handleSubmit}>
           <div className="add-event-modal__field">
             <label className="add-event-modal__label" htmlFor="event-type">
-              Tipo de evento *
+              Tipo de evento <span aria-hidden="true">*</span>
             </label>
             <select
               id="event-type"
@@ -107,6 +110,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
               value={form.eventTypeId}
               onChange={handleChange('eventTypeId')}
               required
+              aria-required="true"
             >
               <option value="" disabled>
                 Selecciona un tipo
@@ -123,7 +127,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
           {isOther && (
             <div className="add-event-modal__field">
               <label className="add-event-modal__label" htmlFor="event-custom-name">
-                Nombre del evento *
+                Nombre del evento <span aria-hidden="true">*</span>
               </label>
               <input
                 id="event-custom-name"
@@ -132,6 +136,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
                 value={form.customName}
                 onChange={handleChange('customName')}
                 required
+                aria-required="true"
                 placeholder="Ej: Limpieza dental"
               />
             </div>
@@ -140,7 +145,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
           <div className="add-event-modal__row">
             <div className="add-event-modal__field">
               <label className="add-event-modal__label" htmlFor="event-date">
-                Fecha programada *
+                Fecha programada <span aria-hidden="true">*</span>
               </label>
               <input
                 id="event-date"
@@ -149,6 +154,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
                 value={form.scheduledDate}
                 onChange={handleChange('scheduledDate')}
                 required
+                aria-required="true"
               />
             </div>
 
@@ -208,7 +214,7 @@ export function AddEventModal({ open, animalId, onClose, onCreated }) {
             />
           </div>
 
-          {error && <p className="add-event-modal__error">{error}</p>}
+          {error && <p className="add-event-modal__error" role="alert">{error}</p>}
 
           <footer className="add-event-modal__footer">
             <button
