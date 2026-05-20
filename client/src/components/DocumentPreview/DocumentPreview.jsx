@@ -37,6 +37,7 @@ export function DocumentPreview({ open, document, onClose }) {
           src={resolveAssetUrl(document.fileUrl)}
           alt={document.filename}
           className="document-preview__image"
+          decoding="async"
         />
         <figcaption className="document-preview__caption">{document.filename}</figcaption>
       </figure>

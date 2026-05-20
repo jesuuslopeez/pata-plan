@@ -54,7 +54,7 @@ export function Landing() {
 
       <header className="landing__topbar">
         <Link to="/" className="landing__brand-link" aria-label="PataPlan">
-          <img src="/pataplan-wordmark.png" alt="PataPlan logo" className="landing__brand-logo" />
+          <img src="/pataplan-wordmark.png" alt="PataPlan logo" className="landing__brand-logo" width="200" height="48" />
         </Link>
         <nav className="landing__topnav" aria-label="Acciones de cuenta">
           <Link to="/login" className="landing__topnav-link">

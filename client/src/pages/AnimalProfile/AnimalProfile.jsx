@@ -27,7 +27,7 @@ import { Tabs } from '../../components/Tabs/Tabs';
 import { HealthEventsTable } from '../../components/HealthEventsTable/HealthEventsTable';
 import { VetVisitsList } from '../../components/VetVisitsList/VetVisitsList';
 import { DocumentsGrid } from '../../components/DocumentsGrid/DocumentsGrid';
-import { WeightChart } from '../../components/WeightChart/WeightChart';
+import { WeightChart } from '../../components/WeightChart/WeightChart.lazy';
 import { AssignProtocolModal } from '../../components/AssignProtocolModal/AssignProtocolModal';
 import { AddEventModal } from '../../components/AddEventModal/AddEventModal';
 import { AddVisitModal } from '../../components/AddVisitModal/AddVisitModal';
@@ -221,6 +221,9 @@ export function AnimalProfile() {
               src={resolveAssetUrl(animal.photoUrl)}
               alt={`Foto de ${animal.name}`}
               className="animal-profile__photo-img"
+              decoding="async"
+              width="128"
+              height="128"
             />
           ) : (
             <PawPrint className="animal-profile__photo-placeholder" size={40} aria-hidden="true" />

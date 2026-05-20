@@ -43,6 +43,10 @@ export function AnimalAlertCard({ animal, group, alerts }) {
                 className="animal-alert-card__avatar-img"
                 src={resolveAssetUrl(animal.photoUrl)}
                 alt={`Foto de ${animal.name}`}
+                loading="lazy"
+                decoding="async"
+                width="56"
+                height="56"
               />
             ) : (
               initial

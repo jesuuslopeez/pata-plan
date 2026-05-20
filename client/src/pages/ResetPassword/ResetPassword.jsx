@@ -46,7 +46,7 @@ export function ResetPassword() {
     <div className="reset-password">
       <div className="reset-password__left">
         <div className="reset-password__brand">
-          <img className="reset-password__logo" src="/pataplan.png" alt="PataPlan logo" />
+          <img className="reset-password__logo" src="/pataplan.png" alt="PataPlan logo" width="180" height="60" />
           <p className="reset-password__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>

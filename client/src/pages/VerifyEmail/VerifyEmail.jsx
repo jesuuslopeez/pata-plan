@@ -37,7 +37,7 @@ export function VerifyEmail() {
     <div className="verify-email">
       <div className="verify-email__left">
         <div className="verify-email__brand">
-          <img className="verify-email__logo" src="/pataplan.png" alt="PataPlan logo" />
+          <img className="verify-email__logo" src="/pataplan.png" alt="PataPlan logo" width="180" height="60" />
           <p className="verify-email__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>

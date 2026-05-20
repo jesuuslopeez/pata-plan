@@ -54,6 +54,8 @@ export function AnimalCard({ animal }) {
             src={resolveAssetUrl(animal.photoUrl)}
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
           />
         )}
         <PawPrint
@@ -67,6 +69,10 @@ export function AnimalCard({ animal }) {
             className="animal-card__image"
             src={resolveAssetUrl(animal.photoUrl)}
             alt={`Foto de ${animal.name}`}
+            loading="lazy"
+            decoding="async"
+            width="320"
+            height="240"
           />
         ) : (
           <PawPrint className="animal-card__placeholder" size={48} aria-hidden="true" />

@@ -81,7 +81,7 @@ export function Register() {
       <div className="register">
         <div className="register__left" aria-hidden="true">
           <div className="register__brand">
-            <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" />
+            <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" width="180" height="60" />
             <p className="register__tagline">La salud de tus animales, bajo control</p>
           </div>
         </div>
@@ -128,7 +128,7 @@ export function Register() {
     <div className="register">
       <div className="register__left" aria-hidden="true">
         <div className="register__brand">
-          <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" />
+          <img className="register__logo" src="/pataplan.png" alt="PataPlan logo" width="180" height="60" />
           <p className="register__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>

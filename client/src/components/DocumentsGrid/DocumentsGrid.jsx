@@ -154,6 +154,9 @@ export function DocumentsGrid({ animalId }) {
                     alt={doc.filename}
                     className="document-card__thumb"
                     loading="lazy"
+                    decoding="async"
+                    width="240"
+                    height="160"
                   />
                 ) : (
                   <div className="document-card__pdf">
