@@ -196,6 +196,7 @@ export function AddAnimalModal({ open, groups, initial, onClose, onSaved, onGrou
                   src={photoPreview}
                   alt={isEdit && form.name ? `Foto de ${form.name}` : 'Vista previa de la foto'}
                   className="add-animal-modal__photo-img"
+                  decoding="async"
                 />
               ) : (
                 <PawPrint size={32} className="add-animal-modal__photo-placeholder" aria-hidden="true" />

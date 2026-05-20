@@ -38,7 +38,7 @@ export function Sidebar({ isOpen, onClose }) {
       <aside className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Barra lateral">
         <div className="sidebar__header">
           <div className="sidebar__brand">
-            <img className="sidebar__logo" src="/pataplan.png" alt="PataPlan logo" />
+            <img className="sidebar__logo" src="/pataplan.png" alt="PataPlan logo" width="120" height="32" />
           </div>
           <button
             className="sidebar__close"

@@ -160,6 +160,7 @@ export function DocumentUpload({ open, animalId, onClose, onUploaded }) {
                   src={previewUrl}
                   alt={file.name}
                   className="document-upload__file-thumb"
+                  decoding="async"
                 />
               ) : (
                 <FileText size={32} className="document-upload__file-icon" aria-hidden="true" />

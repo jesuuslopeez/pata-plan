@@ -35,7 +35,7 @@ export function ForgotPassword() {
     <div className="forgot-password">
       <div className="forgot-password__left">
         <div className="forgot-password__brand">
-          <img className="forgot-password__logo" src="/pataplan.png" alt="PataPlan logo" />
+          <img className="forgot-password__logo" src="/pataplan.png" alt="PataPlan logo" width="180" height="60" />
           <p className="forgot-password__tagline">La salud de tus animales, bajo control</p>
         </div>
       </div>
