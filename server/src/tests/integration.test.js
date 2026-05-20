@@ -309,7 +309,13 @@ describe('Integration · role-based access', () => {
     prisma.group.findMany.mockResolvedValue([]); // no owned groups
     prisma.groupCollaborator.findMany.mockResolvedValue([{ groupId: 99 }]); // shared
     prisma.animal.findMany.mockResolvedValueOnce([
-      { id: 200, name: 'Shared', groupId: 99, group: { id: 99, name: 'Refugio' }, _count: { healthEvents: 0 } },
+      {
+        id: 200,
+        name: 'Shared',
+        groupId: 99,
+        group: { id: 99, name: 'Refugio' },
+        _count: { healthEvents: 0 },
+      },
     ]);
     prisma.healthEvent.groupBy.mockResolvedValue([]); // no overdue events
 

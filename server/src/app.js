@@ -19,7 +19,9 @@ app.use(helmet());
 const corsOrigin = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
   : (origin, cb) => {
-      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) return cb(null, true);
+      if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+        return cb(null, true);
+      }
       return cb(new Error('Not allowed by CORS'));
     };
 app.use(cors({ origin: corsOrigin }));
