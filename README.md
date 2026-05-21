@@ -19,9 +19,9 @@
 
 **Web application for managing the health, vaccination schedules, and veterinary records of multiple pets and animal shelters.**
 
-PataPlan es una plataforma pensada para hogares con varias mascotas y para refugios independientes que gestionan decenas de animales sin depender de una clínica concreta. Reemplaza libretas, cartillas en papel y hojas de cálculo improvisadas con un calendario sanitario inteligente, protocolos encadenados y alertas priorizadas.
+PataPlan is a platform designed for households with multiple pets and independent shelters managing dozens of animals without depending on a specific clinic. It replaces notebooks, paper vaccination cards and ad-hoc spreadsheets with a smart health calendar, chained protocols and prioritised alerts.
 
-🌐 **Live demo:** [pataplan.yiisus.com](https://pataplan.yiisus.com)
+🌐 **Live demo:** [pataplan.yiisus.com](https://pataplan.yiisus.com) · 📋 **Project board:** [GitHub Projects](https://github.com/users/jesuuslopeez/projects/3) · 🎨 **Design:** [Figma prototype](https://www.figma.com/design/4V8fbliz3unSknovv7lmi0/PataPlan?node-id=0-1)
 
 </div>
 
