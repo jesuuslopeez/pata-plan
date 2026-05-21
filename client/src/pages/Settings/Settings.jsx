@@ -16,7 +16,7 @@ export function Settings() {
       <header className="settings__masthead">
         <span className="settings__eyebrow">
           <span className="settings__eyebrow-dot" aria-hidden="true" />
-          Mi cuenta · {new Date().getFullYear()}
+          Mi cuenta
         </span>
         <h1 className="settings__title">
           Ajustes <em>&amp; preferencias</em>
