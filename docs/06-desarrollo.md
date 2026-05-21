@@ -218,6 +218,8 @@ Esta convención permite generar el `CHANGELOG.md` de forma semi-automática agr
 
 La gestión del backlog y el progreso de cada sprint se hace con **GitHub Projects** (tablero kanban con columnas `Backlog`, `Sprint`, `In progress`, `Review`, `Done`). Cada tarea es un **issue** vinculado al tablero, con etiquetas (`type:feature`, `type:bug`, `priority:high`, `area:frontend`, `area:backend`) y, cuando se completa, un PR que la cierra automáticamente con `Closes #N`.
 
+El tablero público está disponible en: <https://github.com/users/jesuuslopeez/projects/3>
+
 ### 6.4.4. Dependabot
 
 El repositorio tiene activado **Dependabot** (`.github/dependabot.yml`) para crear pull requests automáticos cuando hay actualizaciones de dependencias o de versiones de GitHub Actions. Esto mantiene el árbol de dependencias al día sin trabajo manual y avisa de vulnerabilidades de seguridad publicadas en el registro de npm.
