@@ -21,13 +21,13 @@
 
 PataPlan is a platform designed for households with multiple pets and independent shelters managing dozens of animals without depending on a specific clinic. It replaces notebooks, paper vaccination cards and ad-hoc spreadsheets with a smart health calendar, chained protocols and prioritised alerts.
 
-🌐 **Live demo:** [pataplan.yiisus.com](https://pataplan.yiisus.com) · 📋 **Project board:** [GitHub Projects](https://github.com/users/jesuuslopeez/projects/3) · 🎨 **Design:** [Figma prototype](https://www.figma.com/design/rv8A4aZqoQBYzfmjioJ8tk/PataPlan?node-id=0-1)
+**Live demo:** [pataplan.yiisus.com](https://pataplan.yiisus.com) · **Project board:** [GitHub Projects](https://github.com/users/jesuuslopeez/projects/3) · **Design:** [Figma prototype](https://www.figma.com/design/rv8A4aZqoQBYzfmjioJ8tk/PataPlan?node-id=0-1)
 
 </div>
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 | Dashboard | Animals |
 |-----------|---------|
@@ -41,24 +41,24 @@ More screenshots available in [`docs/assets/manual/`](docs/assets/manual/).
 
 ---
 
-## ✨ Features
+## Features
 
-- 🐾 **Multi-animal management** organised by groups (home, shelter, etc.)
-- 📅 **Smart health calendar** with automatic calculation of next doses
-- 🔗 **Health protocol engine** with chained temporal dependencies
-- 🚨 **Priority-based alert system** that surfaces what truly needs attention
-- 📊 **"What needs attention" dashboard** instead of generic stats
-- 📄 **Automatic PDF reports** generation per animal
-- ⚖️ **Weight anomaly detection** based on statistical thresholds
-- 💰 **Veterinary expense tracking** with monthly and per-animal stats
-- 📎 **Document management** (vaccination cards, lab results, vet reports)
-- 👥 **Role system** (Admin / Collaborator) with shareable group codes
-- 📱 **Fully responsive design** (desktop, tablet, mobile)
-- ♿ **Accessible UI** built to WCAG AA standards
+- **Multi-animal management** organised by groups (home, shelter, etc.)
+- **Smart health calendar** with automatic calculation of next doses
+- **Health protocol engine** with chained temporal dependencies
+- **Priority-based alert system** that surfaces what truly needs attention
+- **"What needs attention" dashboard** instead of generic stats
+- **Automatic PDF reports** generation per animal
+- **Weight anomaly detection** based on statistical thresholds
+- **Veterinary expense tracking** with monthly and per-animal stats
+- **Document management** (vaccination cards, lab results, vet reports)
+- **Role system** (Admin / Collaborator) with shareable group codes
+- **Fully responsive design** (desktop, tablet, mobile)
+- **Accessible UI** built to WCAG AA standards
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category   | Technology                       |
 |------------|----------------------------------|
@@ -75,7 +75,7 @@ More screenshots available in [`docs/assets/manual/`](docs/assets/manual/).
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -119,7 +119,7 @@ npm run dev
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -152,7 +152,7 @@ See [`.env.example`](.env.example) for the full template.
 
 ---
 
-## 📡 API Overview
+## API Overview
 
 Full interactive documentation is available at **`/api/docs`** (Swagger UI) once the backend is running.
 
@@ -178,7 +178,7 @@ Full interactive documentation is available at **`/api/docs`** (Swagger UI) once
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 pata-plan/
@@ -216,19 +216,19 @@ pata-plan/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, branching strategy and commit conventions, and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, branching strategy and commit conventions.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👤 Author
+## Author
 
 **Jesús López Pérez**
 

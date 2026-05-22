@@ -4,17 +4,12 @@ Thank you for your interest in contributing to PataPlan! This document provides 
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [How to Contribute](#how-to-contribute)
 - [Development Workflow](#development-workflow)
 - [Commit Convention](#commit-convention)
 - [Pull Request Process](#pull-request-process)
 - [Style Guide](#style-guide)
-
-## Code of Conduct
-
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before contributing.
 
 ## Getting Started
 
