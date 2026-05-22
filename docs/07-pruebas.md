@@ -11,7 +11,7 @@ El stack de testing es:
 | Runner de tests | **Jest** | Ejecutor de tests, aserciones, mocking, reporte de cobertura |
 | Pruebas HTTP del backend | **Supertest** | Simulación de peticiones HTTP a la app Express sin levantar puerto |
 | Mocking de la base de datos | **`jest.mock`** | Sustitución del cliente de Prisma para aislar la capa de lógica |
-| Pruebas del frontend (planificadas) | **React Testing Library + Vitest** | Tests de componentes y de hooks |
+| Pruebas del frontend | **Vitest + React Testing Library** | Tests de componentes y de la página de login |
 
 Se diferencian dos niveles de pruebas:
 
@@ -222,21 +222,141 @@ Las pruebas actuales cubren las siguientes áreas críticas del backend:
 - Tests de la subida de archivos (`multer`): validación de tamaño, tipos MIME permitidos.
 - Tests de los endpoints de invitación a grupos: generación de código, unión por código, expulsión.
 
+### 7.4.4. Resultados numéricos de cobertura
+
+La ejecución `npm test -- --coverage` desde `server/` arroja los siguientes valores agregados (snapshot del último run):
+
+| Métrica | Cobertura global | Observaciones |
+|---------|------------------|---------------|
+| Statements | 37,41 % | Concentrada en las áreas de autenticación, animales, rutas y middlewares. |
+| Branches | 13,92 % | Refleja que muchos servicios secundarios (expense, document, visit, weight) aún no tienen tests unitarios propios. |
+| Functions | 20,74 % | Las funciones críticas (login, registro, CRUD de animales) están al 100 %. |
+| Lines | 37,72 % | Similar al de statements. |
+
+Por capas, la cobertura se concentra donde más importa:
+
+| Capa | Statements | Comentario |
+|------|------------|------------|
+| `src/routes/` | 92,94 % | Todas las rutas principales al 100 %; solo `dev.routes.js` (uso interno) queda al 33 %. |
+| `src/middlewares/auth.js` | 94,73 % | JWT, header `Authorization`, expiración. |
+| `src/middlewares/roles.js` | 88,88 % | Comprobación de `ADMIN` / `COLLABORATOR`. |
+| `src/middlewares/validate.js` | 84 % | Validación de payloads con Joi. |
+| `src/utils/ApiError.js` | 100 % | Clase de error de la API. |
+| `src/utils/groupAccess.js` | 78,78 % | Acceso filtrado por grupo. |
+| `src/services/dashboard.service.js` | 69,04 % | Lógica de scoring agregado. |
+| `src/services/animal.service.js` | 66,66 % | CRUD y filtros. |
+| `src/services/alert.service.js` | 65,51 % | Cálculo de alertas con scoring. |
+
+Los servicios menos cubiertos (`expense`, `visit`, `weight`, `document`, `pdfGenerator`, `notification`, `protocol`) sí están cubiertos **indirectamente** a través de las pruebas de integración y de las rutas, pero carecen de tests unitarios específicos. La decisión consciente fue priorizar las áreas con lógica algorítmica densa (autenticación, control de acceso, animales, dashboard) frente a las que son CRUD lineal sobre Prisma.
+
 ## 7.5. Pruebas del frontend
 
-Los tests del **frontend** no se han incluido en el alcance del MVP del proyecto. La decisión ha sido **priorizar los tests del backend** por dos razones:
+El frontend se prueba con **Vitest + React Testing Library + jsdom**. La configuración se declara en `client/vite.config.js` y los tests se ejecutan con `npm test`.
 
-1. **Concentración de la lógica de negocio en el backend**: el frontend de PataPlan actúa principalmente como una capa de presentación sobre una API REST. La complejidad real (cálculo de scoring, recálculo de fechas, detección de anomalías, generación de PDF, control de permisos) vive en el servidor. Las regresiones lógicas en esos algoritmos son las que tienen más impacto si se cuelan, y son justamente las que un test bien escrito puede detectar.
+La estrategia ha sido **priorizar componentes con lógica condicional y la página de autenticación**, en lugar de testear vistas que se limitan a pintar datos recibidos por API. Esa decisión está documentada en la sección 7.5.6.
 
-2. **Coste/beneficio del testing de UI**: testear componentes React que pintan datos recibidos por API y validan formularios sencillos aporta menos cobertura efectiva por tiempo invertido que cubrir bien los servicios del backend. La validación visual durante el desarrollo y el feedback del usuario sobre la UI han cumplido el papel de detectar regresiones de presentación.
+### 7.5.1. Componente `Badge` (`Badge.test.jsx`, 4 tests)
 
-A medio plazo, el frontend incorporará tests con **Vitest + React Testing Library** centrándose en:
+Cubre el renderizado y las variantes visuales del badge usado en toda la aplicación:
 
-- Componentes de formulario (`AnimalForm`, `EventForm`, `ProtocolForm`) — validaciones inline y submit.
-- Hooks personalizados (`useAuth`, `useAnimals`, `useDashboard`) — gestión de estado y llamadas API.
-- Lógica del frontend que no es mero passthrough: filtros de la página de Calendario, ordenación de tablas, cálculo de totales del dashboard económico.
+- `renders the provided text` — el texto pasado por prop se renderiza tal cual.
+- `applies the default neutral variant when none is given` — sin prop `variant`, aplica la clase neutral.
+- `applies the danger variant when specified` — `variant="danger"` aplica la clase correspondiente.
+- `applies the success variant when specified` — `variant="success"` aplica la clase correspondiente.
 
-## 7.6. Resultados
+### 7.5.2. Componente `SearchInput` (`SearchInput.test.jsx`, 3 tests)
+
+Cubre el input de búsqueda con debounce usado en el listado de animales:
+
+- `renders with the provided placeholder` — el placeholder se respeta.
+- `debounces the onSearch callback until the configured delay elapses` — el callback no se dispara antes de la espera configurada (usa `fakeTimers` de Vitest).
+- `only fires once after several rapid keystrokes within the debounce window` — varias pulsaciones rápidas se colapsan en una sola llamada al callback.
+
+### 7.5.3. Componente `ConfirmDialog` (`ConfirmDialog.test.jsx`, 8 tests)
+
+Cubre el diálogo de confirmación reutilizado en toda la app (borrar animal, borrar visita, borrar peso, borrar evento, errores):
+
+- `does not render anything when open is false` — el diálogo solo se monta cuando está abierto.
+- `renders title and message when open` — título y mensaje aparecen.
+- `calls onConfirm then onClose when the confirm button is clicked` — orden correcto de callbacks al confirmar.
+- `calls onClose when the cancel button is clicked` — el botón cancelar dispara `onClose`.
+- `hides the cancel button when hideCancel is true` — modo "solo aviso" (sin opción de cancelar).
+- `applies the danger style when the danger flag is set` — clase visual de acción destructiva.
+- `exposes a close button with an accessible label` — accesibilidad del botón de cierre.
+- `closes when the Escape key is pressed` — atajo de teclado.
+
+### 7.5.4. Componente `AnimalCard` (`AnimalCard.test.jsx`, 7 tests)
+
+Cubre la tarjeta de animal del listado, incluyendo lógica condicional según el estado de los eventos:
+
+- `renders name, species label and breed` — datos básicos.
+- `shows "Al día" when there are no pending or overdue events` — estado verde.
+- `shows "Pendiente" when there are pending events but none overdue` — estado ámbar.
+- `shows "Vencido" when there are overdue events` — estado rojo.
+- `falls back to "Sin raza" when breed is missing` — valor por defecto.
+- `navigates to the animal profile on click` — click navega al detalle (usa `MemoryRouter`).
+- `is operable with the keyboard (Enter)` — accesibilidad: la tarjeta se puede activar con teclado.
+
+### 7.5.5. Página `Login` (`Login.test.jsx`, 5 tests)
+
+Es el único test que cubre una **página completa**, ejercitando el flujo de autenticación con `AuthContext` mockeado:
+
+- `shows validation errors when the form is submitted empty` — validaciones inline al hacer submit sin datos.
+- `rejects malformed emails and short passwords` — validación de formato.
+- `calls login with the entered credentials when the form is valid` — submit dispara `login()` con los argumentos correctos.
+- `shows the API error message when login fails` — propagación del error de la API al mensaje visible.
+- `offers the resend verification action when the account is not verified` — flujo específico de "email no verificado": aparece el botón para reenviar.
+
+### 7.5.6. Resumen y estrategia
+
+| Capa probada | Tests | Tipo |
+|--------------|-------|------|
+| `Badge` | 4 | Componente puro (renderizado + variantes). |
+| `SearchInput` | 3 | Componente con lógica (debounce). |
+| `ConfirmDialog` | 8 | Componente con interacción + accesibilidad. |
+| `AnimalCard` | 7 | Componente con lógica condicional + navegación + accesibilidad. |
+| `Login` | 5 | Página completa con formularios, validación y API mockeada. |
+| **Total** | **27 tests en 5 ficheros** | |
+
+La estrategia ha sido cubrir:
+
+1. **Componentes con lógica condicional** (`AnimalCard`, `SearchInput`) — donde el render depende de props no triviales.
+2. **Componentes con interacción** (`ConfirmDialog`) — donde callbacks, atajos de teclado y accesibilidad importan.
+3. **El flujo crítico de autenticación** (`Login`) — la puerta de entrada de la aplicación, donde un fallo bloquea todo lo demás.
+
+Quedan **fuera del alcance** los tests de componentes que son passthrough sobre datos de API (listados largos, modales de creación, dashboards de gráficos). En su lugar se han preferido cubrir los servicios del backend que producen esos datos.
+
+## 7.6. Pruebas end-to-end
+
+Los tests **end-to-end** (Playwright o Cypress) **no se han incluido** en el alcance del MVP de PataPlan. La justificación es triple:
+
+1. **Cobertura efectiva**: los flujos críticos ya están cubiertos por los tests de integración del backend (sección 7.3), que ejercitan el mismo encadenamiento de endpoints que un E2E haría, sin la complejidad añadida del navegador. Las pantallas que invocan esos endpoints se han verificado manualmente y con los tests de componente.
+2. **Coste de mantenimiento**: los E2E son frágiles (esperas, selectores, estado entre tests) y requieren infraestructura específica (navegador, dataset reproducible, limpieza entre runs). Para un proyecto académico individual ese coste de mantenimiento no se amortiza.
+3. **Trazabilidad**: el feedback de un E2E roto suele ser ambiguo ("el botón no aparece"), mientras que un test de integración roto apunta directamente al endpoint o al servicio. Para detectar regresiones, los tests más cercanos a la lógica resultan más útiles.
+
+Para una eventual evolución del proyecto se han documentado en el capítulo de conclusiones (`docs/10-conclusiones.md`, sección 10.3.7) los flujos que tendría sentido cubrir con E2E si se incorporara esta capa: registro + verificación + login, alta de animal + asignación de protocolo, completar evento + recálculo en cascada, descarga de PDF.
+
+## 7.7. Resultados
+
+La batería completa se ejecuta con:
+
+```bash
+# Backend
+cd server && npm test
+
+# Frontend
+cd client && npm test
+```
+
+Resultados de la última ejecución:
+
+| Suite | Ficheros | Tests | Estado |
+|-------|----------|-------|--------|
+| Backend (Jest + Supertest) | 3 | 56 | ✓ Todos pasan |
+| Frontend (Vitest + RTL) | 5 | 27 | ✓ Todos pasan |
+| **Total** | **8** | **83** | **✓** |
+
+La duración total de ambas suites en local es de unos **8 segundos** (backend ~4 s + frontend ~5 s), por lo que se ejecutan en cada push del CI sin penalizar el tiempo del pipeline. El workflow `.github/workflows/ci.yml` lanza las dos suites en paralelo.
 
 A continuación se muestra una captura de la ejecución de la batería de tests del backend con el reporte de cobertura:
 
