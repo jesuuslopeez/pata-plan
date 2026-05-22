@@ -1,4 +1,4 @@
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Trash2 } from 'lucide-react';
 import { Badge } from '../Badge/Badge';
 import { translateEventType } from '../../utils/eventTypeLabels';
 import './HealthEventsTable.scss';
@@ -19,7 +19,7 @@ function formatDate(iso) {
   });
 }
 
-export function HealthEventsTable({ events, onComplete }) {
+export function HealthEventsTable({ events, onComplete, onDelete, canManage = false }) {
   if (!events || events.length === 0) {
     return null;
   }
@@ -46,7 +46,7 @@ export function HealthEventsTable({ events, onComplete }) {
                 Próxima: {formatDate(event.nextDueDate)}
               </span>
             )}
-            {canComplete && (
+            {canComplete ? (
               <button
                 className="health-events-table__complete"
                 onClick={() => onComplete?.(event.id)}
@@ -55,6 +55,20 @@ export function HealthEventsTable({ events, onComplete }) {
               >
                 <CheckCircle size={18} aria-hidden="true" />
               </button>
+            ) : (
+              <span aria-hidden="true" />
+            )}
+            {canManage ? (
+              <button
+                className="health-events-table__delete"
+                onClick={() => onDelete?.(event)}
+                type="button"
+                aria-label={`Eliminar evento ${eventLabel} del ${formatDate(event.scheduledDate)}`}
+              >
+                <Trash2 size={18} aria-hidden="true" />
+              </button>
+            ) : (
+              <span aria-hidden="true" />
             )}
           </li>
         );

@@ -14,6 +14,7 @@ import {
   deleteAnimal,
   getAnimalEvents,
   completeEvent,
+  deleteEvent,
   getAnimalWeights,
   getAnimalVisits,
   deleteVisit,
@@ -84,6 +85,7 @@ export function AnimalProfile() {
   const [groups, setGroups] = useState([]);
   const [deletingAnimal, setDeletingAnimal] = useState(false);
   const [deletingVisit, setDeletingVisit] = useState(null);
+  const [deletingEvent, setDeletingEvent] = useState(null);
   const [alertDialog, setAlertDialog] = useState(null);
   const [downloadingReport, setDownloadingReport] = useState(false);
 
@@ -413,6 +415,31 @@ export function AnimalProfile() {
       />
 
       <ConfirmDialog
+        open={!!deletingEvent}
+        title="Eliminar evento sanitario"
+        message={
+          deletingEvent
+            ? `¿Eliminar el evento del ${new Date(deletingEvent.scheduledDate).toLocaleDateString('es-ES')}?`
+            : ''
+        }
+        confirmText="Eliminar"
+        danger
+        onClose={() => setDeletingEvent(null)}
+        onConfirm={async () => {
+          try {
+            await deleteEvent(deletingEvent.id);
+            await reloadEvents();
+            loadAnimal();
+          } catch (err) {
+            setAlertDialog({
+              title: 'No se ha podido eliminar el evento',
+              message: err?.response?.data?.error || 'Inténtalo de nuevo más tarde.',
+            });
+          }
+        }}
+      />
+
+      <ConfirmDialog
         open={!!alertDialog}
         title={alertDialog?.title || 'Aviso'}
         message={alertDialog?.message}
@@ -468,7 +495,12 @@ export function AnimalProfile() {
               </button>
             </div>
             {events.length > 0 ? (
-              <HealthEventsTable events={events} onComplete={handleCompleteEvent} />
+              <HealthEventsTable
+                events={events}
+                onComplete={handleCompleteEvent}
+                onDelete={(event) => setDeletingEvent(event)}
+                canManage={isAdmin}
+              />
             ) : (
               <EmptyState text="Sin eventos registrados" />
             )}

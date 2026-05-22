@@ -41,6 +41,8 @@ export const getAnimalEvents = (id) => api.get(`/animals/${id}/events`);
 
 export const completeEvent = (id, data = {}) => api.patch(`/events/${id}/complete`, data);
 
+export const deleteEvent = (id) => api.delete(`/events/${id}`);
+
 export const createAnimalEvent = (animalId, data) => api.post(`/animals/${animalId}/events`, data);
 
 export const getAnimalWeights = (id) => api.get(`/animals/${id}/weights`);
