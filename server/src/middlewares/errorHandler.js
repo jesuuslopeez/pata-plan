@@ -2,7 +2,7 @@ const { ApiError } = require('../utils/ApiError');
 
 const errorHandler = (err, req, res, next) => {
   if (err instanceof ApiError) {
-    const body = { error: err.message };
+    const body = { error: err.message, code: err.code };
     if (err.details && typeof err.details === 'object') {
       Object.assign(body, err.details);
     }
@@ -13,6 +13,7 @@ const errorHandler = (err, req, res, next) => {
 
   return res.status(500).json({
     error: 'Error interno del servidor',
+    code: 'INTERNAL_ERROR',
   });
 };
 

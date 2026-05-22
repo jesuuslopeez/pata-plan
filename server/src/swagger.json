@@ -77,7 +77,29 @@
     "schemas": {
       "Error": {
         "type": "object",
-        "properties": { "error": { "type": "string", "example": "Recurso no encontrado" } }
+        "required": ["error", "code"],
+        "properties": {
+          "error": { "type": "string", "example": "Recurso no encontrado" },
+          "code": {
+            "type": "string",
+            "enum": [
+              "BAD_REQUEST",
+              "UNAUTHORIZED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "CONFLICT",
+              "VALIDATION_ERROR",
+              "INTERNAL_ERROR"
+            ],
+            "example": "NOT_FOUND"
+          },
+          "fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Only present on 422 VALIDATION_ERROR responses; lists the failing fields.",
+            "example": ["name is required", "email has an invalid format"]
+          }
+        }
       },
       "User": {
         "type": "object",

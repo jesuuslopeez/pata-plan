@@ -32,7 +32,7 @@ El fichero `setup.js` define las variables de entorno necesarias para ejecutar l
 
 ## 7.2. Pruebas unitarias del backend
 
-Los tests unitarios viven en `server/src/tests/` y siguen la convención `<recurso>.test.js`. Cada fichero agrupa los `describe` por endpoint y, dentro de cada uno, los `it` por caso (camino feliz, errores 400, errores 401, errores 403, errores 404, errores 409).
+Los tests unitarios viven en `server/src/tests/` y siguen la convención `<recurso>.test.js`. Cada fichero agrupa los `describe` por endpoint y, dentro de cada uno, los `it` por caso (camino feliz, errores 400, errores 401, errores 403, errores 404, errores 409, errores 422).
 
 ### 7.2.1. Suite de autenticación (`auth.test.js`)
 
@@ -42,20 +42,20 @@ Esta suite cubre los tres endpoints del módulo de autenticación: `POST /api/au
 
 - `should register a new user successfully` — registra un usuario válido, comprueba que la respuesta es 201, que devuelve `user` y `token`, que el `passwordHash` no se filtra al cliente y que el JWT firmado decodifica correctamente con `userId` y `role`.
 - `should return 409 if email already exists` — si Prisma devuelve un usuario existente, la respuesta es 409 con `error: "Email already registered"`.
-- `should return 400 if name is missing` — la validación devuelve 400 si falta `name`.
-- `should return 400 if email is missing` — la validación devuelve 400 si falta `email`.
-- `should return 400 if password is missing` — la validación devuelve 400 si falta `password`.
-- `should return 400 if email format is invalid` — la validación devuelve 400 si el email no respeta el formato.
-- `should return 400 if password is shorter than 8 characters` — refuerza la regla mínima de longitud de contraseña.
-- `should return 400 if body is empty` — petición sin cuerpo, 400.
+- `should return 422 if name is missing` — la validación de payload devuelve 422 si falta `name`, con `code: VALIDATION_ERROR`.
+- `should return 422 if email is missing` — la validación devuelve 422 si falta `email`.
+- `should return 422 if password is missing` — la validación devuelve 422 si falta `password`.
+- `should return 422 if email format is invalid` — la validación devuelve 422 si el email no respeta el formato.
+- `should return 422 if password is shorter than 8 characters` — refuerza la regla mínima de longitud de contraseña.
+- `should return 422 if body is empty` — petición sin cuerpo, 422.
 
 **`POST /api/auth/login`:**
 
 - `should login successfully with valid credentials` — credenciales correctas, comprueba la presencia del token y la ausencia de `passwordHash`, decodifica el JWT y verifica `userId` y `role`.
 - `should return 401 if email does not exist` — usuario inexistente, 401 con mensaje genérico `"Invalid credentials"` (no se revela si el email está registrado o no).
 - `should return 401 if password is wrong` — mismo mensaje genérico para contraseña incorrecta.
-- `should return 400 if email is missing` — validación de entrada.
-- `should return 400 if password is missing` — validación de entrada.
+- `should return 422 if email is missing` — validación de entrada.
+- `should return 422 if password is missing` — validación de entrada.
 
 **`GET /api/auth/me`:**
 
