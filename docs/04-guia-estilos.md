@@ -6,7 +6,7 @@ Este documento recoge los criterios visuales y de interacción que definen PataP
 
 El prototipo interactivo está disponible en Figma:
 
-[Pulsa aquí para ir al prototipo](https://www.figma.com/design/4V8fbliz3unSknovv7lmi0/PataPlan?node-id=0-1&t=J8R5xyJkRE2FUzgC-1)
+[Pulsa aquí para ir al prototipo](https://www.figma.com/design/rv8A4aZqoQBYzfmjioJ8tk/PataPlan?node-id=0-1&t=MC59og3MirEiYxIp-1)
 
 El prototipo cubre las pantallas principales en versión escritorio y móvil, los estados de los componentes (default, focus, error, disabled) y los flujos críticos: alta de animal, asignación de protocolo, generación de informe y consulta de alertas.
 
