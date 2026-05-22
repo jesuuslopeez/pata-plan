@@ -241,7 +241,16 @@ const complete = async (userId, eventId, data) => {
     throw new ApiError(400, 'El evento ya está completado');
   }
 
-  const completedDate = data.completedDate ? new Date(data.completedDate) : new Date();
+  let completedDate;
+  if (data.completedDate) {
+    completedDate = new Date(data.completedDate);
+  } else {
+    // If the scheduled date is in the future, treat it as completed on schedule
+    // so the next event lands at scheduledDate + frequency instead of today + frequency.
+    const today = new Date();
+    const scheduled = new Date(existing.scheduledDate);
+    completedDate = scheduled > today ? scheduled : today;
+  }
   if (isNaN(completedDate.getTime())) {
     throw new ApiError(400, 'La fecha de finalización no es válida');
   }

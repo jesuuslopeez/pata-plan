@@ -6,7 +6,7 @@
 
   &__row {
     display: grid;
-    grid-template-columns: 5.5rem 1fr auto auto 2rem;
+    grid-template-columns: 5.5rem 1fr auto auto 2rem 2rem;
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 0;
@@ -17,7 +17,7 @@
     }
 
     @include mobile {
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr auto auto;
       grid-template-rows: auto auto auto;
       gap: 0.25rem;
     }
@@ -64,6 +64,22 @@
 
     &:hover {
       opacity: 0.7;
+    }
+  }
+
+  &__delete {
+    background: none;
+    border: none;
+    color: $neutral-600;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $danger;
     }
   }
 }
