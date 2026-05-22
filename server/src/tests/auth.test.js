@@ -82,55 +82,56 @@ describe('POST /api/auth/register', () => {
     expect(res.body.error).toBe('El correo ya está registrado');
   });
 
-  it('should return 400 if name is missing', async () => {
+  it('should return 422 if name is missing', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email: 'test@pataplan.com', password: 'password123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/name/i);
+    expect(res.body.code).toBe('VALIDATION_ERROR');
   });
 
-  it('should return 400 if email is missing', async () => {
+  it('should return 422 if email is missing', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Test', password: 'password123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/email/i);
   });
 
-  it('should return 400 if password is missing', async () => {
+  it('should return 422 if password is missing', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Test', email: 'test@pataplan.com' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/password/i);
   });
 
-  it('should return 400 if email format is invalid', async () => {
+  it('should return 422 if email format is invalid', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Test', email: 'not-an-email', password: 'password123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/email/i);
   });
 
-  it('should return 400 if password is shorter than 8 characters', async () => {
+  it('should return 422 if password is shorter than 8 characters', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Test', email: 'test@pataplan.com', password: '123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/password/i);
   });
 
-  it('should return 400 if body is empty', async () => {
+  it('should return 422 if body is empty', async () => {
     const res = await request(app).post('/api/auth/register').send({});
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
   });
 });
 
@@ -180,17 +181,17 @@ describe('POST /api/auth/login', () => {
     expect(res.body.error).toBe('Credenciales inválidas');
   });
 
-  it('should return 400 if email is missing', async () => {
+  it('should return 422 if email is missing', async () => {
     const res = await request(app).post('/api/auth/login').send({ password: 'password123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/email/i);
   });
 
-  it('should return 400 if password is missing', async () => {
+  it('should return 422 if password is missing', async () => {
     const res = await request(app).post('/api/auth/login').send({ email: 'test@pataplan.com' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
     expect(res.body.error).toMatch(/password/i);
   });
 });

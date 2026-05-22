@@ -37,7 +37,7 @@ const validate = (schema) => {
     }
 
     if (errors.length > 0) {
-      throw new ApiError(400, errors.join(', '));
+      throw new ApiError(422, errors.join(', '), { fields: errors });
     }
 
     next();

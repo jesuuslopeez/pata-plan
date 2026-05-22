@@ -256,6 +256,44 @@ La API es REST sobre JSON. Todas las rutas viven bajo `/api`. La autenticación 
 - **Roles:** se refiere al rol global del usuario (`ADMIN` o `COLLABORATOR`). El control fino por grupo se aplica además dentro del *service*.
 - Las rutas con `:id` referidas a un recurso aplican la regla de permisos por grupo: el recurso debe pertenecer a un grupo al que el usuario tiene acceso.
 
+### 5.5.0. Códigos HTTP y formato de error
+
+PataPlan usa los códigos HTTP estándar de forma estricta:
+
+| Código | Significado | Uso típico |
+|--------|-------------|------------|
+| 200 | OK | Lecturas, actualizaciones, login. |
+| 201 | Created | Recursos creados (`POST`). |
+| 204 | No Content | Borrados (`DELETE`). |
+| 400 | Bad Request | Error semántico de dominio (fecha futura, ID inválido, recurso inalcanzable). |
+| 401 | Unauthorized | JWT ausente, malformado o caducado. |
+| 403 | Forbidden | Permisos insuficientes (rol incorrecto, recurso ajeno). |
+| 404 | Not Found | Recurso inexistente o inaccesible (se prefiere 404 frente a 403 para no revelar existencia). |
+| 409 | Conflict | Conflicto con estado existente (correo duplicado, código de invitación en uso). |
+| 422 | Unprocessable Entity | Validación de payload: campo faltante, tipo incorrecto, formato inválido. Lo emite el middleware `validate`. |
+| 500 | Internal Server Error | Error no controlado del servidor. |
+
+Todos los errores siguen el mismo formato JSON estructurado:
+
+```json
+{
+  "error": "Mensaje legible para el usuario",
+  "code": "VALIDATION_ERROR"
+}
+```
+
+Los códigos posibles son: `BAD_REQUEST`, `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `CONFLICT`, `VALIDATION_ERROR` e `INTERNAL_ERROR`. Las respuestas 422 incluyen además un campo `fields` con la lista de errores concretos de cada campo del payload:
+
+```json
+{
+  "error": "name is required, email has an invalid format",
+  "code": "VALIDATION_ERROR",
+  "fields": ["name is required", "email has an invalid format"]
+}
+```
+
+Este formato está definido como `components/schemas/Error` en el spec de Swagger.
+
 ### 5.5.1. Auth (`/api/auth`)
 
 | Método | Ruta | Descripción | Auth | Roles |
